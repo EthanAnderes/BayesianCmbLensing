@@ -1,14 +1,14 @@
 #=
-include("examples/makeFigsOffline.jl")
+include("../../examples/makeFigsOffline.jl")
 =#
 specc 	   = true # plot the spectral coverage
 pcorr 	   = false # plot the empirical cross correlation
 onedslice  = true # plot the 1-d slices of phi
 acc 	   = false # take a look at the accpetence rate
-imagsli    = false # look at the images one by one
+imagsli    = true # look at the images one by one
 mvie 	   = false # make movies and average estimate
 
-krang = 501:(5):5000 # range of samples we are looking at
+krang = 1:(1):5000 # range of samples we are looking at
 
 using PyCall 
 @pyimport matplotlib.pyplot as plt
@@ -270,7 +270,7 @@ if onedslice
 	qex = readcsv("qex_lr.csv")[int(end*propslice),:][:]
 	x = readcsv("x.csv")[int(end*propslice),:][:]
 	varx = readcsv("maskvarx.csv")[int(end*propslice),:][:]
-	maskmin, maskmax = minimum(x[varx.==Inf]), maximum(x[varx.==Inf])
+	isempty(x[varx.==Inf]) || maskmin, maskmax = minimum(x[varx.==Inf]), maximum(x[varx.==Inf])
 	
 	# plot phix
 	plt.plot(x, phix_slice_samples[:,1], color="blue", alpha=0.4, label="posterior samples")
@@ -280,14 +280,13 @@ if onedslice
 	plt.plot(x,  mean(phix_slice_samples,2), color = "black", linewidth=2.5, linestyle="--",  alpha=0.8, label="posterior mean")
 	plt.plot(x, zero(phix), color = "black",  linestyle=":")
 	plt.legend(loc="upper right")
-	#plt.axis("tight")
-	plt.annotate("mask",
+	isempty(x[varx.==Inf]) || plt.annotate("mask",
 	         xy=(maskmin, 0), xycoords="data",
 	         xytext=(-50, -50), textcoords="offset points", fontsize=16,
 	         arrowprops={:arrowstyle=>"->"})
 	plt.title("Lensing potential posterior samples")
 	plt.xlabel("radians")
-	plt.axvspan(maskmin, maskmax,  facecolor="0.5", alpha=0.3, label="mask region")
+	isempty(x[varx.==Inf]) || plt.axvspan(maskmin, maskmax,  facecolor="0.5", alpha=0.3, label="mask region")
 	plt.show()
 	
 	
@@ -298,14 +297,13 @@ if onedslice
 	plt.plot(x,  mean(tildex_slice_samples,2), color = "black", linewidth=2.5, linestyle="--",  alpha=0.8, label="posterior mean")
 	plt.plot(x, zero(tildex), color = "black",  linestyle=":")
 	plt.legend(loc="upper right")
-	#plt.axis("tight")
-	plt.annotate("mask",
+	isempty(x[varx.==Inf]) || plt.annotate("mask",
 	         xy=(maskmin, 0), xycoords="data",
 	         xytext=(-50, -50), textcoords="offset points", fontsize=16,
 	         arrowprops={:arrowstyle=>"->"})
 	plt.title("Lensed CMB posterior samples")
 	plt.xlabel("radians")
-	plt.axvspan(maskmin, maskmax,  facecolor="0.5", alpha=0.3, label="mask region")
+	isempty(x[varx.==Inf]) || plt.axvspan(maskmin, maskmax,  facecolor="0.5", alpha=0.3, label="mask region")
 	plt.show()
 end 
 
