@@ -1,12 +1,13 @@
 #=
-include("../../examples/makeFigsOffline.jl")
+include("../../scripts/makeFigsOffline.jl")
+julia ../../scripts/makeFigsOffline.jl
 =#
 specc 	   = true # plot the spectral coverage
-pcorr 	   = false # plot the empirical cross correlation
+pcorr 	   = true # plot the empirical cross correlation
 onedslice  = true # plot the 1-d slices of phi
-acc 	   = false # take a look at the accpetence rate
+acc 	   = true # take a look at the accpetence rate
 imagsli    = true # look at the images one by one
-mvie 	   = false # make movies and average estimate
+mvie 	   = false # <---- needs work
 
 krang = 1:(1):5000 # range of samples we are looking at
 
@@ -270,7 +271,7 @@ if onedslice
 	qex = readcsv("qex_lr.csv")[int(end*propslice),:][:]
 	x = readcsv("x.csv")[int(end*propslice),:][:]
 	varx = readcsv("maskvarx.csv")[int(end*propslice),:][:]
-	isempty(x[varx.==Inf]) || maskmin, maskmax = minimum(x[varx.==Inf]), maximum(x[varx.==Inf])
+	isempty(x[varx.==Inf]) || (maskmin=minimum(x[varx.==Inf]); maskmax = maximum(x[varx.==Inf]))
 	
 	# plot phix
 	plt.plot(x, phix_slice_samples[:,1], color="blue", alpha=0.4, label="posterior samples")
@@ -367,13 +368,13 @@ end # end the if
 #  make movies and average estimate
 # -----------------------------------------
 if mvie 
-tm = "trashthismovie"  #string(time_ns()) 
-dr = "/tmp/" * tm * "mov"
-isdir(dr) || mkdir(dr)
+tm = "/tmp/trashthismovie"
+dr = tm * "/mov"
+isdir(dr) || (mkdir(tm) ; mkdir(dr))
 
 function saveMovieFram(dr, num, phix, phix_curr, ytx, tildetx_lr_curr)
 	# save to dr
-	fig = plt.figure(figsize=(11,11))
+	fig = plt.figure(figsize=(10,10))
 	plt.subplot(2,2,3)
 	plt.imshow(phix, interpolation = "none", vmin=minimum(phix),vmax=maximum(phix)) 
 	plt.xlabel("true lensing potential")
@@ -421,7 +422,7 @@ fig = plt.figure(figsize=(11,11))
 	plt.xlabel("data")
 	plt.show()
 run(`open $dr/out.mpg`)
-# run(`rm -fr $dr`)
+run(`rm -fr $dr`)
 end
 
 
