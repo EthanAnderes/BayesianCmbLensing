@@ -1,32 +1,44 @@
-# julia scripts/example3.jl 
-const dualMessanger = false 
-const maskupC  = 3000.0  #l_max for cmb
-const maskupP  = 500.0  #l_max for for phi
-const hrfactor = 2.0
-const pixel_size_arcmin = 5.0
-const n = 2.0^9
-const beamFWHM = 0.0
-const nugget_at_each_pixel = (5.0)^2
-const seed = rand(1:1000000)
-const scriptname = "example3"
-const savepath = joinpath("simulations", "$(scriptname)_$seed") # savepath = joinpath("simulations", "test") 
+# julia scripts/scriptNew.jl
 simnotes = """
 low noise
-larger pixels
+small pixels
 """
+const scriptname = "scriptNew"
+const percentNyqForC = 0.5 # used for T l_max
+const numofparsForP  = 1000  # used for P l_max
+const hrfactor = 2.0
+const pixel_size_arcmin = 0.5
+const n = 2.0^9
+const beamFWHM = 0.0
+const nugget_at_each_pixel = (10.0)^2
+begin  #< ---- dependent run parameters
+	local deltx =  pixel_size_arcmin * pi / (180 * 60) #rads
+	local period = deltx * n # side length in rads
+	local deltk =  2 * pi / period
+	local nyq = (2 * pi) / (2 * deltx)
+	const maskupP  = sqrt(deltk^2 * numofparsForP / pi)  #l_max for for phi
+	const maskupC  = percentNyqForC * (2 * pi) / (2 * pixel_size_arcmin * pi / (180*60)) #l_max for for phi
+	println("muK_per_arcmin = $(sqrt(nugget_at_each_pixel * (pixel_size_arcmin^2)))") # muK per arcmin
+	println("maskupP = $maskupP") # muK per arcmin
+	println("maskupC = $maskupC") # muK per arcmin
+end
+const scale_grad =  1.0e-4
+const scale_hmc  =  1.0e-4
+const seed = rand(1:1000000)
+const savepath = joinpath("simulations", "$(scriptname)_$seed") 
 
-#-----------------------------------
-# load modules and functions
-#------------------------------------
+
+
+# ------------ load modules and functions
 push!(LOAD_PATH, pwd()*"/src")
 using Interp
 require("cmb.jl")
 require("fft.jl")
 require("funcs.jl") # use reload after editing funcs.jl
 
-#---------------------------------------
-# Set the parameters of the run 
-#-----------------------------------------
+
+
+# --------- generate cmb spectrum class for high res and low res
 parlr = setpar(
 	pixel_size_arcmin, 
 	n, 
@@ -44,9 +56,9 @@ parhr = setpar(
 	maskupP
 );
 
-#-----------------------------------------
-# Simulate: ytx, maskvarx, phix, tildetx
-#-----------------------------------------
+
+
+# -------- Simulate data: ytx, maskvarx, phix, tildetx
 srand(seed)
 ytk_nomask, tildetk, phix, tx_hr = simulate_start(parlr);
 phik = fft2(phix, parlr)
@@ -57,9 +69,9 @@ ytx = ifft2r(ytk_nomask, parlr)
 ytx[maskboolx] = 0.0
 ytk = fft2(ytx, parlr)
 
-#-----------------------------------------
-#  set the save directory and save stuff 
-#-----------------------------------------
+
+
+# -----------  set the save directory and save stuff 
 isdir(savepath) && run(`rm -r $savepath`) 
 run(`mkdir $savepath`)
 run(`cp src/funcs.jl $savepath/funcs_save.jl`)
@@ -80,9 +92,10 @@ qex_lr = ifft2r(ttk_est(ytk_nomask, parlr) .* (parlr.cPP ./ (2.0 .* al_lr + parl
 writecsv("$savepath/qex_lr.csv", qex_lr)	
 
 
-#-----------------------------------------
-#  initalized and run the gibbs 
-#-----------------------------------------
+
+
+
+# ------------------ initalized and run the gibbs 
 tx_hr_curr    = zeros(parhr.grd.x)
 tbarx_hr_curr = zeros(parhr.grd.x)
 ttx_hr_curr   = zeros(parhr.grd.x)
@@ -94,16 +107,12 @@ phik_curr_sum = zeros(phik)
 acceptclk = [1 for k=1:10] #initialize acceptance record
 bglp = 0
 
-# srand(seedloop) # use this only if you are running multiple session with the same input 
 while true
-	# use phik_curr from previous iteration to simluate the unlensed CMB: tx_hr_curr
-	if dualMessanger 
-		if bglp % 100 == 0 phidx1_hr, phidx2_hr, phidx1_lr, phidx2_lr = gibbspass_coold!(tx_hr_curr, tbarx_hr_curr, phik_curr, ytx, maskvarx, parlr, parhr, 600) end
-    	phidx1_hr, phidx2_hr, phidx1_lr, phidx2_lr = gibbspass_d!(tx_hr_curr, tbarx_hr_curr, phik_curr, ytx, maskvarx, parlr, parhr, 400)
-	else  
-		if  bglp % 100 == 0   phidx1_hr, phidx2_hr, phidx1_lr, phidx2_lr = gibbspass_coolt!(tx_hr_curr, ttx_hr_curr, phik_curr, ytx, maskvarx, parlr, parhr, 600) end
- 		phidx1_hr, phidx2_hr, phidx1_lr, phidx2_lr = gibbspass_t!(tx_hr_curr, ttx_hr_curr, phik_curr, ytx, maskvarx, parlr, parhr, 400) 
+	#  ------ use phik_curr from previous iteration to simluate the unlensed CMB: tx_hr_curr
+	if  bglp % 100 == 0  
+		phidx1_hr, phidx2_hr, phidx1_lr, phidx2_lr = gibbspass_coolt!(tx_hr_curr, ttx_hr_curr, phik_curr, ytx, maskvarx, parlr, parhr, 600) 
 	end
+ 	phidx1_hr, phidx2_hr, phidx1_lr, phidx2_lr = gibbspass_t!(tx_hr_curr, ttx_hr_curr, phik_curr, ytx, maskvarx, parlr, parhr, 400) 
 	tildetx_hr_curr[:] = spline_interp2(
 		parhr.grd.x, 
 		parhr.grd.y, 
@@ -112,14 +121,14 @@ while true
 		parhr.grd.y + phidx2_hr
 		)
 	
-	# shock the system with a gradient update if the accpetence rate falls below 20%
-	if  (bglp <= 4) | false  # (bglp <= 4) | (countnz(acceptclk[end-9:end]) <= 1) 
-		gradupdate!(phik_curr, tildetx_hr_curr, parlr, parhr) 
+	#  ------ gradient updates at the start
+	if  bglp <= 4
+		gradupdate!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_grad) 
 		push!(acceptclk, 2)
 	else 	
-		push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr))
-		push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr))
-		push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr))
+		push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc))
+		push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc))
+		push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc))
 	end
 
 	# update blgp, etc...

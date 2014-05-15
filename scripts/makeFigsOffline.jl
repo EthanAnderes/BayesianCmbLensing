@@ -2,15 +2,33 @@
 include("../../scripts/makeFigsOffline.jl")
 julia ../../scripts/makeFigsOffline.jl
 =#
-specc 	   = true # plot the spectral coverage
-pcorr 	   = true # plot the empirical cross correlation
-onedslice  = true # plot the 1-d slices of phi
-acc 	   = true # take a look at the accpetence rate
-imagsli    = true # look at the images one by one
-mvie 	   = false # <---- needs work
+const specc 	   = true # plot the spectral coverage
+const pcorr 	   = true # plot the empirical cross correlation
+const onedslice    = true # plot the 1-d slices of phi
+const acc 	       = true # take a look at the accpetence rate
+const imagsli      = true # look at the images one by one
+const mvie 	       = false # <---- needs work
+const krang = 1:(1):5000 # range of samples we are looking at
 
-krang = 1:(1):5000 # range of samples we are looking at
+# --- copy these are from the runfile
+const percentNyqForC = 0.5 # used for T l_max
+const numofparsForP  = 1000  # used for P l_max
+const hrfactor = 2.0
+const pixel_size_arcmin = 0.5
+const n = 2.0^9
+const beamFWHM = 0.0
+const nugget_at_each_pixel = (10.0)^2
+begin  #< ---- dependent run parameters
+	local deltx =  pixel_size_arcmin * pi / (180 * 60) #rads
+	local period = deltx * n # side length in rads
+	local deltk =  2 * pi / period
+	local nyq = (2 * pi) / (2 * deltx)
+	const maskupP  = sqrt(deltk^2 * numofparsForP / pi)  #l_max for for phi
+	const maskupC  = percentNyqForC * (2 * pi) / (2 * pixel_size_arcmin * pi / (180*60)) #l_max for for phi
+end
 
+
+# ---- modules etc
 using PyCall 
 @pyimport matplotlib.pyplot as plt
 push!(LOAD_PATH, "../../src")
@@ -23,12 +41,6 @@ require("fft.jl")
 # plot the spectral coverage
 #-----------------------------------------
 if specc
-	maskupC  = 3000.0  #l_max for cmb
-	maskupP  = 1000.0  #l_max for for phi
-	pixel_size_arcmin = 2.0
-	n = 2.0^9
-	beamFWHM = 0.0
-	nugget_at_each_pixel = (4.0)^2
 	d = 2
 	bin_mids = 16:15:700
 	
@@ -130,12 +142,6 @@ end
 # plot cross correlation
 #-----------------------------------------
 if pcorr
-	maskupC  = 3000.0  #l_max for cmb
-	maskupP  = 1000.0  #l_max for for phi
-	pixel_size_arcmin = 2.0
-	n = 2.0^9
-	beamFWHM = 0.0
-	nugget_at_each_pixel = (4.0)^2
 	d = 2
 	bin_mids = 20:20:900
 	

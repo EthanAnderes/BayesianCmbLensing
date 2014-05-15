@@ -3,8 +3,9 @@
 #------------------------------------
 # HMC sampler
 #--------------------------------------------
-function hmc!(phik_curr, tildetx_hr_curr, parlr, parhr)
-    ePs = 1.0e-3 * rand()
+hmc!(phik_curr, tildetx_hr_curr, parlr, parhr) = hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, 1.0e-3)
+function hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc)
+    ePs = scale_hmc * rand()
     ulim =  30 
     h0 = smooth_heavy(parlr.grd.r, 0.5, 1, 1500, 1/200) .* parlr.cPP ./ (parlr.grd.deltk^2) 
     mk = 1.0e-2 ./ h0
@@ -46,11 +47,12 @@ end
 ##--------------------------------
 # gradient of phi given  tildetx
 #------------------------------------
-function gradupdate!(phik_curr, tildetx_hr_curr, parlr, parhr)
+gradupdate!(phik_curr, tildetx_hr_curr, parlr, parhr) = gradupdate!(phik_curr, tildetx_hr_curr, parlr, parhr, 1.0e-3)
+function gradupdate!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_grad)
     for cntr = 1:30
         grad, loglike = ttk_grad_wlog(tildetx_hr_curr, phik_curr, parlr, parhr)
         println(loglike)
-        phik_curr[:]  =  phik_curr + grad .* 1.0e-2 .* smooth_heavy(parlr.grd.r, 1, 2, 1000, 1/200) .* parlr.cPP ./ (parlr.grd.deltk^2) 
+        phik_curr[:]  =  phik_curr + grad .* scale_grad .* smooth_heavy(parlr.grd.r, 1, 2, 1000, 1/200) .* parlr.cPP ./ (parlr.grd.deltk^2) 
     end
 end
 function ttk_grad_wlog(tildetx_hr_sim, phik_curr, parlr, parhr)

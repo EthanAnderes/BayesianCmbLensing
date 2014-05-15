@@ -1,16 +1,17 @@
-# julia examples/example2.jl 
+# julia examples/scriptBase.jl
 const dualMessanger = false 
 const maskupC  = 3000.0  #l_max for cmb
-const maskupP  = 500.0  #l_max for for phi
+const maskupP  = 1000.0  #l_max for for phi
 const hrfactor = 2.0
 const pixel_size_arcmin = 2.0
 const n = 2.0^9
 const beamFWHM = 0.0
-const nugget_at_each_pixel = (15.0)^2
+const nugget_at_each_pixel = (4.0)^2
 const seed = rand(1:1000000)
-savepath = joinpath("simulations", "example2_$seed") # savepath = joinpath("simulations", "test") 
+savepath = joinpath("simulations", "example1_$seed") # savepath = joinpath("simulations", "test") 
 simnotes = """
-Higher noise case, no mask, hrfactor of 2, l_max for for phi is 500
+This is the basic low noise run which has a masked bar down the middle.
+The way to exicute this is to type $ julia examples/example1.jl 
 """
 
 #-----------------------------------
@@ -48,7 +49,7 @@ parhr = setpar(
 srand(seed)
 ytk_nomask, tildetk, phix, tx_hr = simulate_start(parlr);
 phik = fft2(phix, parlr)
-maskboolx =  falses(size(phix))
+maskboolx =  (maximum(parlr.grd.x)*0.3) .<= parlr.grd.x .<= (maximum(parlr.grd.x)*0.4) 
 maskvarx = parlr.nugget_at_each_pixel .* ones(size(phix))
 maskvarx[maskboolx] = Inf
 ytx = ifft2r(ytk_nomask, parlr)
@@ -61,7 +62,7 @@ ytk = fft2(ytx, parlr)
 if isdir(savepath) run(`rm -r $savepath`) end
 run(`mkdir $savepath`)
 run(`cp src/funcs.jl $savepath/funcs_save.jl`)
-run(`cp examples/example2.jl $savepath/example2.jl`)
+run(`cp examples/example1.jl $savepath/example1.jl`)
 run(`echo $simnotes` |> "$savepath/simnotes.txt")
 writecsv("$savepath/x.csv", parlr.grd.x)
 writecsv("$savepath/y.csv", parlr.grd.y)
