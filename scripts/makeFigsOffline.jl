@@ -8,7 +8,7 @@ const onedslice    = true # plot the 1-d slices of phi
 const acc 	       = true # take a look at the accpetence rate
 const imagsli      = true # look at the images one by one
 const mvie 	       = false # <---- needs work
-const krang = 1:(1):5000 # range of samples we are looking at
+const krang = 1:(5):5000 # range of samples we are looking at
 
 # --- copy these are from the runfile
 const percentNyqForC = 0.5 # used for T l_max
@@ -24,7 +24,7 @@ begin  #< ---- dependent run parameters
 	local deltk =  2 * pi / period
 	local nyq = (2 * pi) / (2 * deltx)
 	const maskupP  = sqrt(deltk^2 * numofparsForP / pi)  #l_max for for phi
-	const maskupC  = percentNyqForC * (2 * pi) / (2 * pixel_size_arcmin * pi / (180*60)) #l_max for for phi
+	const maskupC  = min(9000, percentNyqForC * (2 * pi) / (2 * pixel_size_arcmin * pi / (180*60))) #l_max for for phi
 end
 
 
@@ -42,8 +42,6 @@ require("fft.jl")
 #-----------------------------------------
 if specc
 	d = 2
-	bin_mids = 16:15:700
-	
 	parlr = setpar(
 		pixel_size_arcmin, 
 		n, 
@@ -54,11 +52,12 @@ if specc
 		"../../src"
 	);
 	dirac_0 = 1/parlr.grd.deltk^d 
-	el = parlr.ell[10:1000] 
-	cpl = parlr.CPell2d[10:1000]
-	ctl = parlr.CTell2d[10:1000]
-	mte =  el.^4
-	mtr = parlr.grd.r.^2
+	elp = parlr.ell[10:int(maskupP)] 
+	elt = parlr.ell[10:int(maskupC)] 
+	cpl = parlr.CPell2d[10:int(maskupP)]
+	ctl = parlr.CTell2d[10:int(maskupC)]
+	r2 = parlr.grd.r.^2
+	bin_mids = (parlr.grd.deltk*2):(parlr.grd.deltk*2):maskupP
 	
 	function binpower(fk::Matrix, kmag::Matrix, bin_mids::Range)
 		fpwr = Array(Float64, length(bin_mids))
@@ -102,7 +101,7 @@ if specc
 	tib_truth = binpower(sqrt(mtr) .* tildek, parlr.grd.r, bin_mids)
 	
 	plt.figure(figsize=(15,5))
-	plt.plot(el, dirac_0 .* mte .* cpl, "-k")
+	plt.plot(elp, dirac_0 .* elp.^4 .* cpl, "-k")
 	plt.plot(bin_mids, phb_truth, "or", label = "truth")
 	rtcuts  = collect(bin_mids +  step(bin_mids) / 2)  
 	lftcuts = collect(bin_mids -  step(bin_mids) / 2)  
@@ -120,7 +119,7 @@ if specc
 
 
 	plt.figure(figsize=(15,5))
-	plt.plot(el, dirac_0 .* sqrt(mte) .* ctl, "-k")
+	plt.plot(elt, dirac_0 .* elp.^2 .* ctl, "-k")
 	plt.plot(bin_mids, tib_truth, "or", label = "truth")
 	rtcuts  = collect(bin_mids +  step(bin_mids) / 2)  
 	lftcuts = collect(bin_mids -  step(bin_mids) / 2)  

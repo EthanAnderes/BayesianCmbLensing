@@ -5,7 +5,7 @@ small pixels
 """
 const scriptname = "scriptNew"
 const percentNyqForC = 0.5 # used for T l_max
-const numofparsForP  = 1000  # used for P l_max
+const numofparsForP  = 1500  # used for P l_max
 const hrfactor = 2.0
 const pixel_size_arcmin = 0.5
 const n = 2.0^9
@@ -17,13 +17,13 @@ begin  #< ---- dependent run parameters
 	local deltk =  2 * pi / period
 	local nyq = (2 * pi) / (2 * deltx)
 	const maskupP  = sqrt(deltk^2 * numofparsForP / pi)  #l_max for for phi
-	const maskupC  = percentNyqForC * (2 * pi) / (2 * pixel_size_arcmin * pi / (180*60)) #l_max for for phi
+	const maskupC  = min(9000.0, percentNyqForC * (2 * pi) / (2 * pixel_size_arcmin * pi / (180*60))) #l_max for for phi
 	println("muK_per_arcmin = $(sqrt(nugget_at_each_pixel * (pixel_size_arcmin^2)))") # muK per arcmin
 	println("maskupP = $maskupP") # muK per arcmin
 	println("maskupC = $maskupC") # muK per arcmin
 end
-const scale_grad =  1.0e-4
-const scale_hmc  =  1.0e-4
+const scale_grad =  1.0e-3
+const scale_hmc  =  2.0e-4
 const seed = rand(1:1000000)
 const savepath = joinpath("simulations", "$(scriptname)_$seed") 
 
@@ -71,6 +71,7 @@ ytk = fft2(ytx, parlr)
 
 
 
+
 # -----------  set the save directory and save stuff 
 isdir(savepath) && run(`rm -r $savepath`) 
 run(`mkdir $savepath`)
@@ -96,17 +97,18 @@ writecsv("$savepath/qex_lr.csv", qex_lr)
 
 
 # ------------------ initalized and run the gibbs 
-tx_hr_curr    = zeros(parhr.grd.x)
-tbarx_hr_curr = zeros(parhr.grd.x)
-ttx_hr_curr   = zeros(parhr.grd.x)
-phik_curr    = zeros(phik)
+tx_hr_curr      = zeros(parhr.grd.x)
+tbarx_hr_curr   = zeros(parhr.grd.x)
+ttx_hr_curr     = zeros(parhr.grd.x)
+phik_curr       = zeros(phik)
 tildetx_lr_curr = zeros(parlr.grd.x) 
 tildetx_hr_curr = zeros(parhr.grd.x) 
-tx_hr_curr_sum = zeros(tx_hr_curr)
-phik_curr_sum = zeros(phik)
-acceptclk = [1 for k=1:10] #initialize acceptance record
-bglp = 0
+tx_hr_curr_sum  = zeros(tx_hr_curr)
+phik_curr_sum   = zeros(phik)
+acceptclk       = [1 for k=1:10] #initialize acceptance record
 
+
+bglp = 0
 while true
 	#  ------ use phik_curr from previous iteration to simluate the unlensed CMB: tx_hr_curr
 	if  bglp % 100 == 0  

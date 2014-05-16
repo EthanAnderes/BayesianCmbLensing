@@ -160,7 +160,6 @@ function setpar(pixel_size_arcmin, n, beamFWHM, nugget_at_each_pixel, maskupC, m
 end
 
 
-
 #  if you need to specify where src is...used in graphics
 function setpar(pixel_size_arcmin, n, beamFWHM, nugget_at_each_pixel, maskupC, maskupP, pathtosrc::String)
     Sfile = open(joinpath(pathtosrc,"camb/test_scalCls.dat"))
