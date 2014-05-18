@@ -3,8 +3,7 @@
 #------------------------------------
 # HMC sampler
 #--------------------------------------------
-hmc!(phik_curr, tildetx_hr_curr, parlr, parhr) = hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, 1.0e-3)
-function hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc)
+function hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc = 1.0e-3)
     ePs = scale_hmc * rand()
     ulim =  30 
     h0 = smooth_heavy(parlr.grd.r, 0.5, 1, 1500, 1/200) .* parlr.cPP ./ (parlr.grd.deltk^2) 
@@ -47,8 +46,7 @@ end
 ##--------------------------------
 # gradient of phi given  tildetx
 #------------------------------------
-gradupdate!(phik_curr, tildetx_hr_curr, parlr, parhr) = gradupdate!(phik_curr, tildetx_hr_curr, parlr, parhr, 1.0e-3)
-function gradupdate!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_grad)
+function gradupdate!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_grad=1.0e-3)
     for cntr = 1:30
         grad, loglike = ttk_grad_wlog(tildetx_hr_curr, phik_curr, parlr, parhr)
         println(loglike)
@@ -96,12 +94,10 @@ end
 #-----------------------------
 # messenger algorithms: dual messenger
 #------------------------------------
-function gibbspass_coold!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, nruns)
+function gibbspass_coold!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, nruns, uplim)
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
     dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
-    uplim = 4000.0
-    lwlim = 50.0
-    for upl in  linspace(lwlim, uplim, int(nruns/30))
+    for upl in  linspace(2parlr.grd.deltk, uplim, int(nruns/30))
         wsim_gibbs_d!(sx, sbarx, dx, Nx, parhr, upl, 30)
     end
     sk = fft2(sx, parhr)
@@ -109,12 +105,12 @@ function gibbspass_coold!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, nru
     sx[:] = ifft2r(sk, parhr)
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
 end
-function gibbspass_d!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, nruns)
+function gibbspass_d!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, nruns, uplim)
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
     dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
-    wsim_gibbs_d!(sx, sbarx, dx, Nx, parhr, 4000, nruns)
+    wsim_gibbs_d!(sx, sbarx, dx, Nx, parhr, uplim, nruns)
     sk = fft2(sx, parhr)
-    sk[parhr.grd.r .>= 4000] = 0.0
+    sk[parhr.grd.r .>= uplim] = 0.0
     sx[:] = ifft2r(sk, parhr)
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
 end
@@ -157,12 +153,10 @@ end
 #-----------------------------
 # messenger algorithms: t messenger
 #------------------------------------
-function gibbspass_coolt!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, nruns)
+function gibbspass_coolt!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, nruns, uplim = 4000.0)
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
     dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
-    uplim = 4000.0
-    lwlim = 50.0
-    for upl in  linspace(lwlim, uplim, int(nruns/30))
+    for upl in linspace(2parlr.grd.deltk, uplim, int(nruns/30))
         wsim_gibbs_t!(sx, tx, dx, Nx, parhr, upl, 30)
     end
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
@@ -174,15 +168,13 @@ function gibbspass_t!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, nruns)
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
 end
 # ---- these are sub functions
-function  wsim_gibbs_t!(sx, tx, dx, Nx, par, uplim, its)
+function  wsim_gibbs_t!(sx, tx, dx, Nx, par, its, uplim = Inf)
     Tx = 0.99 * minimum(Nx)
     barNx = Nx .- Tx
 
     delt0 = 1.0./par.grd.deltk^2.0
     lamx = 1.0
-    if uplim == Inf
-        lamx = 1.0
-    else
+    if uplim != Inf
         lamk = delt0 .* par.CTell2d[round(uplim)]
         lamx = lamk ./ (delt0 * par.grd.deltx^2.0)
         lamx = max(1.0, lamx)
@@ -191,14 +183,6 @@ function  wsim_gibbs_t!(sx, tx, dx, Nx, par, uplim, its)
     for cntr = 1:its
         sim_sx!(sx, tx, lamx * Tx, barNx, par)
         sim_tx!(sx, tx, dx, lamx * Tx, barNx, par)
-    end
-end
-function  wsim_gibbs_t!(sx, tx, dx, Nx, par, its)
-    Tx = 0.99 * minimum(Nx)
-    barNx = Nx - Tx
-    for cntr = 1:its
-        sim_sx!(sx, tx, Tx, barNx, par)
-        sim_tx!(sx, tx, dx, Tx, barNx, par)
     end
 end
 function sim_sx!(sx, tx, Tx::Float64, barNx, par)

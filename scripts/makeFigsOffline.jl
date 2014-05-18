@@ -2,17 +2,18 @@
 include("../../scripts/makeFigsOffline.jl")
 julia ../../scripts/makeFigsOffline.jl
 =#
-const specc 	   = true # plot the spectral coverage
-const pcorr 	   = true # plot the empirical cross correlation
-const onedslice    = true # plot the 1-d slices of phi
-const acc 	       = true # take a look at the accpetence rate
-const imagsli      = true # look at the images one by one
-const mvie 	       = false # <---- needs work
+const specc 	  = true # plot the spectral coverage
+const pcorr 	  = true # plot the empirical cross correlation
+const onedslice = false # plot the 1-d slices of phi
+const acc 	    = false # take a look at the accpetence rate
+const imagsli   = false # look at the images one by one
+const mvie 	    = false # <---- needs work
 const krang = 1:(5):5000 # range of samples we are looking at
 
 # --- copy these are from the runfile
+const scriptname = "scriptNew"
 const percentNyqForC = 0.5 # used for T l_max
-const numofparsForP  = 1000  # used for P l_max
+const numofparsForP  = 1500  # used for P l_max
 const hrfactor = 2.0
 const pixel_size_arcmin = 0.5
 const n = 2.0^9
@@ -24,7 +25,10 @@ begin  #< ---- dependent run parameters
 	local deltk =  2 * pi / period
 	local nyq = (2 * pi) / (2 * deltx)
 	const maskupP  = sqrt(deltk^2 * numofparsForP / pi)  #l_max for for phi
-	const maskupC  = min(9000, percentNyqForC * (2 * pi) / (2 * pixel_size_arcmin * pi / (180*60))) #l_max for for phi
+	const maskupC  = min(9000.0, percentNyqForC * (2 * pi) / (2 * pixel_size_arcmin * pi / (180*60))) #l_max for for phi
+	println("muK_per_arcmin = $(sqrt(nugget_at_each_pixel * (pixel_size_arcmin^2)))") # muK per arcmin
+	println("maskupP = $maskupP") # muK per arcmin
+	println("maskupC = $maskupC") # muK per arcmin
 end
 
 
@@ -57,7 +61,8 @@ if specc
 	cpl = parlr.CPell2d[10:int(maskupP)]
 	ctl = parlr.CTell2d[10:int(maskupC)]
 	r2 = parlr.grd.r.^2
-	bin_mids = (parlr.grd.deltk*2):(parlr.grd.deltk*2):maskupP
+	bin_mids_P = (parlr.grd.deltk*2):(parlr.grd.deltk):maskupP
+	bin_mids_T = (parlr.grd.deltk*2):(parlr.grd.deltk):maskupC
 	
 	function binpower(fk::Matrix, kmag::Matrix, bin_mids::Range)
 		fpwr = Array(Float64, length(bin_mids))
@@ -80,36 +85,36 @@ if specc
 		if isfile("phix_curr_$k.csv") & isfile("tildetx_lr_curr_$k.csv")
 			phik_curr    = fft2(readcsv("phix_curr_$k.csv"), parlr) 
 			tildetk_curr = fft2(readcsv("tildetx_lr_curr_$k.csv"), parlr)
-			push!(phik_pwr_smpl,   binpower(mtr .* phik_curr, parlr.grd.r, bin_mids))
-			push!(tildek_pwr_smpl, binpower(sqrt(mtr) .* tildetk_curr, parlr.grd.r, bin_mids))
+			push!(phik_pwr_smpl,   binpower(r2 .* phik_curr, parlr.grd.r, bin_mids_P))
+			push!(tildek_pwr_smpl, binpower(sqrt(r2) .* tildetk_curr, parlr.grd.r, bin_mids_T))
 			cntr += 1
 		end
 	end
 	# squish to matrix
-	phik_pwr_smpl = hcat(phik_pwr_smpl...)
+	phik_pwr_smpl   = hcat(phik_pwr_smpl...)
 	tildek_pwr_smpl = hcat(tildek_pwr_smpl...)
 	# then split by the rows
-	phb = Array{Float64,1}[phik_pwr_smpl[k,:][:]   for k=1:length(bin_mids)]
-	tib = Array{Float64,1}[tildek_pwr_smpl[k,:][:] for k=1:length(bin_mids)]
+	phb = Array{Float64,1}[phik_pwr_smpl[k,:][:]   for k=1:size(phik_pwr_smpl,   1)]
+	tib = Array{Float64,1}[tildek_pwr_smpl[k,:][:] for k=1:size(tildek_pwr_smpl, 1)]
 	# now phb[2] shoudl be the samples over bin bin_mids[2]
 	
 	# here is the truth
 	phik =   fft2(readcsv("phix.csv"), parlr)
 	tildek = fft2(readcsv("tildetx_lr.csv"), parlr)
 	
-	phb_truth = binpower(mtr .* phik, parlr.grd.r, bin_mids)
-	tib_truth = binpower(sqrt(mtr) .* tildek, parlr.grd.r, bin_mids)
+	phb_truth = binpower(r2 .* phik, parlr.grd.r, bin_mids_P)
+	tib_truth = binpower(sqrt(r2) .* tildek, parlr.grd.r, bin_mids_T)
 	
 	plt.figure(figsize=(15,5))
 	plt.plot(elp, dirac_0 .* elp.^4 .* cpl, "-k")
-	plt.plot(bin_mids, phb_truth, "or", label = "truth")
-	rtcuts  = collect(bin_mids +  step(bin_mids) / 2)  
-	lftcuts = collect(bin_mids -  step(bin_mids) / 2)  
+	plt.plot(bin_mids_P, phb_truth, "or", label = "truth")
+	rtcuts  = collect(bin_mids_P +  step(bin_mids_P) / 2)  
+	lftcuts = collect(bin_mids_P -  step(bin_mids_P) / 2)  
 	lftcuts[1] = 0.1 # extend the left boundary all the way down, but not zero
 	plt.errorbar(
-		bin_mids,
+		bin_mids_P,
 		map(median,  phb),
-		xerr = Array{Float64,1}[bin_mids-lftcuts, rtcuts-bin_mids],  
+		xerr = Array{Float64,1}[bin_mids_P-lftcuts, rtcuts-bin_mids_P],  
 		yerr = Array{Float64,1}[map(x-> median(x)-quantile(x,0.025), phb), map(x-> quantile(x,0.975)-median(x), phb)],
 		fmt="*b",
 		label = "posterior"
@@ -119,15 +124,15 @@ if specc
 
 
 	plt.figure(figsize=(15,5))
-	plt.plot(elt, dirac_0 .* elp.^2 .* ctl, "-k")
-	plt.plot(bin_mids, tib_truth, "or", label = "truth")
-	rtcuts  = collect(bin_mids +  step(bin_mids) / 2)  
-	lftcuts = collect(bin_mids -  step(bin_mids) / 2)  
+	plt.plot(elt, dirac_0 .* elt.^2 .* ctl, "-k")
+	plt.plot(bin_mids_T, tib_truth, "or", label = "truth")
+	rtcuts  = collect(bin_mids_T +  step(bin_mids_T) / 2)  
+	lftcuts = collect(bin_mids_T -  step(bin_mids_T) / 2)  
 	lftcuts[1] = 0.1 # extend the left boundary all the way down, but not zero
 	plt.errorbar(
-		bin_mids,
+		bin_mids_T,
 		map(median,  tib),
-		xerr = Array{Float64,1}[bin_mids-lftcuts, rtcuts-bin_mids],  
+		xerr = Array{Float64,1}[bin_mids_T-lftcuts, rtcuts-bin_mids_T],  
 		yerr = Array{Float64,1}[map(x-> median(x)-quantile(x,0.025), tib), map(x-> quantile(x,0.975)-median(x), tib)],
 		fmt="*b",
 		label = "posterior"
@@ -154,11 +159,14 @@ if pcorr
 		"../../src"
 	);
 	dirac_0 = 1/parlr.grd.deltk^d 
-	el = parlr.ell[10:1000] 
-	cpl = parlr.CPell2d[10:1000]
-	mte =  el.^4
-	mtr = parlr.grd.r.^2
-	
+	elp = parlr.ell[10:int(maskupP)] 
+	elt = parlr.ell[10:int(maskupC)] 
+	cpl = parlr.CPell2d[10:int(maskupP)]
+	ctl = parlr.CTell2d[10:int(maskupC)]
+	r2 = parlr.grd.r.^2
+	bin_mids_P = (parlr.grd.deltk*2):(parlr.grd.deltk):maskupP
+	bin_mids_T = (parlr.grd.deltk*2):(parlr.grd.deltk):maskupC
+
 	function binave(fk::Matrix, kmag::Matrix, bin_mids::Range)
 		fpwr = Array(Complex{Float64}, length(bin_mids))
 		fill!(fpwr, -1.0)
@@ -191,60 +199,60 @@ if pcorr
 	tildek_cov_smpl = Array{Float64,1}[]
 	cntr = 0
 	for k in krang
-		if isfile("phix_curr_$k.csv") & isfile("tildetx_lr_curr_$k.csv")
+		if isfile("phix_curr_$k.csv") && isfile("tildetx_lr_curr_$k.csv")
 			phik_curr    = fft2(readcsv("phix_curr_$k.csv"), parlr) 
 			tildetk_curr = fft2(readcsv("tildetx_lr_curr_$k.csv"), parlr)
-			pnxt   = binave(mtr .* phik_curr .* conj(phik), parlr.grd.r, bin_mids)
-			pnxt ./= binpower(sqrt(mtr) .* phik_curr, parlr.grd.r, bin_mids) |> sqrt
-			pnxt ./= binpower(sqrt(mtr) .* phik, parlr.grd.r, bin_mids) |> sqrt
-			tnxt   = binave(mtr .* tildetk_curr .* conj(tildek), parlr.grd.r, bin_mids)
-			tnxt ./= binpower(sqrt(mtr) .* tildetk_curr, parlr.grd.r, bin_mids) |> sqrt
-			tnxt ./= binpower(sqrt(mtr) .* tildek, parlr.grd.r, bin_mids) |> sqrt
+			pnxt   = binave(  r2 .* phik_curr .* conj(phik), parlr.grd.r, bin_mids_P)
+			pnxt ./= binpower(sqrt(r2) .* phik_curr, parlr.grd.r, bin_mids_P) |> sqrt
+			pnxt ./= binpower(sqrt(r2) .* phik, parlr.grd.r, bin_mids_P) |> sqrt
+			tnxt   = binave(  r2 .* tildetk_curr .* conj(tildek), parlr.grd.r, bin_mids_T)
+			tnxt ./= binpower(sqrt(r2) .* tildetk_curr, parlr.grd.r, bin_mids_T) |> sqrt
+			tnxt ./= binpower(sqrt(r2) .* tildek, parlr.grd.r, bin_mids_T) |> sqrt
 			push!(phik_cov_smpl, real(pnxt))
 			push!(tildek_cov_smpl, real(tnxt))
 			cntr += 1
 		end
 	end
 	# squish to matrix
-	phik_cov_smpl = hcat(phik_cov_smpl...)
+	phik_cov_smpl   = hcat(phik_cov_smpl...)
 	tildek_cov_smpl = hcat(tildek_cov_smpl...)
 	# then split by the rows
-	phb = Array{Float64,1}[phik_cov_smpl[k,:][:]   for k=1:length(bin_mids)]
-	tib = Array{Float64,1}[tildek_cov_smpl[k,:][:] for k=1:length(bin_mids)]
+	phb = Array{Float64,1}[vec(phik_cov_smpl[k,:])   for k=1:size(phik_cov_smpl,   1)]
+	tib = Array{Float64,1}[vec(tildek_cov_smpl[k,:]) for k=1:size(tildek_cov_smpl, 1)]
 	# now phb[2] shoudl be the samples over bin bin_mids[2]
 	
-	# for phi
+	# --------- for phi
 	plt.figure(figsize=(15,5))
-	rtcuts  = collect(bin_mids +  step(bin_mids) / 2)  
-	lftcuts = collect(bin_mids -  step(bin_mids) / 2)  
+	rtcuts  = collect(bin_mids_P +  step(bin_mids_P) / 2)  
+	lftcuts = collect(bin_mids_P -  step(bin_mids_P) / 2)  
 	lftcuts[1] = 0.1 # extend the left boundary all the way down, but not zero
 	plt.errorbar(
-		bin_mids,
+		bin_mids_P,
 		map(median,  phb),
-		xerr = Array{Float64,1}[bin_mids-lftcuts, rtcuts-bin_mids],  
+		xerr = Array{Float64,1}[bin_mids_P-lftcuts, rtcuts-bin_mids_P],  
 		yerr = Array{Float64,1}[map(x-> median(x)-quantile(x,0.025), phb), 
 								map(x-> quantile(x,0.975)-median(x), phb)],
 		fmt="*b",
 		label = "empirical correlation with truth"
 	)
-	plt.plot(collect(bin_mids), zero(bin_mids), ":k")
+	plt.plot(collect(bin_mids_P), zero(bin_mids_P), ":k")
 	plt.legend()
 	plt.show()
-	# for T
+	#  ------------ for T
 	plt.figure(figsize=(15,5))
-	rtcuts  = collect(bin_mids +  step(bin_mids) / 2)  
-	lftcuts = collect(bin_mids -  step(bin_mids) / 2)  
+	rtcuts  = collect(bin_mids_T +  step(bin_mids_T) / 2)  
+	lftcuts = collect(bin_mids_T -  step(bin_mids_T) / 2)  
 	lftcuts[1] = 0.1 # extend the left boundary all the way down, but not zero
 	plt.errorbar(
-		bin_mids,
+		bin_mids_T,
 		map(median,  tib),
-		xerr = Array{Float64,1}[bin_mids-lftcuts, rtcuts-bin_mids],  
+		xerr = Array{Float64,1}[bin_mids_T-lftcuts, rtcuts-bin_mids_T],  
 		yerr = Array{Float64,1}[map(x-> median(x)-quantile(x,0.025), tib), 
 								map(x-> quantile(x,0.975)-median(x), tib)],
 		fmt="*b",
 		label = "empirical correlation with truth"
 	)
-	plt.plot(collect(bin_mids), zero(bin_mids), ":k")
+	plt.plot(collect(bin_mids_T), zero(bin_mids_T), ":k")
 	plt.legend()
 	plt.show()
 end 
@@ -350,7 +358,7 @@ if  imagsli
 		if isfile("phix_curr_$k.csv") & isfile("tildetx_lr_curr_$k.csv")
 			phix_curr = readcsv("phix_curr_$k.csv")
 			tildetx_curr = readcsv("tildetx_lr_curr_$k.csv")
-			plt.figure(figsize=(12,12))
+			plt.figure(figsize=(10,10))
 			plt.subplot(2,2,3)
 			plt.imshow(phix, interpolation = "none", vmin=minimum(phix),vmax=maximum(phix)) 
 			plt.xlabel("true lensing potential")
