@@ -43,6 +43,51 @@ end
 
 
 
+#-----------------------------
+# messenger algorithms: t messenger
+#------------------------------------
+function gibbspass_t!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])
+    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
+    dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
+    for uplim in coolingVec
+        wsim_gibbs_t!(sx, tx, dx, Nx, parhr, uplim)
+    end
+    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
+end
+# ----- these are sub functions
+function  wsim_gibbs_t!(sx, tx, dx, Nx, par, uplim)
+    Tx = 0.99 * minimum(Nx)
+    barNx = Nx .- Tx
+    delt0 = 1.0./par.grd.deltk^2.0
+    if uplim == Inf
+        lamx = 1.0
+    else
+        lamk = delt0 .* par.CTell2d[round(uplim)]
+        lamx = lamk ./ (delt0 * par.grd.deltx^2.0)
+        lamx = max(1.0, lamx)
+    end
+    sim_sx!(sx, tx, lamx * Tx, barNx, par)
+    sim_tx!(sx, tx, dx, lamx * Tx, barNx, par)
+end
+function sim_sx!(sx, tx, Tx::Float64, barNx, par)
+    tk  = fft2(tx, par)
+    Tk  = Tx * par.grd.deltx * par.grd.deltx # this converts pixel space variance to spectrum
+    pargrddeltk2 = par.grd.deltk * par.grd.deltk
+    tmp    = 1.0./ (pargrddeltk2./par.cTT .+ pargrddeltk2./Tk) 
+    sk_wf  = tmp .* tk ./ (Tk ./ pargrddeltk2)
+    sk_flx = white(par) .* sqrt(tmp)
+    sx[:]  = ifft2r(sk_wf + sk_flx, par)
+end  
+function sim_tx!(sx, tx, dx, Tx::Float64, barNx, par)
+    tmp = 1.0./(1.0./barNx .+ 1.0./Tx)
+    tx_wf  = tmp .* (dx./barNx + sx./Tx)
+    tx_flx  = randn(size(tx)) .* sqrt(tmp) 
+    tx[:] = tx_wf + tx_flx
+end
+
+
+
+
 ##--------------------------------
 # gradient of phi given  tildetx
 #------------------------------------
@@ -94,33 +139,22 @@ end
 #-----------------------------
 # messenger algorithms: dual messenger
 #------------------------------------
-function gibbspass_coold!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, nruns, uplim=4000.0)
+function gibbspass_d!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
     dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
-    for upl in  linspace(2parlr.grd.deltk, uplim, int(nruns/30))
-        wsim_gibbs_d!(sx, sbarx, dx, Nx, parhr, 30, upl)
+    for uplim in coolingVec
+        wsim_gibbs_d!(sx, sbarx, dx, Nx, parhr, upl)
     end
     sk = fft2(sx, parhr)
-    sk[parhr.grd.r .>= uplim] = 0.0
-    sx[:] = ifft2r(sk, parhr)
-    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
-end
-function gibbspass_d!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, nruns, uplim=4000.0)
-    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
-    dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
-    wsim_gibbs_d!(sx, sbarx, dx, Nx, parhr, nruns, uplim)
-    sk = fft2(sx, parhr)
-    sk[parhr.grd.r .>= uplim] = 0.0
+    sk[parhr.grd.r .> coolingVec[end]] = 0.0
     sx[:] = ifft2r(sk, parhr)
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
 end
 # ---- these are sub functions
-function  wsim_gibbs_d!(sx, sbarx, dx, Nx, par, its, uplim=4000.0)
+function  wsim_gibbs_d!(sx, sbarx, dx, Nx, par, uplim)
     Sbark, Qx, Qk = get_SQ(uplim, par)
-    for cntr = 1:its
-        simd_sbarx!(sx, sbarx,  Sbark, Qk, par)
-        simd_sx!(sx, sbarx, dx, Sbark, Qx, Nx, par)
-    end
+    simd_sbarx!(sx, sbarx,  Sbark, Qk, par)
+    simd_sx!(sx, sbarx, dx, Sbark, Qx, Nx, par)
 end
 function simd_sx!(sx, sbarx, dx, Sbark, Qx::Float64, Nx, par)
     tmp = 1.0 ./ (1.0./Nx .+ 1.0./Qx)
@@ -147,59 +181,6 @@ function get_SQ(lp_init, par)
                 # Qk / delt0 is the spectrum
     Qx = Qk ./ (delt0 * par.grd.deltx^2.0) # to convert noise spectrum (i.e. Qk / delt0) to pixel varuance take spectrum / par.grd.deltx^2.0
     Sbark, Qx, Qk
-end
-
-
-#-----------------------------
-# messenger algorithms: t messenger
-#------------------------------------
-function gibbspass_coolt!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, nruns, uplim = 4000.0)
-    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
-    dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
-    for upl in linspace(2parlr.grd.deltk, uplim, int(nruns/29))
-        wsim_gibbs_t!(sx, tx, dx, Nx, parhr, 30, upl)
-    end
-    wsim_gibbs_t!(sx, tx, dx, Nx, parhr, 30)
-    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
-end
-function gibbspass_t!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, nruns)
-    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
-    dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
-    wsim_gibbs_t!(sx, tx, dx, Nx, parhr, nruns)
-    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
-end
-# ---- these are sub functions
-function  wsim_gibbs_t!(sx, tx, dx, Nx, par, its, uplim = Inf)
-    Tx = 0.99 * minimum(Nx)
-    barNx = Nx .- Tx
-
-    delt0 = 1.0./par.grd.deltk^2.0
-    lamx = 1.0
-    if uplim != Inf
-        lamk = delt0 .* par.CTell2d[round(uplim)]
-        lamx = lamk ./ (delt0 * par.grd.deltx^2.0)
-        lamx = max(1.0, lamx)
-    end
-
-    for cntr = 1:its
-        sim_sx!(sx, tx, lamx * Tx, barNx, par)
-        sim_tx!(sx, tx, dx, lamx * Tx, barNx, par)
-    end
-end
-function sim_sx!(sx, tx, Tx::Float64, barNx, par)
-    tk  = fft2(tx, par)
-    Tk  = Tx * par.grd.deltx * par.grd.deltx # this converts pixel space variance to spectrum
-    pargrddeltk2 = par.grd.deltk * par.grd.deltk
-    tmp    = 1.0./ (pargrddeltk2./par.cTT .+ pargrddeltk2./Tk) 
-    sk_wf  = tmp .* tk ./ (Tk ./ pargrddeltk2)
-    sk_flx = white(par) .* sqrt(tmp)
-    sx[:]  = ifft2r(sk_wf + sk_flx, par)
-end  
-function sim_tx!(sx, tx, dx, Tx::Float64, barNx, par)
-    tmp = 1.0./(1.0./barNx .+ 1.0./Tx)
-    tx_wf  = tmp .* (dx./barNx + sx./Tx)
-    tx_flx  = randn(size(tx)) .* sqrt(tmp) 
-    tx[:] = tx_wf + tx_flx
 end
 
 

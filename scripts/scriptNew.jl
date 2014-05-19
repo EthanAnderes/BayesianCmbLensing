@@ -3,10 +3,10 @@ const scriptname = "scriptNew"
 const percentNyqForC = 0.5 # used for T l_max
 const numofparsForP  = 1500  # used for P l_max
 const hrfactor = 2.0
-const pixel_size_arcmin = 1.0
+const pixel_size_arcmin = 3.5
 const n = 2.0^9
 const beamFWHM = 0.0
-const nugget_at_each_pixel = (16.0)^2
+const nugget_at_each_pixel = (3.0)^2
 begin  #< ---- dependent run parameters
 	local deltx =  pixel_size_arcmin * pi / (180 * 60) #rads
 	local period = deltx * n # side length in rads
@@ -100,49 +100,27 @@ tildetx_lr_curr = zeros(parlr.grd.x)
 tildetx_hr_curr = zeros(parhr.grd.x) 
 tx_hr_curr_sum  = zeros(tx_hr_curr)
 phik_curr_sum   = zeros(phik)
-acceptclk       = [1 for k=1:10] #initialize acceptance record
+acceptclk       = [1] #initialize acceptance record
 
 
 
 bglp = 0
 while true
 	#  ------ use phik_curr from previous iteration to simluate the unlensed CMB: tx_hr_curr
-	#if  bglp % 100 == 0  
-		phidx1_hr, phidx2_hr, phidx1_lr, phidx2_lr = gibbspass_coolt!(
-			tx_hr_curr, 
-			ttx_hr_curr, 
-			phik_curr, 
-			ytx, 
-			maskvarx, 
-			parlr, 
-			parhr, 
-			400, 
-			maskupC
+		phidx1_hr, phidx2_hr, phidx1_lr, phidx2_lr = gibbspass_t!(
+			tx_hr_curr, ttx_hr_curr, 
+			phik_curr, ytx, maskvarx, 
+			parlr, parhr, 
+			[linspace(3parhr.grd.deltk, maskupC, 100), [Inf for k=1:50]]
 		) 
-	#end
- 	# phidx1_hr, phidx2_hr, phidx1_lr, phidx2_lr = gibbspass_t!(
- 	# 	tx_hr_curr, 
- 	# 	ttx_hr_curr, 
- 	# 	phik_curr, 
- 	# 	ytx, 
- 	# 	maskvarx, 
- 	# 	parlr, 
- 	# 	parhr, 
- 	# 	400, 
- 	# 	maskupC
- 	# 	) 
 	tildetx_hr_curr[:] = spline_interp2(
-		parhr.grd.x, 
-		parhr.grd.y, 
-		tx_hr_curr, 
-		parhr.grd.x + phidx1_hr, 
-		parhr.grd.y + phidx2_hr
+			parhr.grd.x, parhr.grd.y, tx_hr_curr, 
+			parhr.grd.x + phidx1_hr, parhr.grd.y + phidx2_hr
 		)
 	
 	#  ------ gradient updates at the start
 	if  bglp <= 4
 		gradupdate!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_grad) 
-		push!(acceptclk, 2)
 	else 	
 		push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc))
 		push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc))
