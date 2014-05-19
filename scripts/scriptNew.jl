@@ -1,16 +1,12 @@
 # julia scripts/scriptNew.jl
-simnotes = """
-low noise
-small pixels
-"""
 const scriptname = "scriptNew"
 const percentNyqForC = 0.5 # used for T l_max
-const numofparsForP  = 1000  # used for P l_max
+const numofparsForP  = 1500  # used for P l_max
 const hrfactor = 2.0
 const pixel_size_arcmin = 1.0
-const n = 2.0^10
+const n = 2.0^9
 const beamFWHM = 0.0
-const nugget_at_each_pixel = (6.0)^2
+const nugget_at_each_pixel = (16.0)^2
 begin  #< ---- dependent run parameters
 	local deltx =  pixel_size_arcmin * pi / (180 * 60) #rads
 	local period = deltx * n # side length in rads
@@ -77,7 +73,6 @@ isdir(savepath) && run(`rm -r $savepath`)
 run(`mkdir $savepath`)
 run(`cp src/funcs.jl $savepath/funcs_save.jl`)
 run(`cp scripts/$scriptname.jl $savepath/$(scriptname)_save.jl`)
-run(`echo $simnotes` |> "$savepath/simnotes.txt")
 writecsv("$savepath/x.csv", parlr.grd.x)
 writecsv("$savepath/y.csv", parlr.grd.y)
 writecsv("$savepath/k1.csv", parlr.grd.k1)
@@ -106,6 +101,7 @@ tildetx_hr_curr = zeros(parhr.grd.x)
 tx_hr_curr_sum  = zeros(tx_hr_curr)
 phik_curr_sum   = zeros(phik)
 acceptclk       = [1 for k=1:10] #initialize acceptance record
+
 
 
 bglp = 0

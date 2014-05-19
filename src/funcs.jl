@@ -94,28 +94,28 @@ end
 #-----------------------------
 # messenger algorithms: dual messenger
 #------------------------------------
-function gibbspass_coold!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, nruns, uplim)
+function gibbspass_coold!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, nruns, uplim=4000.0)
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
     dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
     for upl in  linspace(2parlr.grd.deltk, uplim, int(nruns/30))
-        wsim_gibbs_d!(sx, sbarx, dx, Nx, parhr, upl, 30)
+        wsim_gibbs_d!(sx, sbarx, dx, Nx, parhr, 30, upl)
     end
     sk = fft2(sx, parhr)
     sk[parhr.grd.r .>= uplim] = 0.0
     sx[:] = ifft2r(sk, parhr)
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
 end
-function gibbspass_d!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, nruns, uplim)
+function gibbspass_d!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, nruns, uplim=4000.0)
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
     dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
-    wsim_gibbs_d!(sx, sbarx, dx, Nx, parhr, uplim, nruns)
+    wsim_gibbs_d!(sx, sbarx, dx, Nx, parhr, nruns, uplim)
     sk = fft2(sx, parhr)
     sk[parhr.grd.r .>= uplim] = 0.0
     sx[:] = ifft2r(sk, parhr)
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
 end
 # ---- these are sub functions
-function  wsim_gibbs_d!(sx, sbarx, dx, Nx, par, uplim, its)
+function  wsim_gibbs_d!(sx, sbarx, dx, Nx, par, its, uplim=4000.0)
     Sbark, Qx, Qk = get_SQ(uplim, par)
     for cntr = 1:its
         simd_sbarx!(sx, sbarx,  Sbark, Qk, par)
@@ -156,15 +156,16 @@ end
 function gibbspass_coolt!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, nruns, uplim = 4000.0)
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
     dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
-    for upl in linspace(2parlr.grd.deltk, uplim, int(nruns/30))
-        wsim_gibbs_t!(sx, tx, dx, Nx, parhr, upl, 30)
+    for upl in linspace(2parlr.grd.deltk, uplim, int(nruns/29))
+        wsim_gibbs_t!(sx, tx, dx, Nx, parhr, 30, upl)
     end
+    wsim_gibbs_t!(sx, tx, dx, Nx, parhr, 30)
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
 end
 function gibbspass_t!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, nruns)
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
     dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
-    wsim_gibbs_t!(sx, tx, dx, Nx, parhr, Inf, nruns)
+    wsim_gibbs_t!(sx, tx, dx, Nx, parhr, nruns)
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
 end
 # ---- these are sub functions
