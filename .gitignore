@@ -1,8 +1,5 @@
 .DS_Store
 simulations/*
-paper/*.aux
-paper/*.fdb_latexmk
-paper/*.log
-paper/*.synctex.gz
-paper/src/*
-paper/graphics/*
+!/paper
+/paper/*
+!/paper/BLpaper.tex
