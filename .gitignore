@@ -3,3 +3,4 @@ simulations/*
 !/paper
 /paper/*
 !/paper/BLpaper.tex
+!/paper/BLpaper.pdf
