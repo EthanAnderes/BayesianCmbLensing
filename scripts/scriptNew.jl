@@ -3,10 +3,10 @@ const scriptname = "scriptNew"
 const percentNyqForC = 0.5 # used for T l_max
 const numofparsForP  = 1500  # used for P l_max
 const hrfactor = 2.0
-const pixel_size_arcmin = 3.5
+const pixel_size_arcmin = 1.5
 const n = 2.0^9
 const beamFWHM = 0.0
-const nugget_at_each_pixel = (3.0)^2
+const nugget_at_each_pixel = (5.0)^2
 begin  #< ---- dependent run parameters
 	local deltx =  pixel_size_arcmin * pi / (180 * 60) #rads
 	local period = deltx * n # side length in rads
@@ -107,16 +107,16 @@ acceptclk       = [1] #initialize acceptance record
 bglp = 0
 while true
 	#  ------ use phik_curr from previous iteration to simluate the unlensed CMB: tx_hr_curr
-		phidx1_hr, phidx2_hr, phidx1_lr, phidx2_lr = gibbspass_t!(
-			tx_hr_curr, ttx_hr_curr, 
-			phik_curr, ytx, maskvarx, 
-			parlr, parhr, 
-			[linspace(3parhr.grd.deltk, maskupC, 100), [Inf for k=1:50]]
-		) 
+	phidx1_hr, phidx2_hr, phidx1_lr, phidx2_lr = gibbspass_t!(
+		tx_hr_curr, ttx_hr_curr, 
+		phik_curr, ytx, maskvarx, 
+		parlr, parhr, 
+		[linspace(3parhr.grd.deltk, maskupC, 100), [Inf for k=1:50]]
+	) 
 	tildetx_hr_curr[:] = spline_interp2(
 			parhr.grd.x, parhr.grd.y, tx_hr_curr, 
 			parhr.grd.x + phidx1_hr, parhr.grd.y + phidx2_hr
-		)
+	)
 	
 	#  ------ gradient updates at the start
 	if  bglp <= 4

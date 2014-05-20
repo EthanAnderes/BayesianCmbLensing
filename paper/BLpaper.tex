@@ -15,8 +15,8 @@
 
 
 \bibliographystyle{plain}
-\addtolength{\textwidth}{.4in} %this number is 2 times the next number
-\addtolength{\hoffset}{-.2in}
+\addtolength{\textwidth}{.2in} %this number is 2 times the next number
+\addtolength{\hoffset}{-.1in}
 
 \newtheorem{claim}{Claim}
 \newtheorem{proposition}{Proposition}
@@ -26,6 +26,10 @@
 \newtheorem{corollary}[theorem]{Corollary}
 \newtheorem{definition}{Definition}
 \renewcommand{\labelenumi}{(\roman{enumi})}
+\newcommand{\bx}{\boldsymbol x}
+\newcommand{\by}{\boldsymbol y}
+\newcommand{\bl}{\boldsymbol l}
+\newcommand{\bk}{\boldsymbol k}
 
 \title{Bayesian CMB lensing}
 \date{}
@@ -34,6 +38,18 @@
 \begin{document}
 \maketitle
 
+Gravitational lensing studies have become a powerful probe of dark matter, the invisibility of which provides the main obstacle for detection. In particular, the ground based Atacama Cosmology Telescope (ACT)  and  the South Pole Telescope (SPT) have mapped the  cosmic microwave background (CMB)  at such unprecedented resolution as too allow a detection of weak gravitational lensing from the CMB alone.
+The CMB shows a picture of radiation fluctuations frozen at the instant the universe became transparent. Estimating the gravitational lensing of the CMB  is important for two reasons. First, if the CMB is mapped at a sufficient resolution one can use weak lensing estimates to construct a map of dark matter in the sky.
+%This is exceedingly important for understanding the nature and structure of matter in the universe. 
+Second,  weak lensing estimates  can be used, in principle,  to un-distort the observed lensed CMB and construct the original unlensed CMB radiation fluctuations. Both of these maps,  the unlensed CMB radiation field and the dark matter field, are deep probes into the nature of cosmology and cosmic structure. 
+
+ Over the past year, the data from two ground based telescopes, ACT and SPT, have resulted in the first direct detection of weak lensing from the CMB alone, see Das et al. (2011) and van Engelen  et al. (2012). In the coming years, the data from the Plank satellite and  new instrumentation being installed on these telescopes (ACTpol and SPTpol) will begin probing this lensing a much greater scale. This will eventually help cosmologists gain an understanding of gravity waves,  dark matter and dark energy. Unfortunately, the estimators which have been developed for weak lensing are still not fully understood. The state-of-the-art estimator, the quadratic estimator developed by Hu and Okomoto (2001, 2002), works in part through a delicate cancelation of terms in an infinite Taylor expansion of the lensing effect on the CMB. The effect of this cancelation is particularly sensitive to foreground contaminants and sky masking, which  if not fully accounted for,  limit  the statistical inference obtainable from these studies. We propose a  new Bayesian estimator which has the potential to revolutionize the way weak lensing studies are done.  
+  
+
+Possibly the most promising alternative to the quadratic estimator, is Bayesian lensing. Indeed, Bayesian techniques applied to the lensed CMB observations have the potential for drastically changing the way lensing is estimated and used for inference. From the geometry of weak lensing, most of the lensing power comes from matter at a redshift $z\approx 2$. At these distances the matter distribution is well approximated by linear theory which predicts the matter density fluctuations are nearly Gaussian. Moreover, the unlensed CMB $\Theta$ is also extremely close to Gaussian.  From a statistical perspective, this is a perfect scenario for Bayesian methods, in that both the observations and the unknown lensing potential are {\em physically predicted} to be Gaussian random fields. 
+%In particular, physics predicts that our prior should be nearly Gaussian. 
+ Moreover, the structure of the lensing operation gives a compelling case for MCMC posterior sampling techniques.
+ To see an example, we show the feasibility of Gibbs sampling for generating posterior samples of the unlensed CMB $\Theta(x)$  and the lensing potential $\phi(x)$ from observations in the form $\Theta^\text{\tiny obs}(x) = \Theta(x+\nabla \phi(x))+ N(x)$.  
 The Bayesian solution to the estimation of CMB lensing  is to generate random draws from the posterior distribution, given the observed data, on the lensing potential and the unlensed (noiseless) CMB field. This approach is attractive for statistical inference since posterior draws are easy to use and to interpret for scientific inference. Moreover, posterior distributions can often be sequentially updated to incorporate additional information from additional data or other experiments.
 
 History of the Bayesian lensing problem.
@@ -42,12 +58,29 @@ A full solution to this problem would handle non-stationary noise, non-stationar
 
 There are two components to this solution. The first.
 
+\section{Weak Lensing}
+
+This section describes the  basics of CMB lensing and 
+ The effect of weak lensing is to simply remap the CMB, preserving surface brightness.   Up to leading order, the remapping  displacements are given by $\nabla \phi$, where $\phi$ denotes a lensing potential and is the planer projection of a three dimensional gravitational potential (see Dodelson, S. (2003), for example). Therefore the lensed CMB can  be written $T(\bx + \nabla \phi(\bx))$ where $T(\bx)$ denotes the unlensed CMB temperature fluctuations projected to the observable sky.
+The goal of weak lensing surveys is to use the lensed observations $T(\bx + \nabla \phi(\bx))$  (with additional noise) to  estimate $\phi$ or the spectral density of $\phi$. 
+ In the full sky, $\bx$ represents an observational direction on the unit sphere. However, we will be focusing on the small angle limit  so that $\bx$ can be modeled as a variable in $ \Bbb R^2$.  The Einstein principle along with properties of quantum mechanics predicts that $T(\bx)$   is a Gaussian  isotropic random field. These properties translate to  the independence of the Fourier transform of $T$ across different frequencies.
+ %Taking a Fourier transform of $T$ translates to independence under the Fourier transform. 
+ However, for a fixed lensing potential $\phi$, the lensed CMB  becomes non-isotropic, which leads to a correlation in the Fourier transform across different frequencies. The quadratic estimator   takes advantage of this correlation and uses weighted sums of Fourier  cross products to unbiasedly (up to leading order) estimate the lensing potential.
+The quadratic estimator is derived under the assumption that the observed lensed CMB field is contaminated by additive noise and an instrumental beam. Throughout this proposal we let  $T^\text{\tiny obs}(x)$ denote the observed CMB field  with  noise (denoted $N(\bx)$) so that  
+\[ \text{data}(\bx)= T(\bx + \nabla \phi(\bx))+ n(\bx)
+%+\int T(\bs y+\nabla \phi(\bs y)) \varphi(\bs x - \bs y) \, d\bs y.
+ \]
+The quadratic estimator is based on a first order Taylor approximation in $\nabla \phi $ on the lensed CMB field:
+$T(\bx+\nabla \phi(\bx))= T(\bx) + \nabla \phi(\bx)\cdot \nabla T(\bx)+ O(\phi^2)$. 
+In Anderes and Paul (2012) they showed that this estimator is essentially  a generalized least square regression estimator obtained by stacking the cross product of the Fourier transform separated at a certain lag.
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Primer on Gibbs parameterization
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Simple two parameter system}
+\section{Modivation: simple two parameter toy model}
 \label{two parameter system}
 
 
@@ -91,9 +124,9 @@ In the statistics literature,  $(\theta, \phi)$ is commonly referred to as an {\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Ancillary and sufficient parameters for the lensed CMB}
 
-The analog to the two parameter ancillary problem, $\text{data} = \theta +\phi +n$,  in Section \ref{two parameter system} to the lensed CMB is 
+We will see that the ancillary parameterization for the lensed CMB problem is extreemely slow, whereas the sufficient parameterization is fast. Indeed, the analog to the equation, $\text{data} = \theta +\phi + n$,  from Section \ref{two parameter system} for lensed CMB is given by
 \[\text{data}(x) = T(x+\nabla \phi(x)) + n(x)\]
-where the unlensed  CMB temperature field $T$ and the lensing potential $\phi$ are the two unknown parameters. In this chain the Gibbs sampler proceddes in the usual way:
+where the unlensed  CMB temperature field $T$ and the lensing potential $\phi$ are the two unknown parameters. In the ancillary Gibbs chain proceeds in the usual way:
 \begin{align}
 T^{i+1}&\sim P(T |  \phi^{i},\text{data})\\
 \phi^{i+1}&\sim P(\phi | T^{i+1},  \text{data}).
@@ -117,11 +150,19 @@ The suffient chain then procceeds as
 \end{align}
 In the following two ections we discuss these two conditional in detail.
 
-
+% ----------
 \section{$\widetilde T^{i+1}\sim P(\widetilde T |  \phi^{i},\text{data})$}
 
-
+% ----------
 \section{$\phi^{i+1}\sim P(\phi | \widetilde T^{i+1},  \text{data})$}
+\begin{theorem}
+ \[\frac{\partial}{\partial \phi_k}\log P(\phi | \tilde T,  \text{data}) \propto -\frac{i k_q}{2\pi} \int e^{-i x\cdot k} [A^q(x)B(x)]dk + \frac{\phi_k}{C^{\phi\phi}_{k}}  \]
+ where
+ \begin{align}
+ A^q(x) &\equiv \frac{\partial\tilde T}{\partial x_q}(x-\nabla \phi(x)) \\
+ B_k &\equiv \frac{1}{C_k^{TT}} FFT\bigl\{\tilde T(x-\nabla \phi(x))\bigr\}
+ \end{align}
+\end{theorem}
 
 
 \end{document}

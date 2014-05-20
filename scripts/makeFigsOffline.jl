@@ -4,9 +4,9 @@ julia ../../scripts/makeFigsOffline.jl
 =#
 const specc 	  = true # plot the spectral coverage
 const pcorr 	  = true # plot the empirical cross correlation
-const onedslice = false # plot the 1-d slices of phi
-const acc 	    = false # take a look at the accpetence rate
-const imagsli   = false # look at the images one by one
+const onedslice = true # plot the 1-d slices of phi
+const acc 	    = true # take a look at the accpetence rate
+const imagsli   = true # look at the images one by one
 const mvie 	    = false # <---- needs work
 const krang = 1:(5):5000 # range of samples we are looking at
 
@@ -15,10 +15,10 @@ const scriptname = "scriptNew"
 const percentNyqForC = 0.5 # used for T l_max
 const numofparsForP  = 1500  # used for P l_max
 const hrfactor = 2.0
-const pixel_size_arcmin = 0.5
+const pixel_size_arcmin = 1.5
 const n = 2.0^9
 const beamFWHM = 0.0
-const nugget_at_each_pixel = (10.0)^2
+const nugget_at_each_pixel = (5.0)^2
 begin  #< ---- dependent run parameters
 	local deltx =  pixel_size_arcmin * pi / (180 * 60) #rads
 	local period = deltx * n # side length in rads
@@ -30,7 +30,6 @@ begin  #< ---- dependent run parameters
 	println("maskupP = $maskupP") # muK per arcmin
 	println("maskupC = $maskupC") # muK per arcmin
 end
-
 
 # ---- modules etc
 using PyCall 
@@ -262,7 +261,7 @@ end
 # plot the 1-d slices of phi
 #-----------------------------------------
 if onedslice
-	propslice = 0.2 # btwn 0 and 1
+	propslice = 0.8 # btwn 0 and 1
 	phix_slice_samples = Array{Float64,1}[]
 	tildex_slice_samples = Array{Float64,1}[]
 	cntr = 0
