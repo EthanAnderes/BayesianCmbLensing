@@ -1,14 +1,15 @@
 #=
-include("../../scripts/makeFigsOffline.jl")
-julia ../../scripts/makeFigsOffline.jl
+include("scripts/makeFigsOffline.jl")
+julia scripts/makeFigsOffline.jl
 =#
+const simdir    =  "scriptNew_Mask_303335" 
 const specc 	  = true # plot the spectral coverage
 const pcorr 	  = true # plot the empirical cross correlation
 const onedslice = true # plot the 1-d slices of phi
 const acc 	    = true # take a look at the accpetence rate
 const imagsli   = true # look at the images one by one
 const mvie 	    = false # <---- needs work
-const krang = 101:(5):5000 # range of samples we are looking at
+const krang = 1:(5):5000 # range of samples we are looking at
 
 # --- copy these are from the runfile
 const scriptname = "scriptNew"
@@ -34,7 +35,7 @@ end
 # ---- modules etc
 using PyCall 
 @pyimport matplotlib.pyplot as plt
-push!(LOAD_PATH, "../../src")
+push!(LOAD_PATH, "src")
 using Interp
 require("cmb.jl")
 require("fft.jl")
@@ -52,7 +53,7 @@ if specc
 		nugget_at_each_pixel, 
 		maskupC, 
 		maskupP,
-		"../../src"
+		"src"
 	);
 	dirac_0 = 1/parlr.grd.deltk^d 
 	elp = parlr.ell[10:int(maskupP)] 
@@ -81,9 +82,9 @@ if specc
 	tildek_pwr_smpl = Array{Float64,1}[]
 	cntr = 0
 	for k in krang
-		if isfile("phix_curr_$k.csv") & isfile("tildetx_lr_curr_$k.csv")
-			phik_curr    = fft2(readcsv("phix_curr_$k.csv"), parlr) 
-			tildetk_curr = fft2(readcsv("tildetx_lr_curr_$k.csv"), parlr)
+		if isfile("simulations/$simdir/phix_curr_$k.csv") & isfile("simulations/$simdir/tildetx_lr_curr_$k.csv")
+			phik_curr    = fft2(readcsv("simulations/$simdir/phix_curr_$k.csv"), parlr) 
+			tildetk_curr = fft2(readcsv("simulations/$simdir/tildetx_lr_curr_$k.csv"), parlr)
 			push!(phik_pwr_smpl,   binpower(r2 .* phik_curr, parlr.grd.r, bin_mids_P))
 			push!(tildek_pwr_smpl, binpower(sqrt(r2) .* tildetk_curr, parlr.grd.r, bin_mids_T))
 			cntr += 1
@@ -98,8 +99,8 @@ if specc
 	# now phb[2] shoudl be the samples over bin bin_mids[2]
 	
 	# here is the truth
-	phik =   fft2(readcsv("phix.csv"), parlr)
-	tildek = fft2(readcsv("tildetx_lr.csv"), parlr)
+	phik =   fft2(readcsv("simulations/$simdir/phix.csv"), parlr)
+	tildek = fft2(readcsv("simulations/$simdir/tildetx_lr.csv"), parlr)
 	
 	phb_truth = binpower(r2 .* phik, parlr.grd.r, bin_mids_P)
 	tib_truth = binpower(sqrt(r2) .* tildek, parlr.grd.r, bin_mids_T)
@@ -155,7 +156,7 @@ if pcorr
 		nugget_at_each_pixel, 
 		maskupC, 
 		maskupP,
-		"../../src"
+		"src"
 	);
 	dirac_0 = 1/parlr.grd.deltk^d 
 	elp = parlr.ell[10:int(maskupP)] 
@@ -191,16 +192,16 @@ if pcorr
 		fpwr
 	end
 	
-	phik =   fft2(readcsv("phix.csv"), parlr)
-	tildek = fft2(readcsv("tildetx_lr.csv"), parlr)
+	phik =   fft2(readcsv("simulations/$simdir/phix.csv"), parlr)
+	tildek = fft2(readcsv("simulations/$simdir/tildetx_lr.csv"), parlr)
 	
 	phik_cov_smpl = Array{Float64,1}[]
 	tildek_cov_smpl = Array{Float64,1}[]
 	cntr = 0
 	for k in krang
-		if isfile("phix_curr_$k.csv") && isfile("tildetx_lr_curr_$k.csv")
-			phik_curr    = fft2(readcsv("phix_curr_$k.csv"), parlr) 
-			tildetk_curr = fft2(readcsv("tildetx_lr_curr_$k.csv"), parlr)
+		if isfile("simulations/$simdir/phix_curr_$k.csv") && isfile("simulations/$simdir/tildetx_lr_curr_$k.csv")
+			phik_curr    = fft2(readcsv("simulations/$simdir/phix_curr_$k.csv"), parlr) 
+			tildetk_curr = fft2(readcsv("simulations/$simdir/tildetx_lr_curr_$k.csv"), parlr)
 			pnxt   = binave(  r2 .* phik_curr .* conj(phik), parlr.grd.r, bin_mids_P)
 			pnxt ./= binpower(sqrt(r2) .* phik_curr, parlr.grd.r, bin_mids_P) |> sqrt
 			pnxt ./= binpower(sqrt(r2) .* phik, parlr.grd.r, bin_mids_P) |> sqrt
@@ -266,9 +267,9 @@ if onedslice
 	tildex_slice_samples = Array{Float64,1}[]
 	cntr = 0
 	for k in krang
-		if isfile("phix_curr_$k.csv") & isfile("tildetx_lr_curr_$k.csv")
-			phix_curr = readcsv("phix_curr_$k.csv")
-			tildetx_curr = readcsv("tildetx_lr_curr_$k.csv")
+		if isfile("simulations/$simdir/phix_curr_$k.csv") & isfile("simulations/$simdir/tildetx_lr_curr_$k.csv")
+			phix_curr = readcsv("simulations/$simdir/phix_curr_$k.csv")
+			tildetx_curr = readcsv("simulations/$simdir/tildetx_lr_curr_$k.csv")
 			push!(phix_slice_samples, phix_curr[int(end*propslice),:][:])
 			push!(tildex_slice_samples, tildetx_curr[int(end*propslice),:][:])
 			cntr += 1
@@ -278,11 +279,11 @@ if onedslice
 	tildex_slice_samples = hcat(tildex_slice_samples...)
 	
 	# files I can upload directly
-	phix = readcsv("phix.csv")[int(end*propslice),:][:]
-	tildex = readcsv("tildetx_lr.csv")[int(end*propslice),:][:]
-	qex = readcsv("qex_lr.csv")[int(end*propslice),:][:]
-	x = readcsv("x.csv")[int(end*propslice),:][:]
-	varx = readcsv("maskvarx.csv")[int(end*propslice),:][:]
+	phix = readcsv("simulations/$simdir/phix.csv")[int(end*propslice),:][:]
+	tildex = readcsv("simulations/$simdir/tildetx_lr.csv")[int(end*propslice),:][:]
+	qex = readcsv("simulations/$simdir/qex_lr.csv")[int(end*propslice),:][:]
+	x = readcsv("simulations/$simdir/x.csv")[int(end*propslice),:][:]
+	varx = readcsv("simulations/$simdir/maskvarx.csv")[int(end*propslice),:][:]
 	isempty(x[varx.==Inf]) || (maskmin=minimum(x[varx.==Inf]); maskmax = maximum(x[varx.==Inf]))
 	
 	# plot phix
@@ -325,7 +326,7 @@ end
 # take a look at the accpetence rate
 #-----------------------------------------
 if acc 
-	accptrec = readcsv("acceptclk.csv")
+	accptrec = readcsv("simulations/$simdir/acceptclk.csv")
 	
 	# plots the record
 	# plt.plot(accptrec)
@@ -350,13 +351,13 @@ end #end if
 # look at the images one by one
 #--------------------------------
 if  imagsli 
-	phix = readcsv("phix.csv")
-	tildex = readcsv("tildetx_lr.csv")
-	ytx  = readcsv("ytx.csv")
+	phix = readcsv("simulations/$simdir/phix.csv")
+	tildex = readcsv("simulations/$simdir/tildetx_lr.csv")
+	ytx  = readcsv("simulations/$simdir/ytx.csv")
 	for k in krang
-		if isfile("phix_curr_$k.csv") & isfile("tildetx_lr_curr_$k.csv")
-			phix_curr = readcsv("phix_curr_$k.csv")
-			tildetx_curr = readcsv("tildetx_lr_curr_$k.csv")
+		if isfile("simulations/$simdir/phix_curr_$k.csv") & isfile("simulations/$simdir/tildetx_lr_curr_$k.csv")
+			phix_curr = readcsv("simulations/$simdir/phix_curr_$k.csv")
+			tildetx_curr = readcsv("simulations/$simdir/tildetx_lr_curr_$k.csv")
 			plt.figure(figsize=(10,10))
 			plt.subplot(2,2,3)
 			plt.imshow(phix, interpolation = "none", vmin=minimum(phix),vmax=maximum(phix)) 
@@ -402,15 +403,15 @@ function saveMovieFram(dr, num, phix, phix_curr, ytx, tildetx_lr_curr)
 	plt.savefig(dr * "/" * string(num) * ".png")
 	plt.close(fig)
 end
-phix = readcsv("phix.csv")
-ytx  = readcsv("ytx.csv")
+phix = readcsv("simulations/$simdir/phix.csv")
+ytx  = readcsv("simulations/$simdir/ytx.csv")
 phix_sum = zero(phix)
 tildetx_lr_sum = zero(phix)
 cntr = 0
 for k in krang
-	if isfile("phix_curr_$k.csv") & isfile("tildetx_lr_curr_$k.csv")
-		phix_curr = readcsv("phix_curr_$k.csv")
-		tildetx_lr_curr = readcsv("tildetx_lr_curr_$k.csv")
+	if isfile("simulations/$simdir/phix_curr_$k.csv") & isfile("simulations/$simdir/tildetx_lr_curr_$k.csv")
+		phix_curr = readcsv("simulations/$simdir/phix_curr_$k.csv")
+		tildetx_lr_curr = readcsv("simulations/$simdir/tildetx_lr_curr_$k.csv")
 		saveMovieFram(dr, cntr, phix, phix_curr, ytx, tildetx_lr_curr)
 		phix_sum += phix_curr
 		tildetx_lr_sum += tildetx_lr_curr

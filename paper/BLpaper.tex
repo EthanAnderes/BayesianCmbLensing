@@ -21,6 +21,7 @@
 \newtheorem{conjecture}{Conjecture}
 \newtheorem{corollary}[theorem]{Corollary}
 \newtheorem{definition}{Definition}
+\newtheorem{notation}{Notation}
 \renewcommand{\labelenumi}{(\roman{enumi})}
 \newcommand{\bx}{\boldsymbol x}
 \newcommand{\by}{\boldsymbol y}
@@ -82,55 +83,77 @@ A full solution to this problem would handle non-stationary noise, non-stationar
 
 There are two components to this solution. The first.
 
-\section{Weak lensing primer}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Section
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Weak lensing primer and a Bayesian challenge}
+\label{primer}
 
-This section describes the  basics of CMB lensing and The effect of weak lensing is to simply remap the CMB, preserving surface brightness.   Up to leading order, the remapping  displacements are given by $\nabla \phi$, where $\phi$ denotes a lensing potential and is the planer projection of a three dimensional gravitational potential (see Dodelson, S. (2003), for example). Therefore the lensed CMB can  be written $T(\bx + \nabla \phi(\bx))$ where $T(\bx)$ denotes the unlensed CMB temperature fluctuations projected to the observable sky.
-The goal of weak lensing surveys is to use the lensed observations $T(\bx + \nabla \phi(\bx))$  (with additional noise) to  estimate $\phi$ or the spectral density of $\phi$.  In the full sky, $\bx$ represents an observational direction on the unit sphere. However, we will be focusing on the small angle limit  so that $\bx$ can be modeled as a variable in $ \Bbb R^2$.  The Einstein principle along with properties of quantum mechanics predicts that $T(\bx)$   is a Gaussian  isotropic random field. These properties translate to  the independence of the Fourier transform of $T$ across different frequencies.
+This section describes the  basics of CMB lensing and The effect of weak lensing is to simply remap the CMB, preserving surface brightness.   Up to leading order, the remapping  displacements are given by $\nabla \phi$, where $\phi$ denotes a lensing potential and is the planer projection of a three dimensional gravitational potential (see Dodelson, S. (2003), for example). Therefore the lensed CMB can  be written $T(\bx + \nabla \phi(x))$ where $T(x)$ denotes the unlensed CMB temperature fluctuations projected to the observable sky.
+The goal of weak lensing surveys is to use the lensed observations $T(x + \nabla \phi(x))$  (with additional noise) to  estimate $\phi$ or the spectral density of $\phi$.  In the full sky, $x$ represents an observational direction on the unit sphere. However, we will be focusing on the small angle limit  so that $x$ can be modeled as a variable in $ \Bbb R^2$.  The Einstein principle along with properties of quantum mechanics predicts that $T(x)$   is a Gaussian  isotropic random field. These properties translate to  the independence of the Fourier transform of $T$ across different frequencies.
  %Taking a Fourier transform of $T$ translates to independence under the Fourier transform. 
  However, for a fixed lensing potential $\phi$, the lensed CMB  becomes non-isotropic, which leads to a correlation in the Fourier transform across different frequencies. The quadratic estimator   takes advantage of this correlation and uses weighted sums of Fourier  cross products to unbiasedly (up to leading order) estimate the lensing potential.
-The quadratic estimator is derived under the assumption that the observed lensed CMB field is contaminated by additive noise and an instrumental beam. Throughout this proposal we let  $T^\text{\tiny obs}(x)$ denote the observed CMB field  with  noise (denoted $n(\bx)$) so that  
-\[ \text{data}(\bx)= T(\bx + \nabla \phi(\bx))+ n(\bx)
+The quadratic estimator is derived under the assumption that the observed lensed CMB field is contaminated by additive noise and an instrumental beam. Throughout this proposal we let  $T^\text{\tiny obs}(x)$ denote the observed CMB field  with  noise (denoted $n(x)$) so that  
+\[ \text{data}(x)= T(x + \nabla \phi(\bx))+ n(\bx)
 %+\int T(\bs y+\nabla \phi(\bs y)) \varphi(\bs x - \bs y) \, d\bs y.
  \]
 The quadratic estimator is based on a first order Taylor approximation in $\nabla \phi $ on the lensed CMB field:
-$T(\bx+\nabla \phi(\bx))= T(\bx) + \nabla \phi(\bx)\cdot \nabla T(\bx)+ O(\phi^2)$. 
+$T(x+\nabla \phi())= T(x) + \nabla \phi(x)\cdot \nabla T(x)+ O(\phi^2)$. 
 In Anderes and Paul (2012) they showed that this estimator is essentially  a generalized least square regression estimator obtained by stacking the cross product of the Fourier transform separated at a certain lag.
 
+
+
+There has been active interest in devloping a Bayesian estimator of the lensing potential $\phi$ jointly with the unlensed CMB $T$ given the data. A very natural approach to generating posterior samples is to 
+In the ancillary Gibbs chain proceeds in the usual way:
+\begin{align}
+T^{i+1}&\sim P(T |  \phi^{i},\text{data})\\
+\phi^{i+1}&\sim P(\phi | T^{i+1},  \text{data}).
+\end{align}
+Sampling from $P(T |  \phi^{i},\text{data})$ is simply a Gaussian random field prediction problem since conditioning on $\phi^i$ models the data as
+\[ \text{data}(x) = T(\!\!\underbrace{x+\nabla\phi^i(x)}_\text{\tiny known obs locations}\!\!) + n(x).\]
+In otherwords, he data is a noisy version of  $T$ observed on an irregular grid. 
+Conversly, when sampling from $P(\phi |  T^{i+1},\text{data})$ the data is of the form
+\[ \text{data}(x) = \underbrace{T^{i+1}}_{\text{\tiny known}}(x+\nabla\phi(x)) + n(x). \]
+Both of these conditionals make the Gibbs very slow to converge. The case is esasterbated in the situation the noise level is small. For example, in the second conditional, if $T^{i+1}$ is knownw and fixed, the extent of possible  $\phi$'s which are possible under $P(\phi|T^{i+1},\text{data})$  is very small compared to the possible $\phi$'s  in $P(\phi, T| \text{data})$ when $T$ is allowd to vary. 
+This suggests a highly dependent posteror $P(\phi, T| \text{data})$. 
+This was also noitce by \textcolor{red}{[Cite Lewis and Challanore]} for the first conditnioal.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Primer on Gibbs parameterization
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Modivation: simple two parameter toy model}
+\section{Toy model analogy}
 \label{two parameter system}
 
 
-To motivate our solution to the Bayesian lensing problem we start with a simple two parameter statistical problem.  This system has two unknown parameters $\theta, \phi$ with data given by
-\[\text{data} = \theta + \phi + n\]
+To motivate our solution to the Bayesian lensing problem we start with a simple two parameter statistical problem.  This system has two unknown parameters $ t, \varphi$ with data given by
+\[\text{data} =  t + \varphi + n\]
 where $n$ denotes additive noise.  In the Bayesian setting, the posterior distribution is computed as 
 \begin{equation}
 \label{post1}
- P(\theta,\phi|\text{data})\propto P(\text{data}|\theta, \phi) P(\theta,\phi) 
+ P( t,\varphi|\text{data})\propto P(\text{data}| t, \varphi) P( t,\varphi) 
  \end{equation}
-where $P(\text{data}|\theta, \phi)$ denotes the likelihood of the data given  $\theta, \phi$ and $P(\theta,\phi)$ denotes the  prior on $\theta, \phi$. 
-The Gibbs sampler is a widely used algorithm for generating (asymptotic) samples from  $P(\theta, \phi|\text{data})$ \textcolor{red}{[add citations]}. The algorithm generates a Markov chain of parameter values $(\theta^{1}, \phi^{1}), (\theta^{2}, \phi^{2}),\ldots$ generated by iteratively sampling from the conditional distributions:
+where $P(\text{data}| t, \varphi)$ denotes the likelihood of the data given  $ t, \varphi$ and $P( t,\varphi)$ denotes the  prior on $ t, \varphi$. 
+The Gibbs sampler is a widely used algorithm for generating (asymptotic) samples from  $P( t, \varphi|\text{data})$ \textcolor{red}{[add citations]}. The algorithm generates a Markov chain of parameter values $( t^{1}, \varphi^{1}), ( t^{2}, \varphi^{2}),\ldots$ generated by iteratively sampling from the conditional distributions:
 \begin{align*}
-\theta^{i+1} &\sim P(\theta|\phi^i,\text{data})\\
-\phi^{i+1}   &\sim P(\phi|\theta^{i+1},\text{data}).
+ t^{i+1} &\sim P( t|\varphi^i,\text{data})\\
+\varphi^{i+1}   &\sim P(\varphi| t^{i+1},\text{data}).
 \end{align*}
-A useful heuristic for determining the convergence rate of a Gibbs chain is the extent to which the two parameters $\theta$ and $\phi$ are dependent in $P(\phi, \theta|\text{data})$. A highly dependent posterior $P(\theta, \phi|\text{data})$ leads to a slow Gibbs chain, near independence leads to a fast Gibbs chain. Indeed, exact independence gives a sample of the posterior after one Gibbs step.  A technique for accelerating the convergence of a Gibbs sampler is to find a  re-parameterization of $\theta$ and $\phi$ in a way which makes the posterior less dependent. In the remainder of this section we discuss a specific re-parameterization which, by analogy, can be applied to Bayesian lensing.
+A useful heuristic for determining the convergence rate of a Gibbs chain is the extent to which the two parameters $ t$ and $\varphi$ are dependent in $P(\varphi,  t|\text{data})$. A highly dependent posterior $P( t, \varphi|\text{data})$ leads to a slow Gibbs chain, near independence leads to a fast Gibbs chain. Indeed, exact independence gives a sample of the posterior after one Gibbs step.  A technique for accelerating the convergence of a Gibbs sampler is to find a  re-parameterization of $ t$ and $\varphi$ in a way which makes the posterior less dependent. In the remainder of this section we discuss a specific re-parameterization which, by analogy, can be applied to Bayesian lensing.
 
 
-The relevant situation for Bayesian lensing is the case that $\theta$ and $\phi$ are highly negatively correlated in $P(\theta, \phi|\text{data})$.  This motivates re-parameterizing $(\theta,\phi)$ to $(\widetilde \theta, \phi)$ where $\widetilde \theta \equiv \theta + \phi$ so that
+The relevant situation for Bayesian lensing is the case that $ t$ and $\varphi$ are highly negatively correlated in $P( t, \varphi|\text{data})$.  This motivates re-parameterizing $( t,\varphi)$ to $(\widetilde  t, \varphi)$ where $\widetilde  t \equiv  t + \varphi$ so that
 \begin{align*}
-\text{data} &= \widetilde \theta + n.
+\text{data} &= \widetilde  t + n.
 \end{align*}
-In the statistics literature,  $(\theta, \phi)$ is commonly referred to as an {\bf ancillary parameterization} whereas $(\widetilde \theta, \phi)$ is referred to as a {\bf sufficient parameterization} \textcolor{red}{[add citations]}. Figure  \ref{fastslowGibbs} illustrates the difference between an ancillary versus sufficient posterior distribution for our simple two parameter model. The left plot shows the posterior density contours for the ancillary parameterization $(\theta, \phi)$, along with 40 steps of a Gibbs sampler.  Conversely, the right plot shows the posterior density contours for the sufficient chain $(\widetilde \theta, \phi)$ with 40 Gibbs steps. Notice that negative correlation  in the ancillary parameterization manifests in near independence for the sufficient chain.  Indeed, the slower the ancillary chain the faster the sufficient chain and vice-versa. 
+In the statistics literature,  $( t, \varphi)$ is commonly referred to as an {\bf ancillary parameterization} whereas $(\widetilde  t, \varphi)$ is referred to as a {\bf sufficient parameterization} \textcolor{red}{[add citations]}. Figure  \ref{fastslowGibbs} illustrates the difference between an ancillary versus sufficient posterior distribution for our simple two parameter model. The left plot shows the posterior density contours for the ancillary parameterization $( t, \varphi)$, along with 40 steps of a Gibbs sampler.  Conversely, the right plot shows the posterior density contours for the sufficient chain $(\widetilde  t, \varphi)$ with 40 Gibbs steps. Notice that negative correlation  in the ancillary parameterization manifests in near independence for the sufficient chain.  Indeed, the slower the ancillary chain the faster the sufficient chain and vice-versa. 
 \begin{figure}[H]
 \label{fastslowGibbs}
 \includegraphics[height=2.0in]{Graphics/theta.pdf}\includegraphics[height=2.0in]{Graphics/thetatilde.pdf}
-\caption{{\em Left:} density contours of the {\bf ancillary} chain $P(\theta, \phi|\text{data})$ with 40 steps of a Gibbs sampler. {\em Right:} density contours of the {\bf sufficient}  chain $P(\widetilde \theta, \phi|\text{data})$ with 40 steps of a Gibbs sampler.}
+\caption{{\em Left:} density contours of the {\bf ancillary} chain $P( t, \varphi|\text{data})$ with 40 steps of a Gibbs sampler. {\em Right:} density contours of the {\bf sufficient}  chain $P(\widetilde  t, \varphi|\text{data})$ with 40 steps of a Gibbs sampler.}
 \end{figure}
  
 
@@ -146,24 +169,26 @@ In the statistics literature,  $(\theta, \phi)$ is commonly referred to as an {\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Ancillary and sufficient parameters for the lensed CMB}
 
-We will see that the ancillary parameterization for the lensed CMB problem is extreemely slow, whereas the sufficient parameterization is fast. Indeed, the analog to the equation, $\text{data} = \theta +\phi + n$,  from Section \ref{two parameter system} for lensed CMB is given by
-\[\text{data}(x) = T(x+\nabla \phi(x)) + n(x)\]
-where the unlensed  CMB temperature field $T$ and the lensing potential $\phi$ are the two unknown parameters. In the ancillary Gibbs chain proceeds in the usual way:
-\begin{align}
-T^{i+1}&\sim P(T |  \phi^{i},\text{data})\\
-\phi^{i+1}&\sim P(\phi | T^{i+1},  \text{data}).
-\end{align}
-Sampling from $P(T |  \phi^{i},\text{data})$ is simply a Gaussian random field prediction problem since conditioning on $\phi^i$ models the data as
-\[ \text{data}(x) = T(\!\!\underbrace{x+\nabla\phi^i(x)}_\text{\tiny known obs locations}\!\!) + n(x).\]
-In otherwords, he data is a noisy version of  $T$ observed on an irregular grid. 
-Conversly, when sampling from $P(\phi |  T^{i+1},\text{data})$ the data is of the form
-\[ \text{data}(x) = \underbrace{T^{i+1}}_{\text{\tiny known}}(x+\nabla\phi(x)) + n(x). \]
-Both of these conditionals make the Gibbs very slow to converge. The case is esasterbated in the situation the noise level is small. For example, in the second conditional, if $T^{i+1}$ is knownw and fixed, the extent of possible  $\phi$'s which are possible under $P(\phi|T^{i+1},\text{data})$  is very small compared to the possible $\phi$'s  in $P(\phi, T| \text{data})$ when $T$ is allowd to vary. 
-This suggests a highly dependent posteror $P(\phi, T| \text{data})$. 
-This was also noitce by \textcolor{red}{[Cite Lewis and Challanore]} for the first conditnioal.
-
-This clearly modivates attempting to quantify a  sufficient parameterization. The analog to the sufficient toy problem, $\text{data} = \widetilde\theta + n$,  in Section \ref{two parameter system} to the lensed CMB is 
-\[\text{data}(x) = \widetilde T(x) + n(x)\]
+We will see that the ancillary parameterization for the lensed CMB problem is extreemely slow, whereas the sufficient parameterization is fast. Indeed, the analog to the Ancillary toy problem can be related to the lensed CMB problem as follows
+% \begin{align*}
+%   \text{data}(x) &= T(x+\nabla \phi(x)) + n(x) \\
+%   &\Updownarrow \\
+%   \text{data} &=  t +\varphi + n
+% \end{align*}
+\begin{align*}
+  \text{data}(x) &= T(x+\nabla \phi(x)) + n(x)\quad\text{\bf\em analogous to}\quad
+  \text{data} =  t +\varphi + n
+\end{align*}
+where the unlensed  CMB temperature field $T$ and the lensing potential $\phi$ are the two unknown parameters. Since we have seen in Section \ref{primer} that this Ancillary chain is exceedingly slow this clearly modivates attempting to quantify a sufficient parameterization. The analog to the sufficient toy problem, $\text{data} = \widetilde t + n$,  in Section \ref{two parameter system} to the lensed CMB is 
+% \begin{align*}
+%   \text{data}(x) &= \widetilde T(x) + n(x) \\
+%   &\Updownarrow \\
+%   \text{data} &=  \widetilde t + n
+% \end{align*}
+\begin{align*}
+  \text{data}(x) &= \widetilde T(x) + n(x) \quad\text{\bf\em analogous to}\quad
+  \text{data} =  \widetilde t + n
+\end{align*}
 where now $\widetilde T$ denotes the lensed CMB tempuruature field with no noise or beam.
 The suffient chain then procceeds as
 \begin{align}
@@ -172,19 +197,41 @@ The suffient chain then procceeds as
 \end{align}
 In the following two ections we discuss these two conditional in detail.
 
-% ----------
-\section{$\widetilde T^{i+1}\sim P(\widetilde T |  \phi^{i},\text{data})$}
+
+
+\subsection{Anti-lensing approximation}
+
 
 % ----------
-\section{$\phi^{i+1}\sim P(\phi | \widetilde T^{i+1},  \text{data})$}
-\begin{theorem}
- \[\frac{\partial}{\partial \phi_k}\log P(\phi | \tilde T,  \text{data}) \propto -\frac{i k_q}{2\pi} \int e^{-i x\cdot k} [A^q(x)B(x)]dk + \frac{\phi_k}{C^{\phi\phi}_{k}}  \]
- where
+\section{Hamiltonian sampler for $\phi^{i+1}\sim P(\phi | \widetilde T^{i+1},  \text{\rm data})$}
+
+\begin{notation}
+The Fourier trasform of any fucntion $f(x)\colon\Bbb R^2 \rightarrow \Bbb R$ is denoted $f_k$ so that
+$f_k  =  \int e^{-i x\cdot k}  f(x)\frac{dx}{2\pi}$ and
+$f(x) =  \int e^{i x\cdot k}  f_k \frac{dk}{2\pi}$ 
+where $k\in \Bbb R^2$ is a two dimensional frequency vector and $x\in \Bbb R^2$  is a two dimensional spatial corrdinate.
+\end{notation}
+
+
+
+
+
+\begin{claim} Under the anti-lensing approximation,  $\widetilde T(x-\nabla\phi(x)) = T(x)$,  then for any nonzero frequecy vector $k\equiv (k_1, k_2) \in \Bbb R^2$ 
+ \[\frac{\partial}{\partial \phi_k}\log P(\phi | \widetilde T,  \text{\rm data}) \propto \frac{\phi_k}{C^{\phi\phi}_{k}} + \sum_{q=1}^2 - {i k_q} \int e^{-i x\cdot k} A^q(x)B(x) \frac{dx}{2\pi}   \]
+ where  $\phi_k = \text{\rm re} \,\phi_k + i\, \text{\rm im}\phi_k$, $\frac{\partial}{\partial \phi_k}\equiv \frac{\partial}{\partial\, \text{\rm re} \phi_k} + i \frac{\partial}{\partial\, \text{\rm im}\phi_k}$ and 
  \begin{align}
- A^q(x) &\equiv \frac{\partial\tilde T}{\partial x_q}(x-\nabla \phi(x)) \\
- B_k &\equiv \frac{1}{C_k^{TT}} FFT\bigl\{\tilde T(x-\nabla \phi(x))\bigr\}
+ B_k &\equiv \frac{1}{C_k^{TT}} \int e^{-i x\cdot k}  \widetilde T(x-\nabla \phi(x))\frac{dx}{2\pi} \\ 
+ A^q(x) &\equiv \frac{\partial\widetilde T}{\partial x_q}(x-\nabla \phi(x)).
  \end{align}
-\end{theorem}
+\end{claim}
+
+
+
+% ----------
+\section{Message passing algorithm for $\widetilde T^{i+1}\sim P(\widetilde T |  \phi^{i},\text{\rm data})$}
+
+
+\section{Simulations}
 
 \end{document}
 

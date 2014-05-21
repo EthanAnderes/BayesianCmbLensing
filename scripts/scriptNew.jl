@@ -1,7 +1,7 @@
 # julia scripts/scriptNew.jl
 const scriptname = "scriptNew"
-const seed = rand(1:1000000)
-const savepath = joinpath("simulations", "$(scriptname)_Mask_$seed") #<--change the directory name here
+const seed = Base.Random.RANDOM_SEED
+const savepath = joinpath("simulations", "$(scriptname)_Mask_$(seed[1])") #<--change the directory name here
 const percentNyqForC = 0.5 # used for T l_max
 const numofparsForP  = 1500  # used for P l_max
 const hrfactor = 2.0
@@ -74,6 +74,7 @@ isdir(savepath) && run(`rm -r $savepath`)
 run(`mkdir $savepath`)
 run(`cp src/funcs.jl $savepath/funcs_save.jl`)
 run(`cp scripts/$scriptname.jl $savepath/$(scriptname)_save.jl`)
+writecsv("$savepath/seed.csv", seed)
 writecsv("$savepath/x.csv", parlr.grd.x)
 writecsv("$savepath/y.csv", parlr.grd.y)
 writecsv("$savepath/k1.csv", parlr.grd.k1)
