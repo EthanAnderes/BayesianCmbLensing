@@ -1,27 +1,18 @@
 \documentclass[noinfoline]{imsart}
-%\documentclass[10pt,letterpaper]{article}
-
 
 
 \usepackage{bm}
-\usepackage{geometry}
 \usepackage{graphics,epsfig,rotate,lscape,graphicx,amsmath,amsthm,amssymb,float,amsfonts,amsbsy,hyperref,delarray,sectsty,amsfonts,amscd,pifont}
 \usepackage{color,multirow}
 \usepackage{algorithmic}
 \usepackage{algorithm}
-\usepackage{epstopdf}
-\usepackage{verbatim}
 \usepackage{enumerate}
-\usepackage{setspace}
-\usepackage{subfigure}
-\usepackage{float}
-\usepackage{geometry}
 
+\usepackage{geometry}
 \geometry{letterpaper,left=1.2in,right=1.2in,top=1.2in,bottom=1.1in}
 
-
-
 \bibliographystyle{plain}
+
 
 \newtheorem{claim}{Claim}
 \newtheorem{proposition}{Proposition}
@@ -38,42 +29,38 @@
 
 
 
-
+% --------------------------------------
 \begin{document}
 
 
 
 \begin{frontmatter}
-
 \title{Bayesian estimates of CMB gravitational lensing}
 \runtitle{Bayesian CMB lensing}
-
 \begin{aug}
-  \author{\fnms{Ethan}  \snm{Anderes}\thanksref{a}\ead[label=e1]{anderes@ucdavis.edu}}
-    \and
-  \author{\fnms{Benjamin} \snm{Wandelt}\thanksref{b}\ead[label=e2]{?@?}}
-  	\and
-  \author{\fnms{Guilhem} \snm{Lavaux}\thanksref{b}\ead[label=e3]{?@?}}
-  \runauthor{Anderes et al.}
- % \affiliation{University of California, Davis and Stanford University}
-  \address[a]{Department of Statistics, University of California, Davis CA 95616, USA. \printead{e1}}
-  \address[b]{Institut d' Astrophysique de Paris. \printead{e2}\printead{e3}}
+  \author{\fnms{Ethan}  \snm{Anderes}\corref{}\thanksref{t1}\thanksref{a}}
+  \author{\fnms{Benjamin} \snm{Wandelt}\thanksref{b}}
+  \and
+  \author{\fnms{Guilhem}  \snm{Lavaux}\thanksref{b}}%
+  \ead[label=u1,url]{https://github.com/EthanAnderes/BayesianCmbLensing.git}
+  \address[a]{Department of Statistics, University of California, Davis CA 95616, USA.}
+  \address[b]{Institut d' Astrophysique de Paris. }
+  \thankstext{t1}{Research supported by: NSF DMS-1007480, NSF CAREER DMS-1252795}
+  \thankstext{t2}{Code available at \printead{u1}}
+  \runauthor{E. Anderes et al.}
 \end{aug}
-
 
 \begin{abstract} 
 Gravitational lensing studies have become a powerful probe of dark matter, the invisibility of which provides the main obstacle for detection. In particular, the ground based Atacama Cosmology Telescope (ACT)  and  the South Pole Telescope (SPT) have mapped the  cosmic microwave background (CMB)  at such unprecedented resolution as too allow a detection of weak gravitational lensing from the CMB alone.
 The CMB shows a picture of radiation fluctuations frozen at the instant the universe became transparent. Estimating the gravitational lensing of the CMB  is important for two reasons. First, if the CMB is mapped at a sufficient resolution one can use weak lensing estimates to construct a map of dark matter in the sky.
-%This is exceedingly important for understanding the nature and structure of matter in the universe. 
 Second,  weak lensing estimates  can be used, in principle,  to un-distort the observed lensed CMB and construct the original unlensed CMB radiation fluctuations. Both of these maps,  the unlensed CMB radiation field and the dark matter field, are deep probes into the nature of cosmology and cosmic structure. 
 \end{abstract}
-
 
 \begin{keyword}
 \kwd{CMB}
 \kwd{gravitational lensing}
 \kwd{Bayesian}
-\kwd{Gibbs}
+\kwd{Gibbs sampler}
 \end{keyword}
 
 \end{frontmatter}
@@ -82,7 +69,7 @@ Second,  weak lensing estimates  can be used, in principle,  to un-distort the o
 
 
 
- Over the past year, the data from two ground based telescopes, ACT and SPT, have resulted in the first direct detection of weak lensing from the CMB alone, see Das et al. (2011) and van Engelen  et al. (2012). In the coming years, the data from the Plank satellite and  new instrumentation being installed on these telescopes (ACTpol and SPTpol) will begin probing this lensing a much greater scale. This will eventually help cosmologists gain an understanding of gravity waves,  dark matter and dark energy. Unfortunately, the estimators which have been developed for weak lensing are still not fully understood. The state-of-the-art estimator, the quadratic estimator developed by Hu and Okomoto (2001, 2002), works in part through a delicate cancelation of terms in an infinite Taylor expansion of the lensing effect on the CMB. The effect of this cancelation is particularly sensitive to foreground contaminants and sky masking, which  if not fully accounted for,  limit  the statistical inference obtainable from these studies. We propose a  new Bayesian estimator which has the potential to revolutionize the way weak lensing studies are done.  
+ Over the past few years the data from ground based telecopse  (ACT, SPT and Bicep2) and  the Plank satellite and have resulted in unprecedicented detection of weak lensing from the CMB alone, (see Das et al. (2011) and van Engelen  et al. (2012), Plank).  These observations are starting to will eventually help cosmologists gain an understanding of gravity waves, dark matter and dark energy. Unfortunately, the estimators which have been developed for weak lensing are still not fully understood. The state-of-the-art estimator, the quadratic estimator developed by Hu and Okomoto (2001, 2002), works in part through a delicate cancelation of terms in an infinite Taylor expansion of the lensing effect on the CMB. The effect of this cancelation is particularly sensitive to foreground contaminants and sky masking, which  if not fully accounted for,  limit  the statistical inference obtainable from these studies. We propose a  new Bayesian estimator which has the potential to revolutionize the way weak lensing studies are done.  
   
 
 
@@ -203,7 +190,6 @@ In the following two ections we discuss these two conditional in detail.
  B_k &\equiv \frac{1}{C_k^{TT}} FFT\bigl\{\tilde T(x-\nabla \phi(x))\bigr\}
  \end{align}
 \end{theorem}
-
 
 \end{document}
 
