@@ -1,3 +1,62 @@
+#---------------------------
+#  check the signal to noise ratio for T
+#------------------------------
+const scriptname = "scriptNew"
+const percentNyqForC = 0.5 # used for T l_max
+const numofparsForP  = 1500  # used for P l_max
+const hrfactor = 2.0
+const pixel_size_arcmin = 1.5
+const n = 2.0^9
+const beamFWHM = 0.0
+const nugget_at_each_pixel = (5.0)^2
+begin  #< ---- dependent run parameters
+  local deltx =  pixel_size_arcmin * pi / (180 * 60) #rads
+  local period = deltx * n # side length in rads
+  local deltk =  2 * pi / period
+  local nyq = (2 * pi) / (2 * deltx)
+  const maskupP  = sqrt(deltk^2 * numofparsForP / pi)  #l_max for for phi
+  const maskupC  = min(9000.0, percentNyqForC * (2 * pi) / (2 * pixel_size_arcmin * pi / (180*60))) #l_max for for phi
+  println("muK_per_arcmin = $(sqrt(nugget_at_each_pixel * (pixel_size_arcmin^2)))") # muK per arcmin
+  println("maskupP = $maskupP") # muK per arcmin
+  println("maskupC = $maskupC") # muK per arcmin
+end
+const scale_grad =  1.0e-3
+const scale_hmc  =  1.0e-3
+const seed = rand(1:1000000)
+const savepath = joinpath("simulations", "$(scriptname)_$seed") 
+# ------------ load modules and functions
+push!(LOAD_PATH, pwd()*"/src")
+using Interp
+using PyPlot
+require("cmb.jl")
+require("fft.jl")
+require("funcs.jl") # use reload after editing funcs.jl
+# --------- generate cmb spectrum class for high res and low res
+parlr = setpar(
+  pixel_size_arcmin, 
+  n, 
+  beamFWHM, 
+  nugget_at_each_pixel, 
+  maskupC, 
+  maskupP
+);
+d=2
+dirac_0 = 1/parlr.grd.deltk^d 
+elp = parlr.ell[10:int(maskupP)] 
+elt = parlr.ell[10:int(maskupC)] 
+cpl = parlr.CPell2d[10:int(maskupP)]
+ctl = parlr.CTell2d[10:int(maskupC)]
+r2 = parlr.grd.r.^2
+bin_mids_P = (parlr.grd.deltk*2):(parlr.grd.deltk):maskupP
+bin_mids_T = (parlr.grd.deltk*2):(parlr.grd.deltk):maskupC
+
+plot(elt, dirac_0 .* elt.^2 .* ctl, "-k")
+plot(elt, dirac_0 .* elt.^2 .* nugget_at_each_pixel .* (parlr.grd.deltx^2))
+# notice the signal to noise drops below 1.0 just before 3500
+
+
+
+
 #------------------------------------
 # test out the HMC sampler on Wiener filtering
 #--------------------------------------------

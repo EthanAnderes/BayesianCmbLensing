@@ -1,5 +1,7 @@
 # julia scripts/scriptNew.jl
 const scriptname = "scriptNew"
+const seed = rand(1:1000000)
+const savepath = joinpath("simulations", "$(scriptname)_Mask_$seed") #<--change the directory name here
 const percentNyqForC = 0.5 # used for T l_max
 const numofparsForP  = 1500  # used for P l_max
 const hrfactor = 2.0
@@ -20,8 +22,6 @@ begin  #< ---- dependent run parameters
 end
 const scale_grad =  1.0e-3
 const scale_hmc  =  1.0e-3
-const seed = rand(1:1000000)
-const savepath = joinpath("simulations", "$(scriptname)_$seed") 
 
 
 
@@ -58,7 +58,8 @@ parhr = setpar(
 srand(seed)
 ytk_nomask, tildetk, phix, tx_hr = simulate_start(parlr);
 phik = fft2(phix, parlr)
-maskboolx =  falses(size(phix))
+maskboolx =  (maximum(parlr.grd.x)*0.3) .<= parlr.grd.x .<= (maximum(parlr.grd.x)*0.4) 
+# maskboolx =  falses(size(phix))
 maskvarx = parlr.nugget_at_each_pixel .* ones(size(phix))
 maskvarx[maskboolx] = Inf
 ytx = ifft2r(ytk_nomask, parlr)

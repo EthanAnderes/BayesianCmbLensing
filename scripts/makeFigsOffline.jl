@@ -8,7 +8,7 @@ const onedslice = true # plot the 1-d slices of phi
 const acc 	    = true # take a look at the accpetence rate
 const imagsli   = true # look at the images one by one
 const mvie 	    = false # <---- needs work
-const krang = 1:(5):5000 # range of samples we are looking at
+const krang = 101:(5):5000 # range of samples we are looking at
 
 # --- copy these are from the runfile
 const scriptname = "scriptNew"
