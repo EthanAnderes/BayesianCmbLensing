@@ -1,7 +1,7 @@
 # julia scripts/scriptNew.jl
 const scriptname = "scriptNew"
 const seed = Base.Random.RANDOM_SEED
-const savepath = joinpath("simulations", "$(scriptname)_Mask_$(seed[1])") #<--change the directory name here
+const savepath = joinpath("simulations", "$(scriptname)_MaskD_$(seed[1])") #<--change the directory name here
 const percentNyqForC = 0.5 # used for T l_max
 const numofparsForP  = 1500  # used for P l_max
 const hrfactor = 2.0
@@ -20,7 +20,7 @@ begin  #< ---- dependent run parameters
 	println("maskupP = $maskupP") # muK per arcmin
 	println("maskupC = $maskupC") # muK per arcmin
 end
-const scale_grad =  1.0e-3
+const scale_grad =  2.0e-3
 const scale_hmc  =  1.0e-3
 
 
@@ -55,18 +55,26 @@ parhr = setpar(
 
 
 # -------- Simulate data: ytx, maskvarx, phix, tildetx
-srand(seed)
 ytk_nomask, tildetk, phix, tx_hr = simulate_start(parlr);
 phik = fft2(phix, parlr)
-maskboolx =  (maximum(parlr.grd.x)*0.3) .<= parlr.grd.x .<= (maximum(parlr.grd.x)*0.4) 
 # maskboolx =  falses(size(phix))
-maskvarx = parlr.nugget_at_each_pixel .* ones(size(phix))
+tmpdo = maximum(parlr.grd.x)*0.3
+tmpup = maximum(parlr.grd.x)*0.4
+maskboolx = tmpdo .<= parlr.grd.x .<= tmpup
+maskvarx  = parlr.nugget_at_each_pixel .* ones(size(phix))
+decay(x) = exp(-2000abs(x).^2) ./ (abs(x*100).^(1))
+maskvarx += decay(parlr.grd.x .- tmpup)
+maskvarx += decay(parlr.grd.x .- tmpdo)
 maskvarx[maskboolx] = Inf
+# plot(parlr.nugget_at_each_pixel * ones(512))
+# plot(parlr.nugget_at_each_pixel * zeros(512))
+# plot(maskvarx[1,:].')
+# plot(0.3*512, parlr.nugget_at_each_pixel, "*")
+# plot(0.4*512, parlr.nugget_at_each_pixel, "*")
+# axis([0, 500, 0, 40])
 ytx = ifft2r(ytk_nomask, parlr)
 ytx[maskboolx] = 0.0
 ytk = fft2(ytx, parlr)
-
-
 
 
 # -----------  set the save directory and save stuff 
@@ -109,12 +117,20 @@ acceptclk       = [1] #initialize acceptance record
 bglp = 0
 while true
 	#  ------ use phik_curr from previous iteration to simluate the unlensed CMB: tx_hr_curr
-	phidx1_hr, phidx2_hr, phidx1_lr, phidx2_lr = gibbspass_t!(
-		tx_hr_curr, ttx_hr_curr, 
+	# phidx1_hr, phidx2_hr, phidx1_lr, phidx2_lr = gibbspass_t!(
+	# 	tx_hr_curr, ttx_hr_curr, 
+	# 	phik_curr, ytx, maskvarx, 
+	# 	parlr, parhr, 
+	# 	[linspace(3parhr.grd.deltk, 2maskupC, 300), [Inf for k=1:100]] #<-- works when no mask
+	# ) 
+	phidx1_hr, phidx2_hr, phidx1_lr, phidx2_lr = gibbspass_d!(
+		tx_hr_curr, tbarx_hr_curr, 
 		phik_curr, ytx, maskvarx, 
 		parlr, parhr, 
-		[linspace(3parhr.grd.deltk, maskupC, 100), [Inf for k=1:50]]
+		linspace(3parhr.grd.deltk, 2maskupC, 400)
 	) 
+
+
 	tildetx_hr_curr[:] = spline_interp2(
 			parhr.grd.x, parhr.grd.y, tx_hr_curr, 
 			parhr.grd.x + phidx1_hr, parhr.grd.y + phidx2_hr

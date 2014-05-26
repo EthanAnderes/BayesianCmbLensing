@@ -1,3 +1,86 @@
+#--------------------------
+#    test alternating the dual and t messenger.
+#--------------------------------
+const seed = Base.Random.RANDOM_SEED
+const percentNyqForC = 0.5 # used for T l_max
+const numofparsForP  = 1500  # used for P l_max
+const hrfactor = 2.0
+const pixel_size_arcmin = 1.5
+const n = 2.0^9
+const beamFWHM = 0.0
+const nugget_at_each_pixel = (5.0)^2
+begin  #< ---- dependent run parameters
+  local deltx =  pixel_size_arcmin * pi / (180 * 60) #rads
+  local period = deltx * n # side length in rads
+  local deltk =  2 * pi / period
+  local nyq = (2 * pi) / (2 * deltx)
+  const maskupP  = sqrt(deltk^2 * numofparsForP / pi)  #l_max for for phi
+  const maskupC  = min(9000.0, percentNyqForC * (2 * pi) / (2 * pixel_size_arcmin * pi / (180*60))) #l_max for for phi
+  println("muK_per_arcmin = $(sqrt(nugget_at_each_pixel * (pixel_size_arcmin^2)))") # muK per arcmin
+  println("maskupP = $maskupP") # muK per arcmin
+  println("maskupC = $maskupC") # muK per arcmin
+end
+const scale_grad =  1.0e-3
+const scale_hmc  =  1.0e-3
+# ------------ load modules and functions
+push!(LOAD_PATH, pwd()*"/src")
+using Interp, PyPlot
+require("cmb.jl")
+require("fft.jl")
+require("funcs.jl") # use reload after editing funcs.jl
+# --------- generate cmb spectrum class for high res and low res
+parlr = setpar(
+  pixel_size_arcmin, 
+  n, 
+  beamFWHM, 
+  nugget_at_each_pixel, 
+  maskupC, 
+  maskupP
+);
+parhr = setpar(
+  pixel_size_arcmin./hrfactor, 
+  hrfactor*n, 
+  beamFWHM, 
+  nugget_at_each_pixel, 
+  maskupC, 
+  maskupP
+);
+# -------- Simulate data: ytx, maskvarx, phix, tildetx
+ytk_nomask, tildetk, phix, tx_hr = simulate_start(parlr);
+phik = fft2(phix, parlr)
+maskboolx =  (maximum(parlr.grd.x)*0.3) .<= parlr.grd.x .<= (maximum(parlr.grd.x)*0.4) 
+# maskboolx =  falses(size(phix))
+maskvarx = parlr.nugget_at_each_pixel .* ones(size(phix))
+maskvarx[maskboolx] = Inf
+ytx = ifft2r(ytk_nomask, parlr)
+ytx[maskboolx] = 0.0
+ytk = fft2(ytx, parlr)
+
+
+sx_t  = zero(ytx)
+tx    = zero(ytx)
+sx_d  = zero(ytx)
+sbarx = zero(ytx)
+
+
+function bindss!(sx_t, sx_d, parlr, ulim)
+  sk_t = fft2(sx_t, parlr)
+  sk_d = fft2(sx_d, parlr)
+  iup = parlr.grd.r  .> ulim
+  sk_t[iup] = sk_d[iup]
+  sx_fuse = ifft2r(sk_t, parlr)
+  sx_t[:] = sx_fuse[:]
+  sx_d[:] = sx_fuse[:]
+end
+
+for k=1:10
+  wsim_gibbs_t!(sx_t, tx,    ytx, maskvarx, parlr, Inf)
+  wsim_gibbs_d!(sx_d, sbarx, ytx, maskvarx, parlr, maskupC/2)
+  #bindss!(sx_t, sx_d, parlr, maskupC/8)
+end
+
+
+
 #---------------------------
 #  check the signal to noise ratio for T
 #------------------------------

@@ -27,6 +27,8 @@
 \newcommand{\by}{\boldsymbol y}
 \newcommand{\bl}{\boldsymbol l}
 \newcommand{\bk}{\boldsymbol k}
+\newcommand{\re}{\text{\,\rm re}}
+\newcommand{\im}{\text{\,\rm im}}
 
 
 
@@ -83,6 +85,9 @@ A full solution to this problem would handle non-stationary noise, non-stationar
 
 There are two components to this solution. The first.
 
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Section
@@ -91,7 +96,7 @@ There are two components to this solution. The first.
 \section{Weak lensing primer and a Bayesian challenge}
 \label{primer}
 
-This section describes the  basics of CMB lensing and The effect of weak lensing is to simply remap the CMB, preserving surface brightness.   Up to leading order, the remapping  displacements are given by $\nabla \phi$, where $\phi$ denotes a lensing potential and is the planer projection of a three dimensional gravitational potential (see Dodelson, S. (2003), for example). Therefore the lensed CMB can  be written $T(\bx + \nabla \phi(x))$ where $T(x)$ denotes the unlensed CMB temperature fluctuations projected to the observable sky.
+This section describes the  basics of CMB lensing and Bayesian estimates of lensing.  The effect of weak lensing is to simply remap the CMB, preserving surface brightness.   Up to leading order, the remapping  displacements are given by $\nabla \phi$, where $\phi$ denotes a lensing potential and is the planer projection of a three dimensional gravitational potential (see Dodelson, S. (2003), for example). Therefore the lensed CMB can  be written $T(\bx + \nabla \phi(x))$ where $T(x)$ denotes the unlensed CMB temperature fluctuations projected to the observable sky.
 The goal of weak lensing surveys is to use the lensed observations $T(x + \nabla \phi(x))$  (with additional noise) to  estimate $\phi$ or the spectral density of $\phi$.  In the full sky, $x$ represents an observational direction on the unit sphere. However, we will be focusing on the small angle limit  so that $x$ can be modeled as a variable in $ \Bbb R^2$.  The Einstein principle along with properties of quantum mechanics predicts that $T(x)$   is a Gaussian  isotropic random field. These properties translate to  the independence of the Fourier transform of $T$ across different frequencies.
  %Taking a Fourier transform of $T$ translates to independence under the Fourier transform. 
  However, for a fixed lensing potential $\phi$, the lensed CMB  becomes non-isotropic, which leads to a correlation in the Fourier transform across different frequencies. The quadratic estimator   takes advantage of this correlation and uses weighted sums of Fourier  cross products to unbiasedly (up to leading order) estimate the lensing potential.
@@ -108,24 +113,24 @@ In Anderes and Paul (2012) they showed that this estimator is essentially  a gen
 There has been active interest in devloping a Bayesian estimator of the lensing potential $\phi$ jointly with the unlensed CMB $T$ given the data. A very natural approach to generating posterior samples is to 
 In the ancillary Gibbs chain proceeds in the usual way:
 \begin{align}
-T^{i+1}&\sim P(T |  \phi^{i},\text{data})\\
-\phi^{i+1}&\sim P(\phi | T^{i+1},  \text{data}).
+\phi^{i+1}&\sim P(\phi | T^{i},  \text{data})\\
+T^{i+1}&\sim P(T |  \phi^{i+1},\text{data}).
 \end{align}
-Sampling from $P(T |  \phi^{i},\text{data})$ is simply a Gaussian random field prediction problem since conditioning on $\phi^i$ models the data as
-\[ \text{data}(x) = T(\!\!\underbrace{x+\nabla\phi^i(x)}_\text{\tiny known obs locations}\!\!) + n(x).\]
+Sampling from $P(T |  \phi^{i+1},\text{data})$ is simply a Gaussian random field prediction problem since conditioning on $\phi^{i+1}$ models the data as
+\[ \text{data}(x) = T(\underbrace{x+\nabla\phi^{i+1}(x)}_\text{\tiny known obs locations}) + n(x).\]
 In otherwords, he data is a noisy version of  $T$ observed on an irregular grid. 
-Conversly, when sampling from $P(\phi |  T^{i+1},\text{data})$ the data is of the form
-\[ \text{data}(x) = \underbrace{T^{i+1}}_{\text{\tiny known}}(x+\nabla\phi(x)) + n(x). \]
-Both of these conditionals make the Gibbs very slow to converge. The case is esasterbated in the situation the noise level is small. For example, in the second conditional, if $T^{i+1}$ is knownw and fixed, the extent of possible  $\phi$'s which are possible under $P(\phi|T^{i+1},\text{data})$  is very small compared to the possible $\phi$'s  in $P(\phi, T| \text{data})$ when $T$ is allowd to vary. 
-This suggests a highly dependent posteror $P(\phi, T| \text{data})$. 
-This was also noitce by \textcolor{red}{[Cite Lewis and Challanore]} for the first conditnioal.
+Conversly, when sampling from $P(\phi |  T^{i},\text{data})$ the data is of the form
+\[ \text{data}(x) = \underbrace{T^{i}}_{\text{\tiny known}}(x+\nabla\phi(x)) + n(x). \]
+Both of these conditionals make the Gibbs very slow to converge. The case is exacerbated in the situation when noise level is small. For example, in the first conditional, if $T^{i}$ is known and fixed, the extent of the  $\phi$'s which are possible under $P(\phi|T^{i},\text{data})$  is very small compared to the possible $\phi$'s  in $P(\phi, T| \text{data})$ when $T$ is allowed to vary. 
+This suggests a highly dependent posterior $P(\phi, T| \text{data})$. 
+This was also noticed by \textcolor{red}{[Cite Lewis and Challanore]} for the first conditional.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Primer on Gibbs parameterization
+% Section
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Toy model analogy}
+\section{Two parameter analogy}
 \label{two parameter system}
 
 
@@ -139,8 +144,8 @@ where $n$ denotes additive noise.  In the Bayesian setting, the posterior distri
 where $P(\text{data}| t, \varphi)$ denotes the likelihood of the data given  $ t, \varphi$ and $P( t,\varphi)$ denotes the  prior on $ t, \varphi$. 
 The Gibbs sampler is a widely used algorithm for generating (asymptotic) samples from  $P( t, \varphi|\text{data})$ \textcolor{red}{[add citations]}. The algorithm generates a Markov chain of parameter values $( t^{1}, \varphi^{1}), ( t^{2}, \varphi^{2}),\ldots$ generated by iteratively sampling from the conditional distributions:
 \begin{align*}
- t^{i+1} &\sim P( t|\varphi^i,\text{data})\\
-\varphi^{i+1}   &\sim P(\varphi| t^{i+1},\text{data}).
+\varphi^{i+1}   &\sim P(\varphi| t^{i},\text{data}) \\
+ t^{i+1} &\sim P( t|\varphi^{i+1},\text{data}).
 \end{align*}
 A useful heuristic for determining the convergence rate of a Gibbs chain is the extent to which the two parameters $ t$ and $\varphi$ are dependent in $P(\varphi,  t|\text{data})$. A highly dependent posterior $P( t, \varphi|\text{data})$ leads to a slow Gibbs chain, near independence leads to a fast Gibbs chain. Indeed, exact independence gives a sample of the posterior after one Gibbs step.  A technique for accelerating the convergence of a Gibbs sampler is to find a  re-parameterization of $ t$ and $\varphi$ in a way which makes the posterior less dependent. In the remainder of this section we discuss a specific re-parameterization which, by analogy, can be applied to Bayesian lensing.
 
@@ -192,8 +197,8 @@ where the unlensed  CMB temperature field $T$ and the lensing potential $\phi$ a
 where now $\widetilde T$ denotes the lensed CMB tempuruature field with no noise or beam.
 The suffient chain then procceeds as
 \begin{align}
-\widetilde T^{i+1}&\sim P(\widetilde T |  \phi^{i},\text{data})\\
-\phi^{i+1}&\sim P(\phi | \widetilde T^{i+1},  \text{data}).
+\phi^{i+1}&\sim P(\phi | \widetilde T^{i},  \text{data})\\
+\widetilde T^{i+1}&\sim P(\widetilde T |  \phi^{i+1},\text{data})
 \end{align}
 In the following two ections we discuss these two conditional in detail.
 
@@ -203,35 +208,165 @@ In the following two ections we discuss these two conditional in detail.
 
 
 % ----------
-\section{Hamiltonian sampler for $\phi^{i+1}\sim P(\phi | \widetilde T^{i+1},  \text{\rm data})$}
-
-\begin{notation}
-The Fourier trasform of any fucntion $f(x)\colon\Bbb R^2 \rightarrow \Bbb R$ is denoted $f_k$ so that
-$f_k  =  \int e^{-i x\cdot k}  f(x)\frac{dx}{2\pi}$ and
-$f(x) =  \int e^{i x\cdot k}  f_k \frac{dk}{2\pi}$ 
-where $k\in \Bbb R^2$ is a two dimensional frequency vector and $x\in \Bbb R^2$  is a two dimensional spatial corrdinate.
-\end{notation}
+\section{Hamiltonian sampler for $\phi^{i+1}\sim P(\phi | \widetilde T^{i},  \text{\rm data})$}
 
 
 
 
+Throuout this paper the Fourier transform of any function $f(x)$ is denoted $f_l$ or $f_k$ so that
+$f_l  =  \int_{\Bbb R^2} e^{-i x\cdot l}  f(x)\frac{dx}{2\pi}$ and
+$f(x) =  \int_{\Bbb R^2} e^{i x\cdot l}  f_l \frac{dl}{2\pi}$ 
+where $l\in \Bbb R^2$ is a two dimensional frequency vector and $x\in \Bbb R^2$  is a two dimensional spatial coordinate.
+In what follows, we work rather loosely with the Fourier transform of a periodic function or an $L_2(\Bbb R^2)$ function. In particular, we do not differentiate, in our notation, from the case of smooth random field with periodic boundary conditions defined on $(-L/2, L/2]^2$ and the case where $L\rightarrow \infty$ so that the Fourier series $\sum_{l \in \frac{2\pi}{L}\Bbb Z }   e^{i x\cdot l}  f_l \frac{2\pi/ L}{2\pi} $ converges to the continuous Fourier transform $\int_{\Bbb R^2}  e^{i x\cdot l}  f_l \frac{dl}{2\pi} $. Indeed, the notation $\int_{\Bbb R^2}  e^{i x\cdot l}  f_l \frac{dl}{2\pi} $ is simply equivant notation for the Riemann sum, with $L$ near infinity. For example, we will at times refer to  the infinitesimal area element $dk$ in Fourier space, which simply equals $\frac{2\pi}{L}$. Also,  $\delta_l$ denotes a discrete dirac delta function which we equate with $1/dk$ when $l=0$. If there is ever any question  one can simply work with the Fourier series to make the arguments rigourous. 
 
-\begin{claim} Under the anti-lensing approximation,  $\widetilde T(x-\nabla\phi(x)) = T(x)$,  then for any nonzero frequecy vector $k\equiv (k_1, k_2) \in \Bbb R^2$ 
- \[\frac{\partial}{\partial \phi_k}\log P(\phi | \widetilde T,  \text{\rm data}) \propto \frac{\phi_k}{C^{\phi\phi}_{k}} + \sum_{q=1}^2 - {i k_q} \int e^{-i x\cdot k} A^q(x)B(x) \frac{dx}{2\pi}   \]
- where  $\phi_k = \text{\rm re} \,\phi_k + i\, \text{\rm im}\phi_k$, $\frac{\partial}{\partial \phi_k}\equiv \frac{\partial}{\partial\, \text{\rm re} \phi_k} + i \frac{\partial}{\partial\, \text{\rm im}\phi_k}$ and 
+\begin{claim} Under the anti-lensing approximation,  $\widetilde T(x-\nabla\phi(x)) = T(x)$,  for any nonzero frequecy vector $l\equiv (l_1, l_2) \in \Bbb R^2$ 
+ \[\frac{\partial}{\partial \phi_l}\log P(\phi | \widetilde T,  \text{\rm data}) \propto -  \frac{\phi_l}{C^{\phi\phi}_{l}} +  \sum_{q=1,2} i  l_q \int_{\Bbb R^2} e^{-i x\cdot l} A^q(x)B(x) \frac{dx}{2\pi}   \]
+ where  $\phi_l = \re \phi_l + i \im \phi_l$, $\frac{\partial}{\partial \phi_l}\equiv \frac{\partial}{\partial\re \phi_l} + i \frac{\partial}{\partial\im\phi_l}$, and 
  \begin{align}
- B_k &\equiv \frac{1}{C_k^{TT}} \int e^{-i x\cdot k}  \widetilde T(x-\nabla \phi(x))\frac{dx}{2\pi} \\ 
- A^q(x) &\equiv \frac{\partial\widetilde T}{\partial x_q}(x-\nabla \phi(x)).
+ B_l &\equiv \frac{1}{C_l^{TT}} \int e^{-i x\cdot l}  \widetilde T(x-\nabla \phi(x))\frac{dx}{2\pi} \\ 
+ A^q(x) &\equiv \frac{\partial\widetilde T}{\partial x_q}\bigl(x-\nabla \phi(x)\bigr).
  \end{align}
 \end{claim}
 
+The main advantage of this claim is that the gradient can be computed by iterating Fourier transofrms.
 
+Hamiltonian sampler algorithm...
 
+{\rm Remark:}
+We also remark that the gradient is also an un-normalized quadratic destimate when the noise is zero and ...
 % ----------
-\section{Message passing algorithm for $\widetilde T^{i+1}\sim P(\widetilde T |  \phi^{i},\text{\rm data})$}
+\section{Iterative message passing algorithm for $\widetilde T^{i+1}\sim P(\widetilde T |  \phi^{i+1},\text{\rm data})$}
 
 
-\section{Simulations}
+\section{Simulation examples}
+
+\section{Concluding remarks}
+
+What we have accomplished
+
+What needs to be done.
+\begin{itemize}
+ \item High resolution embedding does not scale to Planck (the native resolution is $\sim$10 million pixels)
+\item Approximate Gaussian conditional sampling on Planck data resolution (using previous $\phi^{i}$ to seed a conj gradient?)
+\item Need fast anti-lensing operations in frequency space to compute $A^q(x)$ and $B(x)$ that does not requires high res $\tilde T$
+\item Incorporate spectral density uncertainty
+\item Incorporate polarization
+\end{itemize}
+
+
+\appendix
+
+\section{Proofs}
+\begin{proof}
+Since $\tilde T$ is sufficient for the unkown $\phi$ we have that 
+\begin{align*}
+P(\phi|\widetilde T, \text{\rm data}) &= P(\phi|\widetilde T)\propto P(\widetilde T|\phi)P(\phi).
+\end{align*}
+Now $\phi(x)$ is an isotropic Gaussian random field with spectral density $C_l^{\phi\phi}$. 
+Therefore $E(\phi_l \phi_{l^\prime}^*) = \delta_{l - l^\prime}C_l^{\phi\phi}$.  Now from $\phi_l = \phi_{-l}^*$ (since $\phi(x)$ is real), $E(|\phi_l|^2) = \delta_{0}C_l^{\phi\phi}$ and $E(\phi_l\phi_l^*) = 0 $ one gets that the random variables $\re \phi_l$, $\im \phi_l$ are independent $\mathcal N(0, \frac{1}{2}\delta_0 C_l^{\phi\phi})$ for each fixed $l$ and are independent accross all $l$ which are restricted to the a Hermitian half of the Fourier grid. In particular if we exclude the $l = 0$ and restrict our attention of a hermian half of the Fourier vectors we get
+\begin{align}
+\log P(\phi) - c_1 &=  - \frac{1}{2}\sum_{k \in \Bbb H}  \left[\frac{(\re \phi_k)^2}{\frac{1}{2}\delta_0 C_k^{\phi\phi}} +  \frac{(\im \phi_k)^2}{\frac{1}{2}\delta_0 C_k^{\phi\phi}} \right] = - \frac{1}{2}\int_{\Bbb R^2} \frac{|\phi_k|^2}{C_k^{\phi\phi}} dk \label{dr1} \\
+\log P(\widetilde T| \phi) - c_2 &=  - \frac{1}{2}\sum_{k \in \Bbb H}  \left[\frac{(\re \widetilde T_k^\phi)^2}{\frac{1}{2}\delta_0 C_k^{TT}} +  \frac{(\im \widetilde T_k^\phi)^2}{\frac{1}{2}\delta_0 C_k^{TT}} \right] = - \frac{1}{2}\int_{\Bbb R^2} \frac{\bigl|\widetilde T_k^\phi\bigr|^2}{C_k^{TT}} dk \label{dr2}
+\end{align}
+where $c_1$ and $c_2$ are constants and  $\widetilde T^\phi(x)\equiv \widetilde T(x-\nabla \phi(x))$
+where we are usign the  anti-lensing approximation that for the true lensing potential $\phi$,  $\widetilde T(x-\nabla\phi(x)) = T(x)$ for equation (\ref{dr2}). For any function $f(x)$ we let $f^\phi(x) = f(x-\nabla \phi(x))$ denote anti-lensing of $f$, with Fourier transform denoted by $f_l^\phi$. 
+% -------- extra detail
+% The integral approximation then becomes
+% \[ \log P(\phi) = \text{constant} - \pi \int \left[\frac{(\re \phi_l)^2}{C_l^{\phi\phi}} +  \frac{(\im \phi_l)^2}{ C_l^{\phi\phi}} \right] \frac{dl}{2\pi} \]
+% -------- extra detail
+% Therefore
+% \begin{align*}
+% \frac{\partial}{\partial \re \phi_l}\log P(\phi)  &= -2 \frac{\re \phi_l}{\delta_0 C_l^{\phi\phi}} \\
+% \frac{\partial}{\partial \im \phi_l}\log P(\phi)  &= -2 \frac{\im \phi_l}{\delta_0 C_l^{\phi\phi}}
+% \end{align*}
+Taking derivatives in (\ref{dr1}) gives
+\begin{equation}
+\label{grad of prior}
+\frac{\partial}{\partial \phi_l}\log P(\phi) = - 2(dl) \frac{\phi_l}{C^{\phi\phi}_{l}}.
+\end{equation}
+Taking derivatives in (\ref{dr2}) gives
+\begin{align}
+\frac{\partial}{\partial \re\phi_l}\log P(\widetilde T| \phi) 
+% <----- extra detail
+%&=  - dk\sum_{k \in \Bbb H} 2 \re \Bigl( \frac{\partial \widetilde T_k^\phi}{\partial \re\phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}} \Bigr)\\
+&= - \re \int_{\Bbb R^2} \frac{\partial \widetilde T_k^\phi}{\partial \re\phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}}  \,dk \label{ll1}\\
+\frac{\partial}{\partial \im\phi_l}\log P(\widetilde T| \phi) 
+% <----- extra detail
+%&=  - dk\sum_{k \in \Bbb H}2 \re \Bigl( \frac{\partial \widetilde T_k^\phi}{\partial \im\phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}} \Bigr) \\
+&=  -\re \int_{\Bbb R^2}\frac{\partial \widetilde T_k^\phi}{\partial \im\phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}} \, dk \label{ll2}.
+\end{align}
+Now taking linear combinations of the two equalities in Lemma \ref{partialconj} we get
+\begin{align}
+\frac{\partial \widetilde T^\phi_k}{\partial \re \phi_{l}}  &= \frac{(dk)^2}{4 \pi^2}  \sum_{j=1,2} il_j\left\{ [(\nabla^j\widetilde T)^\phi]_{k-l}  -   [(\nabla^j\widetilde T)^\phi]_{k+l}  \right\}\\
+\frac{\partial \widetilde T^\phi_k}{\partial \im \phi_{l} }  &= \frac{ (dk)^2}{4 \pi^2} \sum_{j=1,2} \phantom{i}l_j\left\{ [(\nabla^j\widetilde T)^\phi]_{k-l}  +   [(\nabla^j\widetilde T)^\phi]_{k+l}  \right\}.
+\end{align}
+Combining the above two equations with  (\ref{ll1}) (\ref{ll2}) and applying Lemma ? gives
+
+
+
+
+Therefore
+\[\frac{\partial}{\partial \phi_l}\log P(\phi | \widetilde T,  \text{\rm data}) = - 2(dl) \frac{\phi_l}{C^{\phi\phi}_{l}} +  i 2(dl) \sum_{q=1,2} l_q \int e^{-i x\cdot l} A^q(x)B(x) \frac{dx}{2\pi}   \]
+
+\end{proof}
+% end proof
+
+
+
+%%%%%%%%%%%% lemma
+\begin{lemma} If $A^j(x)$ for $j=1,2$ and $B(x)$ are real scalar fields then
+\begin{align}
+ \int_{\Bbb R^2} \sum_{j=1,2} il_j\bigl\{ A^j_{k-l}  -   A^j_{k+l}  \bigr\} B^*_k \frac{dk}{2\pi}  &= \\
+  \int_{\Bbb R^2} \sum_{j=1,2} \phantom{i}l_j\bigl\{  A^j_{k-l}  +    A^j_{k+l}   \bigr\} B^*_k \frac{dk}{2\pi} &= 
+\end{align}
+\end{lemma}
+
+
+\begin{proof}
+\end{proof}
+
+
+%%%%%%%%%%%%%%% lemma
+\begin{lemma} 
+\label{partialconj}
+\begin{align}
+\frac{\partial \widetilde T^\phi_k}{\partial \phi_{ l} }  &= \frac{  (dk)^2}{2\pi^2}\sum_{j=1,2} -il_j[(\nabla^j\widetilde T)^\phi]_{k+l} \\
+\frac{\partial \widetilde T^\phi_k}{\partial \phi^*_{ l} }  & = \frac{ (dk)^2}{2\pi^2}\sum_{j=1,2} \phantom{-}\!\!il_j [(\nabla^j\widetilde T)^\phi]_{k-l}.
+\end{align}
+\end{lemma}
+\begin{proof}
+Now
+\begin{align}
+\label{partial1}
+\frac{\partial}{\partial \re \phi_{ l}}\frac{\partial\phi(x)}{ \partial x_j}  &= \int_{\Bbb R^2} i  k_j e^{ix \cdot  k} \frac{\partial \phi_ k}{\partial \re \phi_{l} }  \frac{d k}{2\pi} 
+=\left[i  l_j e^{ix \cdot  l}  - i  l_j e^{-i x \cdot  l}  \right] \frac{d k}{2\pi}   \\
+\label{partial2}\frac{\partial}{\partial \im \phi_{ l}}\frac{\partial\phi(x)}{ \partial x_j}  &= \int_{\Bbb R^2} i  k_j e^{ix \cdot  k} \frac{\partial \phi_ k}{\partial \im \phi_{l} }  \frac{d k}{2\pi} 
+=\left[-  l_j e^{ix \cdot  l}  -  l_j e^{-i x \cdot  l}  \right] \frac{d k}{2\pi}   
+\end{align}
+For any function $f(x)$ we let $f^\phi(x) = f(x-\nabla \phi(x))$ denote anti-lensing of $f$, with Fourier transform denoted by $f_l^\phi$. 
+Now notice that by (\ref{partial1}) and (\ref{partial2})
+\begin{align}
+\nonumber \frac{\partial \widetilde T^\phi_k}{\partial \phi_{ l} } 
+&=  \frac{\partial}{\partial  \phi_{ l} } \int_{\Bbb R^2}  e^{-ix \cdot k}\widetilde T(x+\nabla \phi(x))\frac{dx}{2\pi} \\
+\nonumber &= \sum_{j=1,2}  \int_{\Bbb R^2} e^{-ix \cdot k} \nabla^j\widetilde T(x+\nabla \phi(x))\left[ \frac{\partial}{\partial \re \phi_{ l}}\frac{\partial\phi(x)}{ \partial x_j} +i  \frac{\partial}{\partial \im \phi_{ l}}\frac{\partial\phi(x)}{ \partial x_j}\right]\frac{dx}{2\pi}\\
+% <-----extra detail
+%  &= \left(\frac{d k}{2\pi}\right)^2 \sum_{j=1,2}  \int_{\Bbb R^2} e^{-ix \cdot k} \nabla^j\widetilde T(x+\nabla \phi(x))\left[ i  l_j e^{ix \cdot  l}  - i  l_j e^{-i x \cdot  l}  + i(-  l_j e^{ix \cdot  l}  -  l_j e^{-i x \cdot  l})  \right]\frac{dx}{2\pi} \\
+% &= \left(\frac{d k}{2\pi}\right)^2 \sum_{j=1,2} i l_j \int_{\Bbb R^2} e^{-ix \cdot k} \nabla^j\widetilde T(x+\nabla \phi(x))\left[ e^{ix \cdot  l}  -  e^{-i x \cdot  l}  -  e^{ix \cdot  l}  -  e^{-i x \cdot  l} \right]\frac{dx}{2\pi}\\
+% <-----
+\nonumber &= \sum_{j=1,2}\frac{ - il_j  (dk)^2}{2\pi^2}  \int_{\Bbb R^2} e^{- ix \cdot (k+l)} \nabla^j\widetilde T(x+\nabla \phi(x))\frac{dx}{2\pi} \\
+&=\sum_{j=1,2}\frac{ - il_j  (dk)^2}{2\pi^2} [(\nabla^j\widetilde T)^\phi]_{k+l}
+\end{align}
+Similarly by (\ref{partial1}) and (\ref{partial2})
+\begin{align}
+\frac{\partial \widetilde T^\phi_k }{\partial \phi^*_{ l} } 
+% <-----extra detail
+  % &= \left(\frac{d k}{2\pi}\right)^2 \sum_{j=1,2}  \int_{\Bbb R^2} e^{-ix \cdot k} \nabla^j\widetilde T(x+\nabla \phi(x))\left[ i  l_j e^{ix \cdot  l}  - i  l_j e^{-i x \cdot  l}  - i(-  l_j e^{ix \cdot  l}  -  l_j e^{-i x \cdot  l})  \right]\frac{dx}{2\pi} \\
+  % &= \left(\frac{d k}{2\pi}\right)^2 \sum_{j=1,2}  \int_{\Bbb R^2} e^{-ix \cdot k} \nabla^j\widetilde T(x+\nabla \phi(x))\left[ i  l_j e^{ix \cdot  l}  - i  l_j e^{-i x \cdot  l}  + i  l_j e^{ix \cdot  l}  +i  l_j e^{-i x \cdot  l}  \right]\frac{dx}{2\pi} \\
+% &= \sum_{j=1,2}  \frac{i l_j(d k)^2}{2\pi^2}\int_{\Bbb R^2} e^{-ix \cdot (k-l)} \nabla^j\widetilde T(x+\nabla \phi(x))\frac{dx}{2\pi} \\
+% <-------
+ &=\sum_{j=1,2}\frac{ il_j (dk)^2}{2\pi^2} [(\nabla^j\widetilde T)^\phi]_{k-l}
+\end{align}
+\end{proof}
 
 \end{document}
 

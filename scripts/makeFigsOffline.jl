@@ -2,14 +2,14 @@
 include("scripts/makeFigsOffline.jl")
 julia scripts/makeFigsOffline.jl
 =#
-const simdir    =  "scriptNew_Mask_303335" 
+const simdir    =  "scriptNew_Mask_2463818958" 
 const specc 	  = true # plot the spectral coverage
 const pcorr 	  = true # plot the empirical cross correlation
 const onedslice = true # plot the 1-d slices of phi
 const acc 	    = true # take a look at the accpetence rate
 const imagsli   = true # look at the images one by one
 const mvie 	    = false # <---- needs work
-const krang = 1:(5):5000 # range of samples we are looking at
+const krang = 301:(5):5000 # range of samples we are looking at
 
 # --- copy these are from the runfile
 const scriptname = "scriptNew"
@@ -20,7 +20,7 @@ const pixel_size_arcmin = 1.5
 const n = 2.0^9
 const beamFWHM = 0.0
 const nugget_at_each_pixel = (5.0)^2
-begin  #< ---- dependent run parameters
+begin  # <---- dependent run parameters
 	local deltx =  pixel_size_arcmin * pi / (180 * 60) #rads
 	local period = deltx * n # side length in rads
 	local deltk =  2 * pi / period

@@ -143,7 +143,7 @@ function gibbspass_d!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, cooling
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
     dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
     for uplim in coolingVec
-        wsim_gibbs_d!(sx, sbarx, dx, Nx, parhr, upl)
+        wsim_gibbs_d!(sx, sbarx, dx, Nx, parhr, uplim)
     end
     sk = fft2(sx, parhr)
     sk[parhr.grd.r .> coolingVec[end]] = 0.0
