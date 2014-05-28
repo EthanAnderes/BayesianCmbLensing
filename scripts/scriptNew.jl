@@ -1,7 +1,7 @@
 # julia scripts/scriptNew.jl
 const scriptname = "scriptNew"
 const seed = Base.Random.RANDOM_SEED
-const savepath = joinpath("simulations", "$(scriptname)_MaskD_$(seed[1])") #<--change the directory name here
+const savepath = joinpath("simulations", "$(scriptname)_MaskT_$(seed[1])") #<--change the directory name here
 const percentNyqForC = 0.5 # used for T l_max
 const numofparsForP  = 1500  # used for P l_max
 const hrfactor = 2.0
@@ -20,7 +20,7 @@ begin  #< ---- dependent run parameters
 	println("maskupP = $maskupP") # muK per arcmin
 	println("maskupC = $maskupC") # muK per arcmin
 end
-const scale_grad =  2.0e-3
+const scale_grad =  4.0e-3
 const scale_hmc  =  1.0e-3
 
 
@@ -61,20 +61,24 @@ phik = fft2(phix, parlr)
 tmpdo = maximum(parlr.grd.x)*0.3
 tmpup = maximum(parlr.grd.x)*0.4
 maskboolx = tmpdo .<= parlr.grd.x .<= tmpup
-maskvarx  = parlr.nugget_at_each_pixel .* ones(size(phix))
-decay(x) = exp(-2000abs(x).^2) ./ (abs(x*100).^(1))
-maskvarx += decay(parlr.grd.x .- tmpup)
-maskvarx += decay(parlr.grd.x .- tmpdo)
+maskvarx  = parlr.nugget_at_each_pixel .* ones(size(parlr.grd.x))
 maskvarx[maskboolx] = Inf
-# plot(parlr.nugget_at_each_pixel * ones(512))
-# plot(parlr.nugget_at_each_pixel * zeros(512))
-# plot(maskvarx[1,:].')
-# plot(0.3*512, parlr.nugget_at_each_pixel, "*")
-# plot(0.4*512, parlr.nugget_at_each_pixel, "*")
-# axis([0, 500, 0, 40])
 ytx = ifft2r(ytk_nomask, parlr)
 ytx[maskboolx] = 0.0
 ytk = fft2(ytx, parlr)
+
+
+# the following makes maskvarx_cool used in a cooling step
+decay(x) = 1 ./ (abs(x).^(1/4))
+maskvarx_cool = maskvarx + decay(parlr.grd.x .- tmpup) + decay(parlr.grd.x .- tmpdo)
+maskvarx_cool += decay(parlr.grd.x .- tmpup)
+maskvarx_cool += decay(parlr.grd.x .- tmpdo)
+# plot(parlr.nugget_at_each_pixel * ones(512))
+# plot(parlr.nugget_at_each_pixel * zeros(512))
+# plot(maskvarx_cool[1,:].')
+# plot(0.3*512, parlr.nugget_at_each_pixel, "*")
+# plot(0.4*512, parlr.nugget_at_each_pixel, "*")
+# axis([0, 500, 0, 40])
 
 
 # -----------  set the save directory and save stuff 
@@ -117,19 +121,20 @@ acceptclk       = [1] #initialize acceptance record
 bglp = 0
 while true
 	#  ------ use phik_curr from previous iteration to simluate the unlensed CMB: tx_hr_curr
-	# phidx1_hr, phidx2_hr, phidx1_lr, phidx2_lr = gibbspass_t!(
-	# 	tx_hr_curr, ttx_hr_curr, 
-	# 	phik_curr, ytx, maskvarx, 
-	# 	parlr, parhr, 
-	# 	[linspace(3parhr.grd.deltk, 2maskupC, 300), [Inf for k=1:100]] #<-- works when no mask
-	# ) 
-	phidx1_hr, phidx2_hr, phidx1_lr, phidx2_lr = gibbspass_d!(
-		tx_hr_curr, tbarx_hr_curr, 
+	if bglp % 50 == 0  # shakes up the low-ell modes
+		phidx1_hr, phidx2_hr, phidx1_lr, phidx2_lr = gibbspass_t!(
+			tx_hr_curr, ttx_hr_curr, 
+			phik_curr, ytx, maskvarx_coll, 
+			parlr, parhr, 
+			[linspace(parhr.grd.deltk, 1.5maskupC, 300)] 
+			)
+	end 
+	phidx1_hr, phidx2_hr, phidx1_lr, phidx2_lr = gibbspass_t!(
+		tx_hr_curr, ttx_hr_curr, 
 		phik_curr, ytx, maskvarx, 
 		parlr, parhr, 
-		linspace(3parhr.grd.deltk, 2maskupC, 400)
+		[Inf for k=1:300] 
 	) 
-
 
 	tildetx_hr_curr[:] = spline_interp2(
 			parhr.grd.x, parhr.grd.y, tx_hr_curr, 
