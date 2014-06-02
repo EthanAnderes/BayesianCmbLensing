@@ -59,7 +59,7 @@ function  wsim_gibbs_t!(sx, tx, dx, Nx, par, uplim)
     Tx = 0.99 * minimum(Nx)
     barNx = Nx .- Tx
     delt0 = 1.0./par.grd.deltk^2.0
-    if uplim == Inf
+    if (uplim == Inf) | (uplim > 8000.0)
         lamx = 1.0
     else
         lamx = (grd.deltx^2.0) .* par.CTell2d[round(uplim)]
@@ -171,7 +171,7 @@ function simd_sbarx!(sx, sbarx, Sbark, Qk::Float64, par)
 end
 function get_SQ(lp_init, par)
     delt0 = 1.0./par.grd.deltk^2.0
-    lam = delt0 .* par.CTell2d[round(lp_init)]
+    lam = delt0 .* par.CTell2d[min(8000, round(lp_init))] 
     Sk = delt0 .* par.cTT # fourier variance
     Sbark = Sk .- lam 
     Sbark[Sbark .< 0.0]= 0.0

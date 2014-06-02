@@ -1,10 +1,10 @@
 #= 
-julia scripts/scriptNew.jl
+	julia scripts/scriptNew.jl
 =#
 const scriptname = "scriptNew"
 # const seed = Base.Random.RANDOM_SEED
 const seed = 10000; srand(seed)
-const savepath = joinpath("simulations", "$(scriptname)_MaskD_varcool_$(seed[1])") #<--change the directory name here
+const savepath = joinpath("simulations", "$(scriptname)_MaskT_$(seed[1])") #<--change the directory name here
 const percentNyqForC = 0.5 # used for T l_max
 const numofparsForP  = 1500  # used for P l_max
 const hrfactor = 2.0
@@ -119,12 +119,11 @@ function gibbsloop(its, parhr, parlr, ytx, maskvarx)
 
 	for bglp = 1:its
 		#  ------ use phik_curr from previous iteration to simluate the unlensed CMB: tx_hr_curr
-		phidx1_hr[:], phidx2_hr[:], phidx1_lr[:], phidx2_lr[:] = gibbspass_d!(
+		phidx1_hr[:], phidx2_hr[:], phidx1_lr[:], phidx2_lr[:] = gibbspass_t!(
 			tx_hr_curr, ttx_hr_curr, 
 			phik_curr, ytx, maskvarx, 
 			parlr, parhr, 
-			linspace(100, 1.5maskupC, 1000) #<--- for D 
-			#[linspace(100, 1.5maskupC, 600), fill(Inf, 400)] #<--- for T
+			linspace(parhr.grd.deltk, 2maskupC, 500) 
 		)
 		
 		tildetx_hr_curr[:] = spline_interp2(
@@ -138,8 +137,6 @@ function gibbsloop(its, parhr, parlr, ytx, maskvarx)
 			push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc))
 			push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc))
 			push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc))
-			push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc))
-			push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc))
 		end
 	
 		writecsv("$savepath/tildetx_lr_curr_$bglp.csv", tildetx_hr_curr[1:int(hrfactor):end,1:int(hrfactor):end])
@@ -147,5 +144,4 @@ function gibbsloop(its, parhr, parlr, ytx, maskvarx)
 		writecsv("$savepath/acceptclk.csv", acceptclk)	
 	end # for
 end # function
-gibbsloop(1, parhr, parlr, ytx, maskvarx) # just to get complication
-gibbsloop(2000, parhr, parlr, ytx, maskvarx_cool)
+gibbsloop(2000, parhr, parlr, ytx, maskvarx)
