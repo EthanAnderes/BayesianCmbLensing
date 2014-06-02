@@ -220,9 +220,9 @@ where $l\in \Bbb R^2$ is a two dimensional frequency vector and $x\in \Bbb R^2$ 
 
 \begin{claim}
 \label{grad claim}
- Under the anti-lensing approximation,  $\widetilde T(x-\nabla\phi(x)) = T(x)$,  for any nonzero frequecy vector $l\equiv (l_1, l_2) \in \Bbb R^2$ 
+ Under the anti-lensing approximation, that   $\widetilde T(x-\nabla\phi(x)) = T(x)$ when $\phi$ is the true lensing potential,   for any nonzero frequecy vector $l\equiv (l_1, l_2) \in \Bbb R^2$ 
  \[\frac{\partial}{\partial \phi_l}\log P(\phi | \widetilde T,  \text{\rm data}) \propto -  \frac{\phi_l}{C^{\phi\phi}_{l}} -  \sum_{q=1,2} i  l_q \int_{\Bbb R^2} e^{-i x\cdot l} A^q(x)B(x) \frac{dx}{2\pi}   \]
- where  $\phi_l = \re \phi_l + i \im \phi_l$, $\frac{\partial}{\partial \phi_l}\equiv \frac{\partial}{\partial\re \phi_l} + i \frac{\partial}{\partial\im\phi_l}$, and 
+ where  $\phi_l = \re \phi_l + i \im \phi_l$, $\frac{\partial}{\partial \phi_l}\equiv \frac{\partial}{\partial\re \phi_l} + i \frac{\partial}{\partial\im\phi_l}$ and 
  \begin{align}
  B_l &\equiv \frac{1}{C_l^{TT}} \int e^{-i x\cdot l}  \widetilde T(x-\nabla \phi(x))\frac{dx}{2\pi} \\ 
  A^q(x) &\equiv \frac{\partial\widetilde T}{\partial x_q}\bigl(x-\nabla \phi(x)\bigr).
@@ -263,10 +263,77 @@ What needs to be done.
 
 \section{}
 %\section{Proofs}
-In what follows, we work rather loosely with the Fourier transform of a periodic function or an $L_2(\Bbb R^2)$ function. In particular, we do not differentiate, in our notation, from the case of smooth random field with periodic boundary conditions defined on $(-L/2, L/2]^2$ and the case where $L\rightarrow \infty$ so that the Fourier series $\sum_{l \in \frac{2\pi}{L}\Bbb Z }   e^{i x\cdot l}  f_l \frac{2\pi/ L}{2\pi} $ converges to the continuous Fourier transform $\int_{\Bbb R^2}  e^{i x\cdot l}  f_l \frac{dl}{2\pi} $. Indeed, the notation $\int_{\Bbb R^2}  e^{i x\cdot l}  f_l \frac{dl}{2\pi} $ is simply equivant notation for the Riemann sum, with $L$ near infinity. For example, we will at times refer to  the infinitesimal area element $dk$ in Fourier space, which simply equals $\frac{2\pi}{L}$. Also,  $\delta_l$ denotes a discrete dirac delta function which we equate with $1/dk$ when $l=0$. If there is ever any question  one can simply work with the Fourier series to make the arguments rigourous. 
+
+Before we proceed to the proofs we say a few words regarding notation.
+Firstly, we do not differentiate, notationally, from the case of smooth random field with periodic boundary conditions defined on $(-L/2, L/2]^2$ and the case where $L\rightarrow \infty$ so that the Fourier series $\sum_{l \in \frac{2\pi}{L}\Bbb Z }   e^{i x\cdot l}  f_l \frac{2\pi/ L}{2\pi} $ converges to the continuous Fourier transform $\int_{\Bbb R^2}  e^{i x\cdot l}  f_l \frac{dl}{2\pi} $. %Indeed,  $\int_{\Bbb R^2}  e^{i x\cdot l}  f_l \frac{dl}{2\pi} $ is simply equivalent notation for the Riemann sum, with $L$ near infinity.
+For example, at times we will refer to an infinitesimal area element $dl$ or $dk$ in Fourier space, which simply equals $\frac{2\pi}{L}$ for large $L$. In this case $\delta_l$ denotes a discrete dirac delta function which we equate with $1/dk$ when $l=0$ and zero otherwise. 
+Secondly, for any function $f(x)$ let $f^\phi(x) = f(x-\nabla \phi(x))$ denote anti-lensing of $f$ and $f^\phi_l$ denote the Fourier transform of  $f^\phi(x)$.
 
 
-\paragraph{Notation:} For any function $f(x)$ let $f^\phi(x) = f(x-\nabla \phi(x))$ denote anti-lensing of $f$ and $f^\phi_l$ denote the Fourier transofrm of  $f^\phi(x)$.
+
+
+
+\begin{proof}[{ Proof of Claim \ref{grad claim}}]
+Since $\tilde T$ is sufficient for the unknown $\phi$ we have that 
+\begin{align*}
+P(\phi|\widetilde T, \text{\rm data}) &= P(\phi|\widetilde T)\propto P(\widetilde T|\phi)P(\phi).
+\end{align*}
+Since $\phi(x)$ is an isotropic random field with spectral density $C_l^{\phi\phi}$ we have that $E(\phi^{\phantom{*}}_l \phi_{l^\prime}^*) = \delta_{l - l^\prime}C_l^{\phi\phi}$. 
+Therefore  $E(\phi_l^{\phantom{*}}\phi_l^*) = \delta_{0}C_l^{\phi\phi}$ and $E(\phi_l\phi_{l}) = 0$ one gets that the random variables $\re \phi_l$, $\im \phi_l$ are independent $\mathcal N(0, \frac{1}{2}\delta_0 C_l^{\phi\phi})$ for each fixed $l$.
+Moreovoer  $\phi(x)$ takes values in $\Bbb R$ so that  $\phi_l = \phi_{-l}^*$.  This implies (\textcolor{red}{what exactly implies what here? clearly the moments don't tell us exactly that they are independent since $E(z w^*)=0$ could happen when $w = z^*$, and $(\re z, \im z)^t\sim \mathcal N(0,\sigma^2 I)$. But I think this is the only case where $E(zw^*)=0$ when we know $z$ and $w$ are marginally Gaussian.}) that $\phi_l$ and are independent random variables over all $l$ which are restricted to the a Hermitian half of the Fourier grid, denoted $\Bbb H$. In particular,  if we exclude the zero frequency $l = 0$ we get
+\begin{align}
+\log P(\phi) - c_1 &=  - \frac{1}{2}\sum_{k \in \Bbb H\setminus \{0 \}}  \left[\frac{(\re \phi_k)^2}{\frac{1}{2}\delta_0 C_k^{\phi\phi}} +  \frac{(\im \phi_k)^2}{\frac{1}{2}\delta_0 C_k^{\phi\phi}} \right] = - \frac{1}{2}\int_{\Bbb R^2} \frac{|\phi_k|^2}{C_k^{\phi\phi}} dk \label{dr1} \\
+\log P(\widetilde T| \phi) - c_2 &=  - \frac{1}{2}\sum_{k \in \Bbb H\setminus \{0 \}}  \left[\frac{(\re \widetilde T_k^\phi)^2}{\frac{1}{2}\delta_0 C_k^{TT}} +  \frac{(\im \widetilde T_k^\phi)^2}{\frac{1}{2}\delta_0 C_k^{TT}} \right] = - \frac{1}{2}\int_{\Bbb R^2} \frac{\bigl|\widetilde T_k^\phi\bigr|^2}{C_k^{TT}} dk \label{dr2}
+\end{align}
+where $c_1$ and $c_2$ are constants and  $\widetilde T^\phi(x)\equiv \widetilde T(x-\nabla \phi(x))$.
+% -------- extra detail
+% The integral approximation then becomes
+% \[ \log P(\phi) = \text{constant} - \pi \int \left[\frac{(\re \phi_l)^2}{C_l^{\phi\phi}} +  \frac{(\im \phi_l)^2}{ C_l^{\phi\phi}} \right] \frac{dl}{2\pi} \]
+% -------- extra detail
+% Therefore
+% \begin{align*}
+% \frac{\partial}{\partial \re \phi_l}\log P(\phi)  &= -2 \frac{\re \phi_l}{\delta_0 C_l^{\phi\phi}} \\
+% \frac{\partial}{\partial \im \phi_l}\log P(\phi)  &= -2 \frac{\im \phi_l}{\delta_0 C_l^{\phi\phi}}
+% \end{align*}
+Taking derivatives in (\ref{dr1}) gives
+\begin{equation}
+\label{grad of prior}
+\frac{\partial}{\partial \phi_l}\log P(\phi) = - 2(dl) \frac{\phi_l}{C^{\phi\phi}_{l}}.
+\end{equation}
+Taking derivatives in (\ref{dr2}) gives
+\begin{align}
+\frac{\partial}{\partial \re\phi_l}\log P(\widetilde T| \phi) 
+% <----- extra detail
+%&=  - dk\sum_{k \in \Bbb H} 2 \re \Bigl( \frac{\partial \widetilde T_k^\phi}{\partial \re\phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}} \Bigr)\\
+&= - \re \int_{\Bbb R^2} \frac{\partial \widetilde T_k^{\phi}}{\partial \re\phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}}  \,dk \label{ll1}\\
+\frac{\partial}{\partial \im\phi_l}\log P(\widetilde T| \phi) 
+% <----- extra detail
+%&=  - dk\sum_{k \in \Bbb H}2 \re \Bigl( \frac{\partial \widetilde T_k^\phi}{\partial \im\phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}} \Bigr) \\
+&=  -\re \int_{\Bbb R^2}\frac{\partial \widetilde T_k^{\phi}}{\partial \im\phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}} \, dk \label{ll2}.
+\end{align}
+Taking linear combinations of the two equalities in Lemma \ref{partialconj} we get
+\begin{align}
+\frac{\partial \widetilde T^\phi_k}{\partial \re \phi_{l}}  &= 
+\frac{1}{2}\frac{\partial \widetilde T^\phi_k}{\partial\phi_{l}} + \frac{1}{2}\frac{\partial \widetilde T^\phi_k}{\partial\phi^*_{l}}
+=
+\frac{dk}{2 \pi}  \sum_{q=1,2} il_q\left\{ [(\nabla^q\widetilde T)^\phi]_{k-l}  -   [(\nabla^q\widetilde T)^\phi]_{k+l}  \right\}\\
+\frac{\partial \widetilde T^\phi_k}{\partial \im \phi_{l} }  &= 
+\frac{-i}{2}\frac{\partial \widetilde T^\phi_k}{\partial\phi_{l}} + \frac{i}{2}\frac{\partial \widetilde T^\phi_k}{\partial\phi^*_{l}}
+=
+\frac{ dk}{2 \pi} \sum_{q=1,2} l_q\left\{ -[(\nabla^q\widetilde T)^\phi]_{k-l}  -   [(\nabla^q\widetilde T)^\phi]_{k+l}  \right\}.
+\end{align}
+Now the above two equations establish, by Lemma \ref{forreal}, that  both integrals $\int_{\Bbb R^2} \frac{\partial \widetilde T_k^\phi}{\partial \re\phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}}  \,dk$ and $\int_{\Bbb R^2}\frac{\partial \widetilde T_k^\phi}{\partial \im\phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}} \, dk$ are real
+which implies
+\begin{align*}
+ \frac{\partial}{\partial \phi_l}\log P(\widetilde T| \phi) &= -\int_{\Bbb R^2} \frac{\partial \widetilde T_k^\phi}{\partial \phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}}  \,dk  \\
+ &= -\frac{dk}{ \pi} \sum_{q=1,2} il_q \int_{\Bbb R^2}  [(\nabla^q\widetilde T)^\phi]_{k+l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}}  \,dk \\
+ &= -  i 2 (dk) \sum_{q=1,2} l_q \int_{\Bbb R^2}  [(\nabla^q\widetilde T)^\phi]_{k+l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}}  \,\frac{dk}{2\pi} \\
+ & = -  i 2 (dk) \sum_{q=1,2} l_q \int_{\Bbb R^2} e^{-i x\cdot l} A^q(x) \, B(x)  \,\frac{dx}{2\pi},\quad\text{by Lemma \ref{conv}}
+ \end{align*}
+ where $A^q(x) \equiv (\nabla^q\widetilde T)^\phi(x)$ and $B_k\equiv (\widetilde T_k^{\phi})^* / C_k^{TT}$.
+\end{proof}
+% end proof
+
 
 
 %%%%%%%%%%%%%%% lemma
@@ -306,7 +373,7 @@ Similarly
 % <-----extra detail
 % &= \frac{d k}{2\pi}\sum_{q=1,2}  \int_{\Bbb R^2} e^{-ix \cdot k} \nabla^q\widetilde T(x+\nabla \phi(x))\left[ i  l_q e^{ix \cdot  l}  - i  l_q e^{-i x \cdot  l}  - i(-  l_q e^{ix \cdot  l}  -  l_q e^{-i x \cdot  l})  \right]\frac{dx}{2\pi} \\
 % &= \frac{d k}{2\pi} \sum_{q=1,2}  \int_{\Bbb R^2} e^{-ix \cdot k} \nabla^q\widetilde T(x+\nabla \phi(x))\left[ i  l_q e^{ix \cdot  l}  - i  l_q e^{-i x \cdot  l}  + i  l_q e^{ix \cdot  l}  +i  l_q e^{-i x \cdot  l}  \right]\frac{dx}{\pi} \\
-%  &= \sum_{q=1,2}  \frac{i l_qd k}{\pi}\int_{\Bbb R^2} e^{-ix \cdot (k-l)} \nabla^q\widetilde T(x+\nabla \phi(x))\frac{dx}{\pi} \\
+&= \sum_{q=1,2}  \frac{i l_qd k}{\pi}\int_{\Bbb R^2} e^{-ix \cdot (k-l)} \nabla^q\widetilde T(x+\nabla \phi(x))\frac{dx}{\pi} \\
 % <-------
  &=\sum_{q=1,2}\frac{ il_q dk}{\pi} [(\nabla^q\widetilde T)^\phi]_{k-l}.
 \end{align}
@@ -324,7 +391,7 @@ If $A(x)$ and $B(x)$ are real scalar fields then  the two  integrals,  $\int_{\B
 
 
 \begin{proof}
-By a simple change of variables it is trival to show
+By a simple change of variables it is clear that 
 $\int_{\Bbb R^2} \left(i\bigl\{ A_{k-l}  -   A_{k+l}  \bigr\} B^*_k\right)^* dk = \int_{\Bbb R^2} i\bigl\{ A_{k^\prime-l} - A_{k^\prime+l}  \bigr\} B_{k^\prime}^* dk^\prime$ and $\int_{\Bbb R^2} \left(\bigl\{  A_{k-l}  +    A_{k+l}   \bigr\} B^*_k \right)^* dk  = \int_{\Bbb R^2} \bigl\{ A_{k^\prime-l} + A_{k^\prime+l}  \bigr\} B_{k^\prime}^* dk^\prime$.
 
 % \begin{align*}
@@ -345,82 +412,22 @@ $\int_{\Bbb R^2} \left(i\bigl\{ A_{k-l}  -   A_{k+l}  \bigr\} B^*_k\right)^* dk 
 %%%%%%%%%%%% lemma
 \begin{lemma} 
 \label{conv}
-If $A(x)$ and $B(x)$ are real scalar fields then  $\int_{\Bbb R^2} A_{k-l}  B^*_k \frac{dk}{2\pi}= \int_{\Bbb R^2} e^{-ix\cdot l} A(x)B(x)\frac{dx}{2\pi}$.
+If $A(x)$ and $B(x)$ are real scalar fields then  $\int_{\Bbb R^2} A_{k+l}  B^*_k \frac{dk}{2\pi}= \int_{\Bbb R^2} e^{-ix\cdot l} A(x)B(x)\frac{dx}{2\pi}$.
 \end{lemma}
 
 \begin{proof} 
 \begin{align*}
-\int_{\Bbb R^2} A_{k-l}  B^*_k \frac{dk}{2\pi} 
-& = \int_{\Bbb R^2} A^*_{-k+l}  B_{-k} \frac{dk}{2\pi} \\
-& = \int_{\Bbb R^2} A^*_{-k+l}  B_{-k} \frac{dk}{2\pi} \\
-& = \int_{\Bbb R^2} A^*_{k+l}  B_{k} \frac{dk}{2\pi} \\
-& = \int_{\Bbb R^2} \int_{\Bbb R^2} e^{x\cdot (k+l)} [A(x)]^*\frac{dx}{2\pi}   B_{k} \frac{dk}{2\pi} \\
-& = \int_{\Bbb R^2} \int_{\Bbb R^2} e^{x\cdot k} e^{x\cdot l} [A(x)]^*   B_{k} \frac{dk}{2\pi} \frac{dx}{2\pi} \\
-&= \int_{\Bbb R^2} e^{-ix\cdot l} A(x)B(x)\frac{dx}{2\pi}
+\int_{\Bbb R^2} A_{k+l}  B^*_k \frac{dk}{2\pi} 
+& = \int_{\Bbb R^2} \int_{\Bbb R^2} e^{-x\cdot (k+l)} A(x) B_{k}^*  \frac{dx}{2\pi}   \frac{dk}{2\pi} \\
+& = \int_{\Bbb R^2}e^{-ix\cdot l} A(x) \left[\int_{\Bbb R^2} e^{-x\cdot k} B_{k}^*     \frac{dk}{2\pi}\right] \frac{dx}{2\pi}\\
+& = \int_{\Bbb R^2}e^{-ix\cdot l} A(x) \left[\int_{\Bbb R^2} e^{x\cdot k} B_{k}     \frac{dk}{2\pi}\right]^* \frac{dx}{2\pi}\\
+&= \int_{\Bbb R^2} e^{-ix\cdot l} A(x)B^*(x)\frac{dx}{2\pi}\\
+&= \int_{\Bbb R^2} e^{-ix\cdot l} A(x)B(x)\frac{dx}{2\pi},\quad\text{since $B(x)$ is real.}
 \end{align*}
 
 \end{proof}
 
 
-
-
-
-\begin{proof}[{ Proof of Claim \ref{grad claim}}]
-Since $\tilde T$ is sufficient for the unkown $\phi$ we have that 
-\begin{align*}
-P(\phi|\widetilde T, \text{\rm data}) &= P(\phi|\widetilde T)\propto P(\widetilde T|\phi)P(\phi).
-\end{align*}
-Now $\phi(x)$ is an isotropic Gaussian random field with spectral density $C_l^{\phi\phi}$. 
-Therefore $E(\phi_l \phi_{l^\prime}^*) = \delta_{l - l^\prime}C_l^{\phi\phi}$.  Now from $\phi_l = \phi_{-l}^*$ (since $\phi(x)$ is real), $E(|\phi_l|^2) = \delta_{0}C_l^{\phi\phi}$ and $E(\phi_l\phi_l^*) = 0 $ one gets that the random variables $\re \phi_l$, $\im \phi_l$ are independent $\mathcal N(0, \frac{1}{2}\delta_0 C_l^{\phi\phi})$ for each fixed $l$ and are independent accross all $l$ which are restricted to the a Hermitian half of the Fourier grid. In particular if we exclude the $l = 0$ and restrict our attention of a hermian half of the Fourier vectors we get
-\begin{align}
-\log P(\phi) - c_1 &=  - \frac{1}{2}\sum_{k \in \Bbb H}  \left[\frac{(\re \phi_k)^2}{\frac{1}{2}\delta_0 C_k^{\phi\phi}} +  \frac{(\im \phi_k)^2}{\frac{1}{2}\delta_0 C_k^{\phi\phi}} \right] = - \frac{1}{2}\int_{\Bbb R^2} \frac{|\phi_k|^2}{C_k^{\phi\phi}} dk \label{dr1} \\
-\log P(\widetilde T| \phi) - c_2 &=  - \frac{1}{2}\sum_{k \in \Bbb H}  \left[\frac{(\re \widetilde T_k^\phi)^2}{\frac{1}{2}\delta_0 C_k^{TT}} +  \frac{(\im \widetilde T_k^\phi)^2}{\frac{1}{2}\delta_0 C_k^{TT}} \right] = - \frac{1}{2}\int_{\Bbb R^2} \frac{\bigl|\widetilde T_k^\phi\bigr|^2}{C_k^{TT}} dk \label{dr2}
-\end{align}
-where $c_1$ and $c_2$ are constants and  $\widetilde T^\phi(x)\equiv \widetilde T(x-\nabla \phi(x))$
-where we are usign the  anti-lensing approximation that for the true lensing potential $\phi$,  $\widetilde T(x-\nabla\phi(x)) = T(x)$ for equation (\ref{dr2}). For any function $f(x)$ we let $f^\phi(x) = f(x-\nabla \phi(x))$ denote anti-lensing of $f$, with Fourier transform denoted by $f_l^\phi$. 
-% -------- extra detail
-% The integral approximation then becomes
-% \[ \log P(\phi) = \text{constant} - \pi \int \left[\frac{(\re \phi_l)^2}{C_l^{\phi\phi}} +  \frac{(\im \phi_l)^2}{ C_l^{\phi\phi}} \right] \frac{dl}{2\pi} \]
-% -------- extra detail
-% Therefore
-% \begin{align*}
-% \frac{\partial}{\partial \re \phi_l}\log P(\phi)  &= -2 \frac{\re \phi_l}{\delta_0 C_l^{\phi\phi}} \\
-% \frac{\partial}{\partial \im \phi_l}\log P(\phi)  &= -2 \frac{\im \phi_l}{\delta_0 C_l^{\phi\phi}}
-% \end{align*}
-Taking derivatives in (\ref{dr1}) gives
-\begin{equation}
-\label{grad of prior}
-\frac{\partial}{\partial \phi_l}\log P(\phi) = - 2(dl) \frac{\phi_l}{C^{\phi\phi}_{l}}.
-\end{equation}
-Taking derivatives in (\ref{dr2}) gives
-\begin{align}
-\frac{\partial}{\partial \re\phi_l}\log P(\widetilde T| \phi) 
-% <----- extra detail
-%&=  - dk\sum_{k \in \Bbb H} 2 \re \Bigl( \frac{\partial \widetilde T_k^\phi}{\partial \re\phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}} \Bigr)\\
-&= - \re \int_{\Bbb R^2} \frac{\partial \widetilde T_k^\phi}{\partial \re\phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}}  \,dk \label{ll1}\\
-\frac{\partial}{\partial \im\phi_l}\log P(\widetilde T| \phi) 
-% <----- extra detail
-%&=  - dk\sum_{k \in \Bbb H}2 \re \Bigl( \frac{\partial \widetilde T_k^\phi}{\partial \im\phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}} \Bigr) \\
-&=  -\re \int_{\Bbb R^2}\frac{\partial \widetilde T_k^\phi}{\partial \im\phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}} \, dk \label{ll2}.
-\end{align}
-
-Now taking linear combinations of the two equalities in Lemma \ref{partialconj} we get
-\begin{align}
-\frac{\partial \widetilde T^\phi_k}{\partial \re \phi_{l}}  &= \frac{dk}{2 \pi}  \sum_{q=1,2} il_q\left\{ [(\nabla^q\widetilde T)^\phi]_{k-l}  -   [(\nabla^q\widetilde T)^\phi]_{k+l}  \right\}\\
-\frac{\partial \widetilde T^\phi_k}{\partial \im \phi_{l} }  &= \frac{ dk}{2 \pi} \sum_{q=1,2} \phantom{i}l_q\left\{ [(\nabla^q\widetilde T)^\phi]_{k-l}  +   [(\nabla^q\widetilde T)^\phi]_{k+l}  \right\}.
-\end{align}
-Now the above two equations establish, by Lemma \ref{forreal}, that  both integrals $\int_{\Bbb R^2} \frac{\partial \widetilde T_k^\phi}{\partial \re\phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}}  \,dk$ and $\int_{\Bbb R^2}\frac{\partial \widetilde T_k^\phi}{\partial \im\phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}} \, dk$ are real
-which implies
-\begin{align*}
- \frac{\partial}{\partial \phi_l}\log P(\widetilde T| \phi) &= -\int_{\Bbb R^2} \frac{\partial \widetilde T_k^\phi}{\partial \phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}}  \,dk  \\
- &= -\frac{dk}{ \pi} \sum_{q=1,2} il_q \int_{\Bbb R^2}  [(\nabla^q\widetilde T)^\phi]_{k-l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}}  \,dk \\
- &= -  i 2 (dk) \sum_{q=1,2} l_q \int_{\Bbb R^2}  [(\nabla^q\widetilde T)^\phi]_{k-l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}}  \,\frac{dk}{2\pi} \\
- & = -  i 2 (dk) \sum_{q=1,2} l_q \int_{\Bbb R^2} e^{-i x\cdot l} A^q(x) \, B(x)  \,\frac{dx}{2\pi},\quad\text{by Lemma \ref{conv}}
- \end{align*}
- where $A^q(x) \equiv [\nabla^q\widetilde T](x-\nabla \phi(x))$ and $B_k\equiv \widetilde T_k^{\phi^*} / C_k^{TT}$
-from (\ref{ll2})) and (\ref{ll1})).
-\end{proof}
-% end proof
 
 
 \end{document}

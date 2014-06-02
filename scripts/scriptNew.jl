@@ -1,14 +1,17 @@
-# julia scripts/scriptNew.jl
+#= 
+julia scripts/scriptNew.jl
+=#
 const scriptname = "scriptNew"
-const seed = Base.Random.RANDOM_SEED
-const savepath = joinpath("simulations", "$(scriptname)_MaskT_$(seed[1])") #<--change the directory name here
+# const seed = Base.Random.RANDOM_SEED
+const seed = 10000; srand(seed)
+const savepath = joinpath("simulations", "$(scriptname)_MaskD_varcool_$(seed[1])") #<--change the directory name here
 const percentNyqForC = 0.5 # used for T l_max
 const numofparsForP  = 1500  # used for P l_max
 const hrfactor = 2.0
-const pixel_size_arcmin = 1.5
+const pixel_size_arcmin = 2.0
 const n = 2.0^9
 const beamFWHM = 0.0
-const nugget_at_each_pixel = (5.0)^2
+const nugget_at_each_pixel = (3.0)^2
 begin  #< ---- dependent run parameters
 	local deltx =  pixel_size_arcmin * pi / (180 * 60) #rads
 	local period = deltx * n # side length in rads
@@ -20,7 +23,7 @@ begin  #< ---- dependent run parameters
 	println("maskupP = $maskupP") # muK per arcmin
 	println("maskupC = $maskupC") # muK per arcmin
 end
-const scale_grad =  4.0e-3
+const scale_grad =  5.0e-3
 const scale_hmc  =  1.0e-3
 
 
@@ -67,7 +70,6 @@ ytx = ifft2r(ytk_nomask, parlr)
 ytx[maskboolx] = 0.0
 ytk = fft2(ytx, parlr)
 
-
 # the following makes maskvarx_cool used in a cooling step
 decay(x) = 1 ./ (abs(x).^(1/4))
 maskvarx_cool = maskvarx + decay(parlr.grd.x .- tmpup) + decay(parlr.grd.x .- tmpdo)
@@ -79,6 +81,7 @@ maskvarx_cool += decay(parlr.grd.x .- tmpdo)
 # plot(0.3*512, parlr.nugget_at_each_pixel, "*")
 # plot(0.4*512, parlr.nugget_at_each_pixel, "*")
 # axis([0, 500, 0, 40])
+
 
 
 # -----------  set the save directory and save stuff 
@@ -106,58 +109,43 @@ writecsv("$savepath/qex_lr.csv", qex_lr)
 
 
 # ------------------ initalized and run the gibbs 
-tx_hr_curr      = zeros(parhr.grd.x)
-tbarx_hr_curr   = zeros(parhr.grd.x)
-ttx_hr_curr     = zeros(parhr.grd.x)
-phik_curr       = zeros(phik)
-tildetx_lr_curr = zeros(parlr.grd.x) 
-tildetx_hr_curr = zeros(parhr.grd.x) 
-tx_hr_curr_sum  = zeros(tx_hr_curr)
-phik_curr_sum   = zeros(phik)
-acceptclk       = [1] #initialize acceptance record
+function gibbsloop(its, parhr, parlr, ytx, maskvarx)
+	tx_hr_curr      = zero(parhr.grd.x)
+	ttx_hr_curr     = zero(parhr.grd.x)
+	phidx1_hr, phidx2_hr, phidx1_lr, phidx2_lr = zero(parhr.grd.x), zero(parhr.grd.x), zero(parlr.grd.x), zeros(parlr.grd.x)
+	phik_curr       = zero(fft2(ytx, parlr))
+	tildetx_hr_curr = zero(parhr.grd.x) 
+	acceptclk       = [1] #initialize acceptance record
 
-
-
-bglp = 0
-while true
-	#  ------ use phik_curr from previous iteration to simluate the unlensed CMB: tx_hr_curr
-	if bglp % 50 == 0  # shakes up the low-ell modes
-		phidx1_hr, phidx2_hr, phidx1_lr, phidx2_lr = gibbspass_t!(
+	for bglp = 1:its
+		#  ------ use phik_curr from previous iteration to simluate the unlensed CMB: tx_hr_curr
+		phidx1_hr[:], phidx2_hr[:], phidx1_lr[:], phidx2_lr[:] = gibbspass_d!(
 			tx_hr_curr, ttx_hr_curr, 
-			phik_curr, ytx, maskvarx_coll, 
+			phik_curr, ytx, maskvarx, 
 			parlr, parhr, 
-			[linspace(parhr.grd.deltk, 1.5maskupC, 300)] 
-			)
-	end 
-	phidx1_hr, phidx2_hr, phidx1_lr, phidx2_lr = gibbspass_t!(
-		tx_hr_curr, ttx_hr_curr, 
-		phik_curr, ytx, maskvarx, 
-		parlr, parhr, 
-		[Inf for k=1:300] 
-	) 
-
-	tildetx_hr_curr[:] = spline_interp2(
+			linspace(100, 1.5maskupC, 1000) #<--- for D 
+			#[linspace(100, 1.5maskupC, 600), fill(Inf, 400)] #<--- for T
+		)
+		
+		tildetx_hr_curr[:] = spline_interp2(
 			parhr.grd.x, parhr.grd.y, tx_hr_curr, 
 			parhr.grd.x + phidx1_hr, parhr.grd.y + phidx2_hr
-	)
+		)
+		
+		if bglp <= 5 
+			gradupdate!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_grad) 
+		else
+			push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc))
+			push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc))
+			push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc))
+			push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc))
+			push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc))
+		end
 	
-	#  ------ gradient updates at the start
-	if  bglp <= 4
-		gradupdate!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_grad) 
-	else 	
-		push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc))
-		push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc))
-		push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc))
-	end
-
-	# update blgp, etc...
-	if bglp % 5 == 1
 		writecsv("$savepath/tildetx_lr_curr_$bglp.csv", tildetx_hr_curr[1:int(hrfactor):end,1:int(hrfactor):end])
 		writecsv("$savepath/phix_curr_$bglp.csv", ifft2r(phik_curr, parlr))
-		writecsv("$savepath/acceptclk.csv", acceptclk)
-	end
-	phik_curr_sum += phik_curr
-	tx_hr_curr_sum += tx_hr_curr 
-	bglp += 1
-end
-
+		writecsv("$savepath/acceptclk.csv", acceptclk)	
+	end # for
+end # function
+gibbsloop(1, parhr, parlr, ytx, maskvarx) # just to get complication
+gibbsloop(2000, parhr, parlr, ytx, maskvarx_cool)

@@ -1,26 +1,26 @@
 #=
 include("scripts/makeFigsOffline.jl")
 =#
-const simdir    =  "scriptNew_MaskT_4221706767" 
-# const simdir    =  "scriptNew_MaskD_608941668" 
-const specc 	  = true # plot the spectral coverage
-const pcorr 	  = true # plot the empirical cross correlation
-const onedslice = true # plot the 1-d slices of phi
-const acc 	    = true # take a look at the accpetence rate
-const imagsli   = true # look at the images one by one
-const mvie 	    = false # <---- needs work
-const krang = 1:(5):5000 # range of samples we are looking at
+const simdir    =  "scriptNew_MaskDv2_10000" 
+const specc 	  = false  # plot the spectral coverage
+const pcorr 	  = false  # plot the empirical cross correlation
+const onedslice  = false  # plot the 1-d slices of phi
+const acc 	     = false # take a look at the acceptance rate
+const imagsli    = false # look at the images one by one
+const aveim      = true  # point-wise average.
+const mvie 	     = false # <---- needs work
+const krang = 1:1:5000   # range of samples we are looking at
 
 # --- copy these are from the runfile
 const scriptname = "scriptNew"
 const percentNyqForC = 0.5 # used for T l_max
 const numofparsForP  = 1500  # used for P l_max
 const hrfactor = 2.0
-const pixel_size_arcmin = 1.5
+const pixel_size_arcmin = 2.0
 const n = 2.0^9
 const beamFWHM = 0.0
-const nugget_at_each_pixel = (5.0)^2
-begin  # <---- dependent run parameters
+const nugget_at_each_pixel = (3.0)^2
+begin  #< ---- dependent run parameters
 	local deltx =  pixel_size_arcmin * pi / (180 * 60) #rads
 	local period = deltx * n # side length in rads
 	local deltk =  2 * pi / period
@@ -31,6 +31,9 @@ begin  # <---- dependent run parameters
 	println("maskupP = $maskupP") # muK per arcmin
 	println("maskupC = $maskupC") # muK per arcmin
 end
+const scale_grad =  1.0e-3
+const scale_hmc  =  1.0e-3
+
 
 # ---- modules etc
 using PyCall 
@@ -376,6 +379,43 @@ if  imagsli
 	end
 end # end the if
 
+#--------------------
+# pointwise average
+#---------------
+if aveim
+	phix = readcsv("simulations/$simdir/phix.csv")
+	tildex = readcsv("simulations/$simdir/tildetx_lr.csv")
+	ytx  = readcsv("simulations/$simdir/ytx.csv")
+	qex = readcsv("simulations/$simdir/qex_lr.csv")
+	phix_sum = zero(phix)
+	tildetx_lr_sum = zero(phix)
+	cntr = 0
+	for k in krang
+		if isfile("simulations/$simdir/phix_curr_$k.csv") & isfile("simulations/$simdir/tildetx_lr_curr_$k.csv")
+			phix_curr = readcsv("simulations/$simdir/phix_curr_$k.csv")
+			tildetx_lr_curr = readcsv("simulations/$simdir/tildetx_lr_curr_$k.csv")
+			phix_sum += phix_curr
+			tildetx_lr_sum += tildetx_lr_curr
+			cntr += 1
+		end
+	end
+	fig = plt.figure(figsize=(15,6))
+	plt.subplot(1,3,1)
+	plt.imshow(phix, interpolation = "none", vmin=minimum(phix),vmax=maximum(phix)) 
+	plt.xlabel("true lensing potential")
+	plt.subplot(1,3,2)
+	plt.imshow(phix_sum/cntr, interpolation = "none", vmin=minimum(phix),vmax=maximum(phix)) 
+	plt.xlabel("estimated lensing potential")
+	plt.subplot(1,3,3)
+	plt.imshow(qex, interpolation = "none", vmin=minimum(phix),vmax=maximum(phix)) 
+	plt.xlabel("quadratic estimate")
+	#=plt.imshow(tildetx_lr_sum/cntr, interpolation = "none", vmin=minimum(ytx),vmax=maximum(ytx)) 
+	plt.xlabel("estimated unlensing CMB")
+	plt.subplot(2,2,4)
+	plt.imshow(ytx, interpolation = "none", vmin=minimum(ytx),vmax=maximum(ytx)) 
+	plt.xlabel("data")=#
+	plt.show()
+end
 
 #---------------------------------
 #  make movies and average estimate
