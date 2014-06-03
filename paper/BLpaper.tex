@@ -174,12 +174,7 @@ In the statistics literature,  $( t, \varphi)$ is commonly referred to as an {\b
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Ancillary and sufficient parameters for the lensed CMB}
 
-We will see that the ancillary parameterization for the lensed CMB problem is extreemely slow, whereas the sufficient parameterization is fast. Indeed, the analog to the Ancillary toy problem can be related to the lensed CMB problem as follows
-% \begin{align*}
-%   \text{data}(x) &= T(x+\nabla \phi(x)) + n(x) \\
-%   &\Updownarrow \\
-%   \text{data} &=  t +\varphi + n
-% \end{align*}
+The analog to the Ancillary toy problem is related to the lensed CMB problem as follows
 \begin{align*}
   \text{data}(x) &= T(x+\nabla \phi(x)) + n(x)\quad\text{\bf\em analogous to}\quad
   \text{data} =  t +\varphi + n
@@ -197,15 +192,30 @@ where the unlensed  CMB temperature field $T$ and the lensing potential $\phi$ a
 where now $\widetilde T$ denotes the lensed CMB tempuruature field with no noise or beam.
 The suffient chain then procceeds as
 \begin{align}
-\widetilde T^{i+1}&\sim P(\widetilde T |  \phi^{i},\text{data}) \\
-\phi^{i+1}&\sim P(\phi | \widetilde T^{i+1},  \text{data}).
+\label{suff 1} \widetilde T^{i+1}&\sim P(\widetilde T |  \phi^{i},\text{data}) \\
+\label{suff 2} \phi^{i+1}&\sim P(\phi | \widetilde T^{i+1},  \text{data}).
 \end{align}
 In the following two ections we discuss these two conditional in detail.
 
 
 
 \subsection{Anti-lensing approximation}
+Notice in the analog toy model the relation between the suffient parameter $\widetilde t$ and the ancillary parameter $t$ is through the equation $\widetilde t - \varphi = t$. A similar type of relation hold in the lensed CMB problem which becomes key for sampling from both conditionals distributions (\ref{suff 1}) and (\ref{suff 2}). The analogy is what we are referring to as the {\em anti-lensing approximation}
+\begin{equation}
+\label{antilense}
+ \widetilde T(x-\nabla\phi(x)) \approx T(x) \quad\text{\bf\em analogous to}\quad \widetilde t - \varphi = t.
+\end{equation}
+There are two points to make here. First, anti-lensing is a good approximation to the inverse lensing operation $\tilde T(x)\rightarrow T(x)$. Second, in the methodology that we describe below, the anti-lensing approximation can be made exact with the introdution of a field rotation. 
 
+
+Regarding the accuracy of the anti-lensing approximation...
+ and is subdomanty to the esimtation uncertainty of the displacement field.
+ This is do too the fact that the expected size of the displacement $\nabla\phi$ is much smaller than the correlation length scale of $\nabla\phi$. Indeed, the typoical displacement size $\nabla \phi(x)$ is less than 3 arcmin whereas the correlation length scale of $\phi$  is on the order of degrees. 
+
+
+Regarding the field rotation, notice  one can introduce a field rotation parameter, call it $\psi$, which makes antilensing exact: $\widetilde T\bigl(x-\nabla\phi^a(x)+ \nabla^\perp \psi^a(x)\bigr) = T(x)$ where $\nabla^\perp \equiv \bigr(-\frac{\partial}{\partial y},\frac{\partial}{\partial x} \bigl)$.
+ 
+We can quantify...this by showing the simluated Helmholts spectrums for the inverse lensign operation and show how small it is.
 
 % ----------
 \section{Hamiltonian sampler for $P(\phi | \widetilde T,  \text{\rm data})$}
@@ -220,7 +230,7 @@ where $l\in \Bbb R^2$ is a two dimensional frequency vector and $x\in \Bbb R^2$ 
 
 \begin{claim}
 \label{grad claim}
- Under the anti-lensing approximation, that   $\widetilde T(x-\nabla\phi(x)) = T(x)$ when $\phi$ is the true lensing potential,   for any nonzero frequecy vector $l\equiv (l_1, l_2) \in \Bbb R^2$ 
+ Under the anti-lensing approximation (\ref{antilense}) for any nonzero frequecy vector $l\equiv (l_1, l_2) \in \Bbb R^2$ 
  \[\frac{\partial}{\partial \phi_l}\log P(\phi | \widetilde T,  \text{\rm data}) \propto -  \frac{\phi_l}{C^{\phi\phi}_{l}} -  \sum_{q=1,2} i  l_q \int_{\Bbb R^2} e^{-i x\cdot l} A^q(x)B(x) \frac{dx}{2\pi}   \]
  where  $\phi_l = \re \phi_l + i \im \phi_l$, $\frac{\partial}{\partial \phi_l}\equiv \frac{\partial}{\partial\re \phi_l} + i \frac{\partial}{\partial\im\phi_l}$ and 
  \begin{align}
