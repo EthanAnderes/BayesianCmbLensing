@@ -1,15 +1,15 @@
 #=
 	include("scripts/makeFigsOffline.jl")
 =#
-const simdir    =  "scriptNew_MaskT_10000" 
+const simdir    =  "scriptNew_MaskD_10000" 
 const specc 	  = true  # plot the spectral coverage
 const pcorr 	  = true  # plot the empirical cross correlation
-const onedslice  = false  # plot the 1-d slices of phi
+const onedslice  = true  # plot the 1-d slices of phi
 const acc 	     = true # take a look at the acceptance rate
 const imagsli    = false # look at the images one by one
 const aveim      = true  # point-wise average.
 const mvie 	     = false # <---- needs work
-const krang = 1:1:5000   # range of samples we are looking at
+const krang = 57:1:5000   # range of samples we are looking at
 
 # --- copy these are from the runfile
 const scriptname = "scriptNew"

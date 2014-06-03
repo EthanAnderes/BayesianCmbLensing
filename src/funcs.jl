@@ -59,10 +59,12 @@ function  wsim_gibbs_t!(sx, tx, dx, Nx, par, uplim)
     Tx = 0.99 * minimum(Nx)
     barNx = Nx .- Tx
     delt0 = 1.0./par.grd.deltk^2.0
+    # maybe what we need to do is to scale Tx so that 
+    # pixel var = lamx * Tx ---> spectrum = lamx * Tx * dx^2 == CTT[uplim]
     if (uplim == Inf) | (uplim > 8000.0)
         lamx = 1.0
     else
-        lamx = (par.grd.deltx^2.0) .* par.CTell2d[round(uplim)]
+        lamx = par.CTell2d[round(uplim)] / (Tx * par.grd.deltx^2)
         lamx = max(1.0, lamx)
     end
     sim_sx!(sx, tx, lamx * Tx, barNx, par)

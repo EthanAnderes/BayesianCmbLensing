@@ -77,8 +77,8 @@ function SpectrumGrids(
     beamSQ =abs2(beam)
     cNT    = nugget_at_each_pixel .* (grd.deltx^d) ./ beamSQ
 
-    cMaskBool = ~((grd.r.<= maskupC) & (grd.r.>= 1.0)) # this is true when the masking is active Mat[cMaskBool] = 0 or Inf
-    pMaskBool = ~((grd.r.<= maskupP) & (grd.r.>= 1.0)) # this is true when the masking is active Mat[cMaskBool] = 0 or Inf
+    cMaskBool = !((grd.r.<= maskupC) & (grd.r.>= 1.0)) # this is true when the masking is active Mat[cMaskBool] = 0 or Inf
+    pMaskBool = !((grd.r.<= maskupP) & (grd.r.>= 1.0)) # this is true when the masking is active Mat[cMaskBool] = 0 or Inf
     cMaskInf = 1.0./((grd.r.<=maskupC) & (grd.r.>= 1.0))  # this equals Inf when the masking is active and 1.0 otherwise...
     
     index=ceil(grd.r)
