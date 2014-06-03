@@ -62,7 +62,7 @@ function  wsim_gibbs_t!(sx, tx, dx, Nx, par, uplim)
     if (uplim == Inf) | (uplim > 8000.0)
         lamx = 1.0
     else
-        lamx = (grd.deltx^2.0) .* par.CTell2d[round(uplim)]
+        lamx = (par.grd.deltx^2.0) .* par.CTell2d[round(uplim)]
         lamx = max(1.0, lamx)
     end
     sim_sx!(sx, tx, lamx * Tx, barNx, par)
