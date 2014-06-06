@@ -4,7 +4,7 @@
 const scriptname = "scriptNew_challenger"
 # const seed = Base.Random.RANDOM_SEED
 const seed = 10000; srand(seed)
-const savepath = joinpath("simulations", "$(scriptname)_$(seed[1])") #<--change the directory name here
+const savepath = joinpath("simulations", "$(scriptname)_2nd_$(seed[1])") #<--change the directory name here
 const percentNyqForC = 0.5 # used for T l_max
 const numofparsForP  = 1500  # used for P l_max
 const hrfactor = 2.0
@@ -102,22 +102,21 @@ writecsv("$savepath/qex_lr.csv", qex_lr)
 function gibbsloop(its, parhr, parlr, ytx, maskvarx)
 	tx_hr_curr      = zero(parhr.grd.x)
 	ttx_hr_curr     = zero(parhr.grd.x)
-	phidx1_hr, phidx2_hr, phidx1_lr, phidx2_lr = zero(parhr.grd.x), zero(parhr.grd.x), zero(parlr.grd.x), zeros(parlr.grd.x)
+	p1hr, p2hr      = zero(parhr.grd.x), zero(parhr.grd.x)
 	phik_curr       = zero(fft2(ytx, parlr))
 	tildetx_hr_curr = zero(parhr.grd.x) 
 	acceptclk       = [1] #initialize acceptance record
 
-	for bglp = 1:its
+	for bglp = 1:its 
 		# ----- update tildetx_hr_curr
-		cool = (bglp % 50 == 1) ? [linspace(50, maskupC, 500), fill(Inf, 500)] : fill(Inf, 500)
-		phidx1_hr[:], phidx2_hr[:], phidx1_lr[:], phidx2_lr[:] = gibbspass_t!(
-			tx_hr_curr, ttx_hr_curr, phik_curr, ytx, maskvarx, 
-			parlr, parhr, cool
+		cool =  [linspace(50, 1.1maskupC, 350), fill(Inf, 50)]
+		p1hr[:], p2hr[:] = gibbspass_t_smooth!(tx_hr_curr, ttx_hr_curr, phik_curr, ytx, 
+			maskvarx, parlr, parhr, cool
 		)
-	
+
 		tildetx_hr_curr[:] = spline_interp2(
 			parhr.grd.x, parhr.grd.y, tx_hr_curr, 
-			parhr.grd.x + phidx1_hr, parhr.grd.y + phidx2_hr
+			parhr.grd.x + p1hr, parhr.grd.y + p2hr
 		)
 		
 		# ----- update phik_curr

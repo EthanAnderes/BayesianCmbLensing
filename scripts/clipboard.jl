@@ -69,15 +69,16 @@ function gibbspass_t!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec
         sx[:]    = ifft2r(sk, parhr) 
         # ---- update t
         # whatever updates are done, they are only done on the low ell multipoles
-        tpx[:]   = 1 ./ (1 ./ barNx .+ 1 / (λ * Tx)) 
+        barNxsmth = smooth_to_inf(barNx, uplim, parhr)
+        tpx[:]   = 1 ./ (1 ./ barNxsmth .+ 1 / (λ * Tx)) 
         # can the following pointwise averaging be done in a spatially smooth way?
-        tx_tmp   = tpx .* (dx ./ barNx + sx ./ (λ * Tx)) # wiener filter...weighted ave of dx and sx.
+        tx_tmp   = tpx .* (dx ./ barNxsmth + sx ./ (λ * Tx)) # wiener filter...weighted ave of dx and sx.
         tx_tmp  += randn(size(tx)) .* √(tpx)             # random fluctuation
         tk_tmp   = fft2(tx_tmp, parhr)
         tk[chng] = tk_tmp[chng]
         tx[:]    = ifft2r(tk, parhr)
     end
-    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
+    phidx1_hr_curr, phidx2_hr_curr
 end
 function gibbspass_d!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
@@ -103,22 +104,43 @@ function gibbspass_d!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, cooling
     sk = fft2(sx, parhr)
     sk[parhr.grd.r .> coolingVec[end]] = 0.0
     sx[:] = ifft2r(sk, parhr)
-    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
+    phidx1_hr_curr, phidx2_hr_curr
 end
+function smooth_to_inf(maskvarx, uplim, par) 
+  if uplim >= 8000
+    return maskvarx
+  end 
+  varx = copy(maskvarx)
+  indinf = (varx .== Inf)
+  varx[indinf] = minimum(varx) * 100 #/ log(λ) # exp(1/(λ-1))
+  fwhm = (2 * pi) / uplim  # in rad scale
+  sig  = fwhm / (2 * √(2 * log(2)))
+  beam = exp(-(sig^2) * (par.grd.r.^2) / 2)
+  vark = fft2(varx, par) .* beam
+  varx[:] = ifft2r(vark, par)
+  varx[indinf] = Inf
+  varx
+end
+#plot(smooth_to_inf(maskvarx, 100, parlr)[1,:]')
+#plot(smooth_to_inf(maskvarx, 500, parlr)[1,:]')
+#plot(smooth_to_inf(maskvarx, 1000, parlr)[1,:]')
+#plot(smooth_to_inf(maskvarx, 4000, parlr)[1,:]')
+#plot(smooth_to_inf(maskvarx, 8000, parlr)[1,:]')
+
 
 
 # ------------------ initalized and run the gibbs 
 tx_hr_curr      = zero(parhr.grd.x)
 ttx_hr_curr     = zero(parhr.grd.x)
-phidx1_hr, phidx2_hr, phidx1_lr, phidx2_lr = zero(parhr.grd.x), zero(parhr.grd.x), zero(parlr.grd.x), zeros(parlr.grd.x)
+p1hr, p2hr      = zero(parhr.grd.x), zero(parhr.grd.x)
 phik_curr       = zero(fft2(ytx, parlr))
 tildetx_hr_curr = zero(parhr.grd.x) 
 acceptclk       = [1] # initialize acceptance record
 # cool = [linspace(10, 100, 30), fill(Inf, 20)]
-cool = [fill(100, 30), fill(Inf, 20)]
-@time phidx1_hr[:], phidx2_hr[:], phidx1_lr[:], phidx2_lr[:] = gibbspass_t!(
-  tx_hr_curr, ttx_hr_curr, phik_curr, ytx, maskvarx, 
-  parlr, parhr, cool
+# cool = [fill(100, 30), fill(Inf, 20)]
+cool = linspace(4parhr.grd.deltk, 2700, 50)
+@time p1hr[:], p2hr[:] = gibbspass_t!(tx_hr_curr, ttx_hr_curr, phik_curr, ytx, 
+  maskvarx, parlr, parhr, cool
 );
 
 figure(figsize=(11,4))

@@ -47,7 +47,7 @@ end
 
 #-----------------------------
 #  messenger algorithms
-#------------------------------------
+#------------------------------------#----- define gibbs
 function gibbspass_t!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
     dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
@@ -67,22 +67,22 @@ function gibbspass_t!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec
         λ =  (uplim > 8000.0) ? 1.0 : max(1.0, parhr.CTell2d[round(uplim)]/Tk)
         chng = parhr.grd.r .<= uplim
         # ---- update s
-        tpx[:]   = 1./(1./(λ * Tk * delt0) .+ 1./(parhr.cTT * delt0)) 
+        tpx[:]   = 1 ./ (1 / (λ * Tk * delt0) .+ 1 ./ (parhr.cTT * delt0)) 
         sk[chng] = tpx[chng] .* (tk[chng] / (λ * Tk * delt0))  # wiener filter
         sk[chng]+= white(parhr)[chng] .* √(tpx)[chng]      # random fluctuation
         sx[:]    = ifft2r(sk, parhr) 
         # ---- update t
         # whatever updates are done, they are only done on the low ell multipoles
-        tpx[:]   = 1.0 ./ (1.0 ./ barNx .+ 1.0 / (λ * Tx)) 
-        tx_tmp   = tpx .* (dx ./ barNx + sx ./ (λ * Tx)) # wiener filter  
-        tx_tmp  += randn(size(tx)) .* √(tpx)        # random fluctuation
+        tpx[:]   = 1 ./ (1 ./ barNx .+ 1 / (λ * Tx)) 
+        # can the following pointwise averaging be done in a spatially smooth way?
+        tx_tmp   = tpx .* (dx ./ barNx + sx ./ (λ * Tx)) # wiener filter...weighted ave of dx and sx.
+        tx_tmp  += randn(size(tx)) .* √(tpx)             # random fluctuation
         tk_tmp   = fft2(tx_tmp, parhr)
         tk[chng] = tk_tmp[chng]
         tx[:]    = ifft2r(tk, parhr)
     end
-    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
+    phidx1_hr_curr, phidx2_hr_curr
 end
-
 
 function gibbspass_d!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
@@ -94,24 +94,76 @@ function gibbspass_d!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, cooling
         λk = delt0 .* parhr.CTell2d[min(8000, round(uplim))] 
         λx = λk / (delt0 * d2x) 
         Sbark = delt0 .* parhr.cTT .- λk 
-        Sbark[Sbark .< 0.0]= 0.0 # Sbark[1] = 0.0 needed?
+        Sbark[Sbark .< 0.0]= 0.0 
         # ---- update sbarx
         tmp      = λk .* Sbark ./ (Sbark .+ λk) # this can work when Sbark is zero
         sbark    = tmp .* fft2(sx, parhr) ./ λk # wiener filter
         sbark   += white(parhr) .* √(tmp)    # fluctuation
         sbarx[:] = ifft2r(sbark, parhr)
         # --- update sx
-        tmp    = 1.0 ./ (1.0./Nx .+ 1.0./λx)
-        sx[:]  = tmp .* (dx./Nx .+ sbarx./λx)  
-        sx[:] += vec(randn(size(sx)) .* sqrt(tmp))
+        tmp    = 1 ./ (1 ./ Nx .+ 1 / λx)
+        sx[:]  = tmp .* (dx ./ Nx  .+ sbarx / λx)  
+        sx[:]  = vec(sx + randn(size(sx)) .* sqrt(tmp))
     end
     sk = fft2(sx, parhr)
     sk[parhr.grd.r .> coolingVec[end]] = 0.0
     sx[:] = ifft2r(sk, parhr)
-    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
+    phidx1_hr_curr, phidx2_hr_curr
 end
 
 
+# --- experimental version which also smooths the noise:
+function gibbspass_t_smooth!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])
+    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
+    dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
+    # ------ pre-allocate space
+    tk = fft2(tx, parhr)
+    sk = fft2(sx, parhr)
+    tpx = Array(Float64, size(tx))
+    chng  = Array(Bool, size(tx))
+    Tx    = 0.99 * minimum(Nx)
+    barNx = Nx .- Tx
+    d2k = parhr.grd.deltk * parhr.grd.deltk
+    d2x = parhr.grd.deltx * parhr.grd.deltx
+    delt0 = 1 / d2k
+    Tk  = Tx * d2x # Tk is the spectrum, Tx is the pixelwise variance
+    # ------ gibbs with cooling:) 
+    for uplim in coolingVec
+        λ =  (uplim > 8000.0) ? 1.0 : max(1.0, parhr.CTell2d[round(uplim)]/Tk)
+        chng = parhr.grd.r .<= uplim
+        # ---- update s
+        tpx[:]   = 1 ./ (1 / (λ * Tk * delt0) .+ 1 ./ (parhr.cTT * delt0)) 
+        sk[chng] = tpx[chng] .* (tk[chng] / (λ * Tk * delt0))  # wiener filter
+        sk[chng]+= white(parhr)[chng] .* √(tpx)[chng]      # random fluctuation
+        sx[:]    = ifft2r(sk, parhr) 
+        # ---- update t
+        # whatever updates are done, they are only done on the low ell multipoles
+        barNxsmth = smooth_to_inf(barNx, uplim, parhr)
+        tpx[:]   = 1 ./ (1 ./ barNxsmth .+ 1 / (λ * Tx)) 
+        # can the following pointwise averaging be done in a spatially smooth way?
+        tx_tmp   = tpx .* (dx ./ barNxsmth + sx ./ (λ * Tx)) # wiener filter...weighted ave of dx and sx.
+        tx_tmp  += randn(size(tx)) .* √(tpx)             # random fluctuation
+        tk_tmp   = fft2(tx_tmp, parhr)
+        tk[chng] = tk_tmp[chng]
+        tx[:]    = ifft2r(tk, parhr)
+    end
+    phidx1_hr_curr, phidx2_hr_curr
+end
+function smooth_to_inf(maskvarx, uplim, par) 
+  if uplim >= 8000
+    return maskvarx
+  end 
+  varx = copy(maskvarx)
+  indinf = (varx .== Inf)
+  varx[indinf] = minimum(varx) * 100 #/ log(λ) # exp(1/(λ-1))
+  fwhm = (2 * pi) / uplim  # in rad scale
+  sig  = fwhm / (2 * √(2 * log(2)))
+  beam = exp(-(sig^2) * (par.grd.r.^2) / 2)
+  vark = fft2(varx, par) .* beam
+  varx[:] = ifft2r(vark, par)
+  varx[indinf] = Inf
+  varx
+end
 
 
 
