@@ -1,10 +1,10 @@
 #= 
-	julia scripts/scriptNew.jl
+	julia scripts/scriptNew_winner.jl
 =#
-const scriptname = "scriptNew"
+const scriptname = "scriptNew_winner"
 # const seed = Base.Random.RANDOM_SEED
 const seed = 10000; srand(seed)
-const savepath = joinpath("simulations", "$(scriptname)_MaskT_$(seed[1])") #<--change the directory name here
+const savepath = joinpath("simulations", "$(scriptname)_$(seed[1])") #<--change the directory name here
 const percentNyqForC = 0.5 # used for T l_max
 const numofparsForP  = 1500  # used for P l_max
 const hrfactor = 2.0
@@ -119,11 +119,19 @@ function gibbsloop(its, parhr, parlr, ytx, maskvarx)
 
 	for bglp = 1:its
 		#  ------ use phik_curr from previous iteration to simluate the unlensed CMB: tx_hr_curr
+		if bglp % 50 == 1 
+			phidx1_hr[:], phidx2_hr[:], phidx1_lr[:], phidx2_lr[:] = gibbspass_d!(
+				tx_hr_curr, ttx_hr_curr, 
+				phik_curr, ytx, maskvarx, 
+				parlr, parhr, 
+				linspace(100, maskupC, 1000) 
+			)
+		end
 		phidx1_hr[:], phidx2_hr[:], phidx1_lr[:], phidx2_lr[:] = gibbspass_t!(
-			tx_hr_curr, ttx_hr_curr, 
-			phik_curr, ytx, maskvarx, 
-			parlr, parhr, 
-			linspace(parhr.grd.deltk, 2maskupC, 500) 
+		 	tx_hr_curr, ttx_hr_curr, 
+		 	phik_curr, ytx, maskvarx, 
+		 	parlr, parhr, 
+		 	fill(Inf, 500)
 		)
 		
 		tildetx_hr_curr[:] = spline_interp2(
@@ -131,7 +139,7 @@ function gibbsloop(its, parhr, parlr, ytx, maskvarx)
 			parhr.grd.x + phidx1_hr, parhr.grd.y + phidx2_hr
 		)
 		
-		if bglp <= 5 
+		if bglp <= 4 
 			gradupdate!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_grad) 
 		else
 			push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc))

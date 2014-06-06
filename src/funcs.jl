@@ -30,6 +30,8 @@ function hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc = 1.0e-3)
         return 0
     end
 end
+
+
 function lfrog!(phik_curr, rk, tildetx_hr_curr, parlr, parhr, ePs, mk)
     grad, loglike   = ttk_grad_wlog(tildetx_hr_curr, phik_curr, parlr, parhr)
     rk_halfstep =  rk +  ePs .* grad ./ 2.0
@@ -44,47 +46,71 @@ end
 
 
 #-----------------------------
-# messenger algorithms: t messenger
+#  messenger algorithms
 #------------------------------------
 function gibbspass_t!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
     dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
+    # ------ pre-allocate space
+    tk = fft2(tx, parhr)
+    sk = fft2(sx, parhr)
+    tpx = Array(Float64, size(tx))
+    chng  = Array(Bool, size(tx))
+    Tx    = 0.99 * minimum(Nx)
+    barNx = Nx .- Tx
+    d2k = parhr.grd.deltk * parhr.grd.deltk
+    d2x = parhr.grd.deltx * parhr.grd.deltx
+    delt0 = 1 / d2k
+    Tk  = Tx * d2x # Tk is the spectrum, Tx is the pixelwise variance
+    # ------ gibbs with cooling:) 
     for uplim in coolingVec
-        wsim_gibbs_t!(sx, tx, dx, Nx, parhr, uplim)
+        λ =  (uplim > 8000.0) ? 1.0 : max(1.0, parhr.CTell2d[round(uplim)]/Tk)
+        chng = parhr.grd.r .<= uplim
+        # ---- update s
+        tpx[:]   = 1./(1./(λ * Tk * delt0) .+ 1./(parhr.cTT * delt0)) 
+        sk[chng] = tpx[chng] .* (tk[chng] / (λ * Tk * delt0))  # wiener filter
+        sk[chng]+= white(parhr)[chng] .* √(tpx)[chng]      # random fluctuation
+        sx[:]    = ifft2r(sk, parhr) 
+        # ---- update t
+        # whatever updates are done, they are only done on the low ell multipoles
+        tpx[:]   = 1.0 ./ (1.0 ./ barNx .+ 1.0 / (λ * Tx)) 
+        tx_tmp   = tpx .* (dx ./ barNx + sx ./ (λ * Tx)) # wiener filter  
+        tx_tmp  += randn(size(tx)) .* √(tpx)        # random fluctuation
+        tk_tmp   = fft2(tx_tmp, parhr)
+        tk[chng] = tk_tmp[chng]
+        tx[:]    = ifft2r(tk, parhr)
     end
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
 end
-# ----- these are sub functions
-function  wsim_gibbs_t!(sx, tx, dx, Nx, par, uplim)
-    Tx = 0.99 * minimum(Nx)
-    barNx = Nx .- Tx
-    delt0 = 1.0./par.grd.deltk^2.0
-    # maybe what we need to do is to scale Tx so that 
-    # pixel var = lamx * Tx ---> spectrum = lamx * Tx * dx^2 == CTT[uplim]
-    if (uplim == Inf) | (uplim > 8000.0)
-        lamx = 1.0
-    else
-        lamx = par.CTell2d[round(uplim)] / (Tx * par.grd.deltx^2)
-        lamx = max(1.0, lamx)
+
+
+function gibbspass_d!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])
+    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
+    dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
+    d2k = parhr.grd.deltk * parhr.grd.deltk
+    d2x = parhr.grd.deltx * parhr.grd.deltx
+    delt0 = 1 / d2k
+    for uplim in coolingVec
+        λk = delt0 .* parhr.CTell2d[min(8000, round(uplim))] 
+        λx = λk / (delt0 * d2x) 
+        Sbark = delt0 .* parhr.cTT .- λk 
+        Sbark[Sbark .< 0.0]= 0.0 # Sbark[1] = 0.0 needed?
+        # ---- update sbarx
+        tmp      = λk .* Sbark ./ (Sbark .+ λk) # this can work when Sbark is zero
+        sbark    = tmp .* fft2(sx, parhr) ./ λk # wiener filter
+        sbark   += white(parhr) .* √(tmp)    # fluctuation
+        sbarx[:] = ifft2r(sbark, parhr)
+        # --- update sx
+        tmp    = 1.0 ./ (1.0./Nx .+ 1.0./λx)
+        sx[:]  = tmp .* (dx./Nx .+ sbarx./λx)  
+        sx[:] += vec(randn(size(sx)) .* sqrt(tmp))
     end
-    sim_sx!(sx, tx, lamx * Tx, barNx, par)
-    sim_tx!(sx, tx, dx, lamx * Tx, barNx, par)
+    sk = fft2(sx, parhr)
+    sk[parhr.grd.r .> coolingVec[end]] = 0.0
+    sx[:] = ifft2r(sk, parhr)
+    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
 end
-function sim_sx!(sx, tx, Tx::Float64, barNx, par)
-    tk  = fft2(tx, par)
-    Tk  = Tx * par.grd.deltx * par.grd.deltx # this converts pixel space variance to spectrum
-    pargrddeltk2 = par.grd.deltk * par.grd.deltk
-    tmp    = 1.0./ (pargrddeltk2./par.cTT .+ pargrddeltk2./Tk) 
-    sk_wf  = tmp .* tk ./ (Tk ./ pargrddeltk2)
-    sk_flx = white(par) .* sqrt(tmp)
-    sx[:]  = ifft2r(sk_wf + sk_flx, par)
-end  
-function sim_tx!(sx, tx, dx, Tx::Float64, barNx, par)
-    tmp = 1.0./(1.0./barNx .+ 1.0./Tx)
-    tx_wf  = tmp .* (dx./barNx + sx./Tx)
-    tx_flx  = randn(size(tx)) .* sqrt(tmp) 
-    tx[:] = tx_wf + tx_flx
-end
+
 
 
 
@@ -133,56 +159,6 @@ function ttk_grad_wlog(tildetx_hr_sim, phik_curr, parlr, parhr)
 end
 
 
-
-
-
-
-#-----------------------------
-# messenger algorithms: dual messenger
-#------------------------------------
-function gibbspass_d!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])
-    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
-    dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
-    for uplim in coolingVec
-        wsim_gibbs_d!(sx, sbarx, dx, Nx, parhr, uplim)
-    end
-    sk = fft2(sx, parhr)
-    sk[parhr.grd.r .> coolingVec[end]] = 0.0
-    sx[:] = ifft2r(sk, parhr)
-    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
-end
-# ---- these are sub functions
-function  wsim_gibbs_d!(sx, sbarx, dx, Nx, par, uplim)
-    Sbark, Qx, Qk = get_SQ(uplim, par)
-    simd_sbarx!(sx, sbarx,  Sbark, Qk, par)
-    simd_sx!(sx, sbarx, dx, Sbark, Qx, Nx, par)
-end
-function simd_sx!(sx, sbarx, dx, Sbark, Qx::Float64, Nx, par)
-    tmp = 1.0 ./ (1.0./Nx .+ 1.0./Qx)
-    sx_wf  = tmp .* (dx./Nx .+ sbarx./Qx)  
-    sx_flx = randn(size(sx)) .* sqrt(tmp) 
-    sx[:] = sx_wf + sx_flx
-end  
-function simd_sbarx!(sx, sbarx, Sbark, Qk::Float64, par)
-    # tmp = 1.0 ./ (1.0./Qk + 1.0./Sbark) # this can work when Sbark is zeros by using the Wiener filter version 
-    tmp = Qk .* Sbark ./ (Sbark .+ Qk) # this can work when Sbark is zero
-    sbark_wf = tmp .* fft2(sx, par) ./ Qk
-    sbark_flx = white(par) .* sqrt(tmp)
-    sbark = sbark_wf + sbark_flx
-    sbarx[:] = ifft2r(sbark, par)
-end
-function get_SQ(lp_init, par)
-    delt0 = 1.0./par.grd.deltk^2.0
-    lam = delt0 .* par.CTell2d[min(8000, round(lp_init))] 
-    Sk = delt0 .* par.cTT # fourier variance
-    Sbark = Sk .- lam 
-    Sbark[Sbark .< 0.0]= 0.0
-    Sbark[1] = 0.0
-    Qk = lam    # so Qk + Sbark should be delt0.*par.cTT up to lp_init then lam after
-                # Qk / delt0 is the spectrum
-    Qx = Qk ./ (delt0 * par.grd.deltx^2.0) # to convert noise spectrum (i.e. Qk / delt0) to pixel varuance take spectrum / par.grd.deltx^2.0
-    Sbark, Qx, Qk
-end
 
 
 

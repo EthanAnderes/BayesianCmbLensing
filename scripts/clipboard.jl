@@ -1,3 +1,144 @@
+#--- test messenger algorithms
+const seed = 10000; srand(seed)
+const percentNyqForC = 0.5 # used for T l_max
+const numofparsForP  = 1500  # used for P l_max
+const hrfactor = 2.0
+const pixel_size_arcmin = 2.0
+const n = 2.0^9
+const beamFWHM = 0.0
+const nugget_at_each_pixel = (3.0)^2
+begin  #< ---- dependent run parameters
+  local deltx =  pixel_size_arcmin * pi / (180 * 60) #rads
+  local period = deltx * n # side length in rads
+  local deltk =  2 * pi / period
+  local nyq = (2 * pi) / (2 * deltx)
+  const maskupP  = sqrt(deltk^2 * numofparsForP / pi)  #l_max for for phi
+  const maskupC  = min(9000.0, percentNyqForC * (2 * pi) / (2 * pixel_size_arcmin * pi / (180*60))) #l_max for for phi
+  println("muK_per_arcmin = $(sqrt(nugget_at_each_pixel * (pixel_size_arcmin^2)))") # muK per arcmin
+  println("maskupP = $maskupP") # muK per arcmin
+  println("maskupC = $maskupC") # muK per arcmin
+end
+# ------------ load modules and functions
+push!(LOAD_PATH, pwd()*"/src")
+using Interp, PyPlot
+require("cmb.jl"); require("fft.jl"); require("funcs.jl") # use reload after editing funcs.jl
+# --------- generate cmb spectrum class for high res and low res
+parlr = setpar(
+  pixel_size_arcmin, n, beamFWHM, nugget_at_each_pixel, 
+  maskupC, maskupP
+)
+parhr = setpar(
+  pixel_size_arcmin./hrfactor, hrfactor*n, beamFWHM, nugget_at_each_pixel, 
+  maskupC, maskupP
+)
+# -------- Simulate data: ytx, maskvarx, phix, tildetx
+ytk_nomask, tildetk, phix, tx_hr = simulate_start(parlr);
+phik = fft2(phix, parlr)
+# maskboolx =  falses(size(phix))
+tmpdo = maximum(parlr.grd.x)*0.3
+tmpup = maximum(parlr.grd.x)*0.4
+maskboolx = tmpdo .<= parlr.grd.x .<= tmpup
+maskvarx  = parlr.nugget_at_each_pixel .* ones(size(parlr.grd.x))
+maskvarx[maskboolx] = Inf
+ytx = ifft2r(ytk_nomask, parlr)
+ytx[maskboolx] = 0.0
+ytk = fft2(ytx, parlr)
+#----- define gibbs
+function gibbspass_t!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])
+    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
+    dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
+    # ------ pre-allocate space
+    tk = fft2(tx, parhr)
+    sk = fft2(sx, parhr)
+    tpx = Array(Float64, size(tx))
+    chng  = Array(Bool, size(tx))
+    Tx    = 0.99 * minimum(Nx)
+    barNx = Nx .- Tx
+    d2k = parhr.grd.deltk * parhr.grd.deltk
+    d2x = parhr.grd.deltx * parhr.grd.deltx
+    delt0 = 1 / d2k
+    Tk  = Tx * d2x # Tk is the spectrum, Tx is the pixelwise variance
+    # ------ gibbs with cooling:) 
+    for uplim in coolingVec
+        λ =  (uplim > 8000.0) ? 1.0 : max(1.0, parhr.CTell2d[round(uplim)]/Tk)
+        chng = parhr.grd.r .<= uplim
+        # ---- update s
+        tpx[:]   = 1 ./ (1 / (λ * Tk * delt0) .+ 1 ./ (parhr.cTT * delt0)) 
+        sk[chng] = tpx[chng] .* (tk[chng] / (λ * Tk * delt0))  # wiener filter
+        sk[chng]+= white(parhr)[chng] .* √(tpx)[chng]      # random fluctuation
+        sx[:]    = ifft2r(sk, parhr) 
+        # ---- update t
+        # whatever updates are done, they are only done on the low ell multipoles
+        tpx[:]   = 1 ./ (1 ./ barNx .+ 1 / (λ * Tx)) 
+        # can the following pointwise averaging be done in a spatially smooth way?
+        tx_tmp   = tpx .* (dx ./ barNx + sx ./ (λ * Tx)) # wiener filter...weighted ave of dx and sx.
+        tx_tmp  += randn(size(tx)) .* √(tpx)             # random fluctuation
+        tk_tmp   = fft2(tx_tmp, parhr)
+        tk[chng] = tk_tmp[chng]
+        tx[:]    = ifft2r(tk, parhr)
+    end
+    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
+end
+function gibbspass_d!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])
+    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
+    dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
+    d2k = parhr.grd.deltk * parhr.grd.deltk
+    d2x = parhr.grd.deltx * parhr.grd.deltx
+    delt0 = 1 / d2k
+    for uplim in coolingVec
+        λk = delt0 .* parhr.CTell2d[min(8000, round(uplim))] 
+        λx = λk / (delt0 * d2x) 
+        Sbark = delt0 .* parhr.cTT .- λk 
+        Sbark[Sbark .< 0.0]= 0.0 
+        # ---- update sbarx
+        tmp      = λk .* Sbark ./ (Sbark .+ λk) # this can work when Sbark is zero
+        sbark    = tmp .* fft2(sx, parhr) ./ λk # wiener filter
+        sbark   += white(parhr) .* √(tmp)    # fluctuation
+        sbarx[:] = ifft2r(sbark, parhr)
+        # --- update sx
+        tmp    = 1 ./ (1 ./ Nx .+ 1 / λx)
+        sx[:]  = tmp .* (dx ./ Nx  .+ sbarx / λx)  
+        sx[:]  = vec(sx + randn(size(sx)) .* sqrt(tmp))
+    end
+    sk = fft2(sx, parhr)
+    sk[parhr.grd.r .> coolingVec[end]] = 0.0
+    sx[:] = ifft2r(sk, parhr)
+    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
+end
+
+
+# ------------------ initalized and run the gibbs 
+tx_hr_curr      = zero(parhr.grd.x)
+ttx_hr_curr     = zero(parhr.grd.x)
+phidx1_hr, phidx2_hr, phidx1_lr, phidx2_lr = zero(parhr.grd.x), zero(parhr.grd.x), zero(parlr.grd.x), zeros(parlr.grd.x)
+phik_curr       = zero(fft2(ytx, parlr))
+tildetx_hr_curr = zero(parhr.grd.x) 
+acceptclk       = [1] # initialize acceptance record
+# cool = [linspace(10, 100, 30), fill(Inf, 20)]
+cool = [fill(100, 30), fill(Inf, 20)]
+@time phidx1_hr[:], phidx2_hr[:], phidx1_lr[:], phidx2_lr[:] = gibbspass_t!(
+  tx_hr_curr, ttx_hr_curr, phik_curr, ytx, maskvarx, 
+  parlr, parhr, cool
+);
+
+figure(figsize=(11,4))
+subplot(1,2,1)
+imshow(tx_hr_curr)
+colorbar()
+subplot(1,2,2)
+imshow(tx_hr)
+colorbar()
+
+
+
+
+
+
+
+
+
+
+
 #--------------------------
 #    test alternating the dual and t messenger.
 #--------------------------------
