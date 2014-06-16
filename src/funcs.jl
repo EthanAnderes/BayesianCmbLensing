@@ -111,6 +111,52 @@ function gibbspass_d!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, cooling
     phidx1_hr_curr, phidx2_hr_curr
 end
 
+function gibbspass_td!(sx,  sbarx, tx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])
+    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
+    dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
+    # ------ pre-allocate space
+    sbark = fft2(sbarx, parhr)
+    tk    = similar(sbark)
+    sk    = similar(sbark)
+    tpx   = similar(tx)
+    
+    d2k = parhr.grd.deltk * parhr.grd.deltk
+    d2x = parhr.grd.deltx * parhr.grd.deltx
+    delt0 = 1 / d2k
+
+    barNx    = 0.99 * minimum(Nx)
+    barNk  = barNx * d2x * delt0   # barNk  is the fourier variance, barNx is the pixelwise variance
+    tildeNx = Nx .- barNx
+
+    # ------ gibbs with cooling:) 
+    for uplim in coolingVec
+        # get cooling variances
+        barSk = delt0 .* parhr.CTell2d[min(8000, round(uplim))] 
+        barSx = barSk / (d2x * delt0 ) 
+        tildeSk = delt0 .* parhr.cTT .- barSk 
+        tildeSk[tildeSk .< 0.0]= 0.0 
+        # ---- update t
+        tpx[:] = 1 ./ (1 ./ tildeNx .+ 1 / barNx) 
+        tx[:]  = tpx .* (dx ./ tildeNx + sx ./ barNx)  # wiener filter
+        tx[:] += vec(randn(size(tx)) .* √(tpx))        # random fluctuation
+        # ---- update s
+        tmp1   = 1 / (1 / barNx + 1 / barSx) 
+        sx[:]    = tmp1 * (tx / barNx +  sbarx / barSx) # wiener filter
+        sx[:]   += vec(randn(size(tx)) * √(tmp1))             # random fluctuation
+          # ---- update sbar
+        sk[:]    = fft2(sx, parhr) 
+        tpx[:]   = 1 ./ (1 ./ tildeSk .+ 1 / barSk)   # wiener filter
+        # sbark[:] = tpx .* sk ./ tildeSk               # random fluctuation
+        sbark[:] = (tildeSk ./ (barSk .+ tildeSk)) .* sk # this helps with the zeros
+        sbark[:]+= vec(white(parhr) .* √(tpx))   
+        sbarx[:] = ifft2r(sbark, parhr) 
+    end # for
+    phidx1_hr_curr, phidx2_hr_curr
+end # function
+
+
+
+
 
 # --- experimental version which also smooths the noise:
 function gibbspass_t_smooth!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])

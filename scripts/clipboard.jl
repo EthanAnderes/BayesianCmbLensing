@@ -1,3 +1,79 @@
+const seed = 10000; srand(seed)
+const percentNyqForC = 0.5 # used for T l_max
+const numofparsForP  = 1500  # used for P l_max
+const hrfactor = 2.0
+const pixel_size_arcmin = 2.0
+const n = 2.0^9
+const beamFWHM = 0.0
+const nugget_at_each_pixel = (3.0)^2
+begin  #< ---- dependent run parameters
+  local deltx =  pixel_size_arcmin * pi / (180 * 60) #rads
+  local period = deltx * n # side length in rads
+  local deltk =  2 * pi / period
+  local nyq = (2 * pi) / (2 * deltx)
+  const maskupP  = sqrt(deltk^2 * numofparsForP / pi)  #l_max for for phi
+  const maskupC  = min(9000.0, percentNyqForC * (2 * pi) / (2 * pixel_size_arcmin * pi / (180*60))) #l_max for for phi
+end
+push!(LOAD_PATH, pwd()*"/src")
+using Interp, PyPlot
+require("cmb.jl")
+require("fft.jl")
+require("funcs.jl") # use reload after editing funcs.jl
+# --------- generate cmb spectrum class for high res and low res
+parlr = setpar(
+pixel_size_arcmin, n, beamFWHM, nugget_at_each_pixel, 
+maskupC, maskupP
+)
+parhr = setpar(
+pixel_size_arcmin./hrfactor, hrfactor*n, beamFWHM, nugget_at_each_pixel, 
+maskupC, maskupP
+)
+# -------- Simulate data: ytx, maskvarx, phix, tildetx
+ytk_nomask, tildetk, phix, tx_hr = simulate_start(parlr);
+phik = fft2(phix, parlr)
+# maskboolx =  falses(size(phix))
+tmpdo = maximum(parlr.grd.x)*0.3
+tmpup = maximum(parlr.grd.x)*0.4
+maskboolx = tmpdo .<= parlr.grd.x .<= tmpup
+maskvarx  = parlr.nugget_at_each_pixel .* ones(size(parlr.grd.x))
+maskvarx[maskboolx] = Inf
+ytx = ifft2r(ytk_nomask, parlr)
+ytx[maskboolx] = 0.0
+ytk = fft2(ytx, parlr)
+
+
+tx_hr_curr  = zero(parhr.grd.x)
+ttx  = zero(parhr.grd.x)
+tttx  = zero(parhr.grd.x)
+p1hr, p2hr  = zero(parhr.grd.x), zero(parhr.grd.x)
+phik_curr   = zero(fft2(ytx, parlr))
+tildetx_hr_curr = zero(parhr.grd.x) 
+
+cool =  linspace(100, 3000, 50)
+p1hr[:], p2hr[:] = gibbspass_td!(tx_hr_curr, ttx, tttx, phik_curr, ytx, 
+      maskvarx, parlr, parhr, cool
+)
+
+
+#p1hr[:], p2hr[:] = gibbspass_d!(tx_hr_curr, tttx, phik_curr, ytx, 
+#      maskvarx, parlr, parhr, linspace(100, 3000, 25)
+#)
+#p1hr[:], p2hr[:] = gibbspass_t!(tx_hr_curr, tttx, phik_curr, ytx, 
+#      maskvarx, parlr, parhr, fill(Inf, 25)
+#)
+
+
+imshow(tx_hr_curr)
+
+
+
+
+
+
+
+
+
+
 #--- test messenger algorithms
 const seed = 10000; srand(seed)
 const percentNyqForC = 0.5 # used for T l_max

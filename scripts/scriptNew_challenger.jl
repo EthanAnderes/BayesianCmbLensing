@@ -4,7 +4,7 @@
 const scriptname = "scriptNew_challenger"
 # const seed = Base.Random.RANDOM_SEED
 const seed = 10000; srand(seed)
-const savepath = joinpath("simulations", "$(scriptname)_2nd_$(seed[1])") #<--change the directory name here
+const savepath = joinpath("simulations", "$(scriptname)_3_$(seed[1])") #<--change the directory name here
 const percentNyqForC = 0.5 # used for T l_max
 const numofparsForP  = 1500  # used for P l_max
 const hrfactor = 2.0
@@ -23,7 +23,7 @@ begin  #< ---- dependent run parameters
 	println("maskupP = $maskupP") # muK per arcmin
 	println("maskupC = $maskupC") # muK per arcmin
 end
-const scale_grad =  5.0e-3
+const scale_grad =  2.0e-3
 const scale_hmc  =  1.0e-3
 
 
@@ -100,18 +100,19 @@ writecsv("$savepath/qex_lr.csv", qex_lr)
 
 # ------------------ initalized and run the gibbs 
 function gibbsloop(its, parhr, parlr, ytx, maskvarx)
-	tx_hr_curr      = zero(parhr.grd.x)
-	ttx_hr_curr     = zero(parhr.grd.x)
-	p1hr, p2hr      = zero(parhr.grd.x), zero(parhr.grd.x)
-	phik_curr       = zero(fft2(ytx, parlr))
+	acceptclk   = [1] #initialize acceptance record
+	tx_hr_curr  = zero(parhr.grd.x)
+	ttx         = zero(parhr.grd.x)
+	tttx        = zero(parhr.grd.x)
+	p1hr, p2hr  = zero(parhr.grd.x), zero(parhr.grd.x)
+	phik_curr   = zero(fft2(ytx, parlr))
 	tildetx_hr_curr = zero(parhr.grd.x) 
-	acceptclk       = [1] #initialize acceptance record
 
 	for bglp = 1:its 
 		# ----- update tildetx_hr_curr
-		cool =  [linspace(50, 1.1maskupC, 350), fill(Inf, 50)]
-		p1hr[:], p2hr[:] = gibbspass_t_smooth!(tx_hr_curr, ttx_hr_curr, phik_curr, ytx, 
-			maskvarx, parlr, parhr, cool
+		coolplan = (bglp == 1) ? linspace(4parhr.grd.deltk, 1.5maskupC, 5000) : linspace(4parhr.grd.deltk, 1.5maskupC, 500)
+		p1hr[:], p2hr[:] = gibbspass_t!(tx_hr_curr, ttx, phik_curr, ytx, 
+			maskvarx, parlr, parhr, coolplan
 		)
 
 		tildetx_hr_curr[:] = spline_interp2(
