@@ -1,8 +1,7 @@
 #=
 	include("scripts/makeFigsOffline.jl")
 =#
-const simdir     =  "scriptNew_challenger_1_10000" 
-# const simdir     =  "scriptNew_winner_10000" 
+const simdir     =  "scriptNew_winner_10000" 
 const specc 	  = true  # plot the spectral coverage
 const pcorr 	  = true  # plot the empirical cross correlation
 const onedslice  = true  # plot the 1-d slices of phi
@@ -13,14 +12,13 @@ const mvie 	     = false # <---- needs work
 const krang = 100:3:500   # range of samples we are looking at
 
 # --- copy these are from the runfile
-const scriptname = "scriptNew"
 const percentNyqForC = 0.5 # used for T l_max
 const numofparsForP  = 1500  # used for P l_max
 const hrfactor = 2.0
 const pixel_size_arcmin = 2.0
 const n = 2.0^9
 const beamFWHM = 0.0
-const nugget_at_each_pixel = (3.0)^2
+const nugget_at_each_pixel = (4.0)^2
 begin  #< ---- dependent run parameters
 	local deltx =  pixel_size_arcmin * pi / (180 * 60) #rads
 	local period = deltx * n # side length in rads
