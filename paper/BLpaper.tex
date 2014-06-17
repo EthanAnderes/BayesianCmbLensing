@@ -55,9 +55,10 @@
 \end{aug}
 
 \begin{abstract} 
-Ground based telescopes, such as the Atacama Cosmology Telescope (ACT)  and  the South Pole Telescope (SPT), along with the Plank satellite have mapped the  cosmic microwave background (CMB) at such an unprecedented resolution as too allow a detection of the subtle distortions  due to the gravitational influence of intervening  dark matter. This distortion is called  gravitational lensing and has become a  powerful probe of cosmology and the nature of dark matter.
+The Plank satellite along with
+ground based telescopes such as the Atacama Cosmology Telescope (ACT)  and  the South Pole Telescope (SPT) have mapped the  cosmic microwave background (CMB) at such an unprecedented resolution as too allow a detection of the subtle distortions  due to the gravitational influence of intervening  dark matter. This distortion is called  gravitational lensing and has become a  powerful probe of cosmology and the nature of dark matter.
 Estimating the gravitational lensing of the CMB  is important for two reasons. First, the weak lensing estimates can be used to construct a map of dark matter which would be invisible otherwise.
-Second,  weak lensing estimates can be used, in principle, to un-lensed the observed CMB and construct the original CMB radiation fluctuations. Both of these maps,  the un-lensed CMB radiation field and the dark matter field, are deep probes into the nature of cosmology and cosmic structure. Bayesian techniques seem a perfect fit for the statistical analysis of lensing and the CMB. One reason is that both the unlensed CMB and the lensing potential are physically predicted to realization of---very nearly---Gaussian random fields, where the Guassianity comes from physical quantum randomness in the early universe. However, challenges associated with a full Bayesian analysis has prevented previous attempts at  developing a working Bayesian prototype. 
+Second,  weak lensing estimates can, in principle, un-lense the observed CMB to construct the original CMB radiation fluctuations. Both of these maps,  the un-lensed CMB radiation field and the dark matter field, are deep probes into the nature of cosmology and cosmic structure. Bayesian techniques seem a perfect fit for the statistical analysis of lensing and the CMB. One reason is that both the unlensed CMB and the lensing potential are---very nearly---realizations of Gaussian random fields. The Gaussianity coming from physically predicted   quantum randomness in the early universe. However, challenges associated with a full Bayesian analysis has prevented previous attempts at  developing a working Bayesian prototype. 
 In this paper we solve many of these obstacles with a re-parameterization of the na\"ive lensing problem. This  allows us to obtain approximate draws from the  Bayesian lensing posterior of both the lensing potential and the un-lensed CMB which converges remarkably fast. 
 \end{abstract}
 
@@ -76,9 +77,9 @@ In this paper we solve many of these obstacles with a re-parameterization of the
 
  Over the past few years, data from ground based telescopes (ACT, SPT and Bicep2) and the Plank satellite and have resulted in an unprecedented detection of weak gravitational lensing of the cosmic microwave background (CMB) \textcolor{red}{[add citations]}.  This new data not only probes the nature of dark matter but also constrains cosmological models of gravity waves and dark energy \textcolor{red}{[add citations]}. The state-of-the-art estimator of CMB gravitational lensing, the quadratic estimator developed by Hu and Okomoto (2001, 2002), works in part through a delicate cancellation of terms in an infinite Taylor expansion of the lensing effect on the CMB. The effect of this cancellation is particularly sensitive to foreground contaminants and sky masking, which  if not fully accounted for,  limits  the statistical inferential power of this new data.  
 
- Possibly the most promising alternative to the quadratic estimator is Bayesian lensing. Indeed, Bayesian techniques applied to the lensed CMB observations have the potential for drastically changing the way lensing is estimated and used for inference.  Current frequentest estimators of the unknown lensing potential treat the unlensed CMB as a source of shape noise which is marginalized out. Conversely, a Bayesian lensing posterior treats the lensing potential {\em and} the unlensed CMB as joint unknowns, whereby obtaining scientific constrains jointly rather than marginally. Moreover, the  posterior distribution is easier to interpret and sequentially update with additional data or other experiments. From the geometry of weak lensing, most of the lensing power comes from matter at a redshift $z\approx 2$ \textcolor{red}{(check the facts here)}. At these distances the matter distribution is well approximated by linear theory which predicts the matter density fluctuations are nearly Gaussian. Moreover, the unlensed CMB is, at present, indistinguishable from an isotropic Gaussian random field.  From a statistical perspective, this is a perfect scenario for Bayesian methods, in that both the observations and the unknown lensing potential are {\em physically predicted} to be Gaussian random fields.  
+ Possibly the most promising alternative to the quadratic estimator is Bayesian lensing. Indeed, Bayesian techniques applied to the lensed CMB observations have the potential for drastically changing the way lensing is estimated and used for inference.  Current frequentest estimators of the unknown lensing potential treat the unlensed CMB as a source of shape noise which is marginalized out. Conversely, a Bayesian lensing posterior treats the lensing potential {\em and} the unlensed CMB as joint unknowns, whereby obtaining scientific constrains jointly rather than marginally. Moreover, the  posterior distribution is easier to interpret and sequentially update with additional data. From the geometry of weak lensing, most of the lensing power comes from matter at a redshift $z\approx 2$ \textcolor{red}{(check the facts here)}. At these distances the matter distribution is well approximated by linear theory which predicts the matter density fluctuations are nearly Gaussian. In addition, the unlensed CMB is, at present, indistinguishable from an isotropic Gaussian random field.  From a statistical perspective, this is a perfect scenario for Bayesian methods in that both the observations and the unknown lensing potential are {\em physically predicted} to be Gaussian random fields.  
  
-Physicists have known, for some time, that Bayesian methods could potentially provide next-generation lensing estimates. In the seminal review ``Weak gravitational lensing of the CMB'', authors Lewis and Challinor \cite{Lewis20061} discuss the possibility of obtaining posterior draws from the lensing potential and the unlensed CMB jointly. However, they acknowledge the main obstacle for naive Gibbs implementations:
+Physicists have known, for some time, that Bayesian methods could potentially provide next-generation lensing estimates. In their seminal review \cite{Lewis20061}, authors Lewis and Challinor  discuss the possibility of obtaining posterior draws from the lensing potential and the unlensed CMB jointly. However, they acknowledge the main obstacle for naive Gibbs implementations:
 \begin{quote}
 ``... given a particular lensing potential the delensed sky is given essentially by a delta function.
 This means that naive Gibbs iterations will not converge within a reasonable time. At the time of writing there are no known practical methods for sampling from the full posterior distribution."
@@ -236,11 +237,11 @@ Due to the fact that the expected size of the lensing displacement $\nabla\phi$ 
 \label{anti approx}
 -\nabla\phi &\approx -\nabla\phi^\text{inv} \approx -\nabla\phi^\text{inv}- \nabla^\perp \psi^\text{inv}.
 \end{align}
-Indeed, the typical displacement size $\nabla \phi(x)$ is less than 3 arcmin whereas the correlation length scale of $\phi$ is on the order of degrees. In Figure \ref{antilensing plots} we show a simulation of  $-\phi$ (upper left) with the corresponding inverse lensing potential $-\phi^\text{inv}$ (upper right). The difference $\phi - \phi^\text{inv}$ is also shown (bottom left) along with the stream function $-\psi^\text{inv}$. Clearly, the magnitude of the difference  $\phi^\text{inv}-\phi$ and $-\psi^\text{inv}$ sub-dominant to estimation error expected in current lensing experimental conditions.
+Indeed, the typical displacement size $\nabla \phi(x)$ is less than 3 arcmin whereas the correlation length scale of $\phi$ is on the order of degrees. In Figure \ref{antilensing plots} we show a simulation of  $-\phi$ (upper left) with the corresponding inverse lensing potential $-\phi^\text{inv}$ (upper right). The difference $\phi - \phi^\text{inv}$ is also shown (bottom left) along with the stream function $-\psi^\text{inv}$. Clearly, the magnitude of the difference  $\phi^\text{inv}-\phi$ and $-\psi^\text{inv}$ is sub-dominant to estimation error expected in current lensing experimental conditions.
 
 Regardless of the fact that $-\nabla\phi$ is a good approxiamtion to inverse lensing, the Hamiltonian sampler for $P(\phi | \widetilde T,  \text{\rm data})$, described below in Section \ref{Section: hamiltonian sampler section},  can be easily adjusted to sample from the inverse lensing stream and potential functions jointly $P(\phi^\text{inv},\psi^\text{inv} | \widetilde T,  \text{\rm data})$.   However, we have excluded it from our analysis since the magnitude of the lensing potential is at least an order of magnitude smaller than estimation error. 
 
-\begin{figure}[H]
+\begin{figure}[h]
 \label{antilensing plots}
 \includegraphics[height=2.4in]{graphics/anti_plt1.pdf}\includegraphics[height=2.4in]{graphics/anti_plt2.pdf}\\%
 \includegraphics[height=2.4in]{graphics/anti_plt3.pdf}\includegraphics[height=2.4in]{graphics/anti_plt4.pdf}
@@ -265,10 +266,13 @@ Regardless of the fact that $-\nabla\phi$ is a good approxiamtion to inverse len
 \label{Section: hamiltonian sampler section}
 
 
-Throughout this paper the Fourier transform of any function $f(x)$ is denoted $f_l$ or $f_k$ so that
+Throughout the remainder of this paper the Fourier transform of any function $f(x)$ will be denoted by $f_l$ or $f_k$ so that
 $f_l  =  \int_{\Bbb R^2} e^{-i x\cdot l}  f(x)\frac{dx}{2\pi}$ and
 $f(x) =  \int_{\Bbb R^2} e^{i x\cdot l}  f_l \frac{dl}{2\pi}$ 
 where $l\in \Bbb R^2$ is a two dimensional frequency vector and $x\in \Bbb R^2$  is a two dimensional spatial coordinate.
+
+
+The follow claim shows that the gradient of the log density of $P(\phi|\widetilde T, \text{data})$, with respect to the Fourier basis of $\phi$, can be computed quickly with Fourier and inverse Fourier transforms. This claim makes the Hamiltonian MCMC algorithm possible.
 
 \begin{claim}
 \label{grad claim}
@@ -281,9 +285,10 @@ where $l\in \Bbb R^2$ is a two dimensional frequency vector and $x\in \Bbb R^2$ 
  \end{align}
 \end{claim}
 
-The main advantage of this claim is that the gradient can be computed by iterating Fourier transofrms.
+
 
 Hamiltonian sampler algorithm...
+
 
 {\rm Remark:}
 We also remark that the gradient is also an un-normalized quadratic destimate when the noise is zero and ...

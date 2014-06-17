@@ -48,8 +48,7 @@ end
 #-----------------------------
 #  messenger algorithms
 #------------------------------------#----- define gibbs
-#=
-function gibbspass_t!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])
+function gibbspass_ttest!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
     dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
     # ------ pre-allocate space
@@ -84,7 +83,6 @@ function gibbspass_t!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec
     end
     phidx1_hr_curr, phidx2_hr_curr
 end
-=#
 
 
 function gibbspass_t!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])
