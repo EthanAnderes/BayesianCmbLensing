@@ -16,7 +16,7 @@ begin  #< ---- dependent run parameters
 	local period = deltx * n # side length in rads
 	local deltk =  2 * pi / period
 	local nyq = (2 * pi) / (2 * deltx)
-	const maskupP  = sqrt(deltk^2 * numofparsForP / pi)  #l_max for for phi
+	const maskupP  = √(deltk^2 * numofparsForP / pi)  #l_max for for phi
 	const maskupC  = min(9000.0, percentNyqForC * (2 * pi) / (2 * pixel_size_arcmin * pi / (180*60))) #l_max for for phi
 	println("muK_per_arcmin = $(sqrt(nugget_at_each_pixel * (pixel_size_arcmin^2)))") # muK per arcmin
 	println("maskupP = $maskupP") # muK per arcmin
@@ -88,7 +88,6 @@ function gibbsloop(its, parhr, parlr, ytx, maskvarx)
 	acceptclk   = [1] #initialize acceptance record
 	tx_hr_curr  = zero(parhr.grd.x)
 	ttx         = zero(parhr.grd.x)
-	tttx        = zero(parhr.grd.x)
 	p1hr, p2hr  = zero(parhr.grd.x), zero(parhr.grd.x)
 	phik_curr   = zero(fft2(ytx, parlr))
 	tildetx_hr_curr = zero(parhr.grd.x) 
