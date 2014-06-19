@@ -47,43 +47,48 @@ end
 
 #-----------------------------
 #  messenger algorithms
-#------------------------------------#----- define gibbs
-function gibbspass_ttest!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])
+#------------------------------------
+rwhite(ln, par::SpectrumGrids) = (par.grd.deltk/par.grd.deltx)*rft(randn(ln, ln), par)
+function gibbspass_t!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
     dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
-    # ------ pre-allocate space
-    tk = fft2(tx, parhr)
-    sk = fft2(sx, parhr)
-    tpx = Array(Float64, size(tx))
-    chng  = Array(Bool, size(tx))
-    Tx    = 0.99 * minimum(Nx)
-    barNx = Nx .- Tx
-    d2k = parhr.grd.deltk * parhr.grd.deltk
-    d2x = parhr.grd.deltx * parhr.grd.deltx
-    delt0 = 1 / d2k
-    Tk  = Tx * d2x # Tk is the spectrum, Tx is the pixelwise variance
-    # ------ gibbs with cooling:) 
-    for uplim in coolingVec
-        λ =  (uplim > 8000.0) ? 1.0 : max(1.0, parhr.CTell2d[round(uplim)]/Tk)
-        chng = parhr.grd.r .<= uplim
-        # ---- update s
-        tpx[:]   = 1 ./ (1 / (λ * Tk * delt0) .+ 1 ./ (parhr.cTT * delt0)) 
-        sk[chng] = tpx[chng] .* (tk[chng] / (λ * Tk * delt0))  # wiener filter
-        sk[chng]+= white(parhr)[chng] .* √(tpx)[chng]      # random fluctuation
-        sx[:]    = ifft2r(sk, parhr) 
-        # ---- update t
-        # whatever updates are done, they are only done on the low ell multipoles
-        tpx[:]   = 1 ./ (1 ./ barNx .+ 1 / (λ * Tx)) 
-        # can the following pointwise averaging be done in a spatially smooth way?
-        tx_tmp   = tpx .* (dx ./ barNx + sx ./ (λ * Tx)) # wiener filter...weighted ave of dx and sx.
-        tx_tmp  += randn(size(tx)) .* √(tpx)             # random fluctuation
-        tk_tmp   = fft2(tx_tmp, parhr)
-        tk[chng] = tk_tmp[chng]
-        tx[:]    = ifft2r(tk, parhr)
-    end
+    tk    = rft(tx, parhr)
+    sk    = similar(tk)
+    gpass!(sx, sk, tx, tk, dx, Nx, parhr, coolingVec)
     phidx1_hr_curr, phidx2_hr_curr
 end
+function gpass!(sx, sk, tx, tk, dx, Nx, par, cool)
+  ln    = size(tx, 1)
+  d2k   = par.grd.deltk * par.grd.deltk
+  d2x   = par.grd.deltx * par.grd.deltx
+  delt0 = 1 / d2k
+  barNx = 0.99 * minimum(Nx)
+  barNk = barNx * d2x * delt0 # var in fourier
+  tldNx = Nx .- barNx 
+  Sk    = scale(par.cTT[1:size(sk, 1),1:size(sk, 2)], delt0)
+  for uplim in cool
+    λbarNk = (uplim > 8000.0) ? barNk : max(barNk, delt0 * par.CTell2d[int(uplim)])  # var in fourier
+    λbarNx = λbarNk / (d2x * delt0)
+    # --- update s
+    tmpx   = 1 ./ (1 / λbarNk .+ 1 ./ Sk) 
+    sk[:]  = tmpx .* scale(tk, 1 / λbarNk) 
+    sk[:] += vec(rwhite(ln, par) .* √(tmpx))  
+    sx[:]  = irft(sk, par) 
+    # --- update t
+    tmpx  = 1 ./ (1 ./ tldNx .+ 1 / λbarNx) 
+    tx[:]   = tmpx .* (dx ./ tldNx + sx ./ λbarNx) 
+    tx[:]  += vec(randn(ln, ln) .* √(tmpx))        
+    tk[:]   = rft(tx, par)
+  end
+  nothing
+end
 
+
+
+
+
+
+#=
 
 function gibbspass_t!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
@@ -145,7 +150,7 @@ function gibbspass_d!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, cooling
     sx[:] = ifft2r(sk, parhr)
     phidx1_hr_curr, phidx2_hr_curr
 end
-
+=#
 
 ##--------------------------------
 # gradient of phi given  tildetx

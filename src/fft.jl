@@ -1,73 +1,43 @@
 
-
-
-#-------------------
-# fft2
-#----------------------------
-function  fft2(xx, deltx::Real)
-	#2-d Fourier transform of Xx to Xk
-	#returns Xk=FFT2(Xx, Deltx)
+function  fft2(fx, deltx::Real)
 	d = 2.0
-	c = (deltx/sqrt(2.0*pi))^d 
-  	scale(fft( xx ), c)
+	c = complex( (deltx / √(2.0 * π))^d )
+   fk = fft(fx)
+   scale!(fk, c)
+   fk
 end
-function  fft2(xx, deltx::Real, plan)
-	d=2.0
-	c= (deltx/sqrt(2.0*pi))^d 
-  	scale(plan( xx ), c)
+function  ifft2(fk, deltk::Real)
+	d = 2.0
+	c = (deltk / √(2.0 * π))^d
+	fx = bfft(fk)
+	scale!(fx, c)
+	fx
 end
-function fft2(xx ,par::SpectrumGrids)
-	if size(xx)==size(par.grd.k1)
-		return fft2(xx, par.grd.deltx)
-	else
-		return fft2(xx, par.grd.deltx)
-	end
+function  ifft2r(fk, deltk::Real)
+	d = 2.0
+	c = (deltk / √(2.0 * π))^d
+	fx = real(bfft(fk))
+	scale!(fx, c)
+	fx
 end
-
-#-------------------
-# ifft2r
-#----------------------------
-#TODO extend this so that it is the inverse of fft2r...
-#the main issue is that rfft returns a vector which has the first dimension cut in half...
-function  ifft2r(xk, deltk::Real)
-	#inverse 2-d Fourier transform when Xx is real
-	# Xx = IFFT2r(Xk, Deltk)
-	d=2.0
-	n=float64(size(xk,1))
-	c= (n*deltk/sqrt(2.0*pi))^d 
-	scale(real(ifft( xk )), c)
-end
-function  ifft2r(xk, deltk::Real, plan)
-	#inverse 2-d Fourier transform when Xx is real
-	# Xx = IFFT2r(Xk, Deltk)
-	d=2.0
-	n=float64(size(xk,1))
-	c= (n*deltk/sqrt(2.0*pi))^d 
-	scale(real(plan( xk )), c)
-end
-function ifft2r(xk, par::SpectrumGrids)
-	if size(xk)==size(par.grd.k1)
-		return ifft2r(xk, par.grd.deltk)
-	else
-		return ifft2r(xk, par.grd.deltk)
-	end
-end
+fft2(fx ,par::SpectrumGrids) = fft2(fx, par.grd.deltx)
+ifft2(fk, par::SpectrumGrids) = ifft2(fk, par.grd.deltk)
+ifft2r(fk, par::SpectrumGrids) = ifft2r(fk, par.grd.deltk)
 
 
 
-#-------------------
-# ifft2r
-#----------------------------
-function  ifft2(xk, deltk::Real)
-	#inverse 2-d Fourier transform when Xx could be imag
-	# Xx = IFFT2r(Xk, Deltk)
-	d=2.0
-	n=float64(size(xk,1))
-	c=(n*deltk/sqrt(2.0*pi))^d
-	scale( ifft( xk ), c)
+
+function  rft(fx, par::SpectrumGrids)
+  c = complex( (par.grd.deltx / √(2.0 * π))^2.0 )
+  fk = rfft(fx)
+  scale!(fk, c)
+  fk
 end
-
- 
-
-
+function  irft(fk, par::SpectrumGrids)
+  c = (par.grd.deltk / √(2.0 * π))^2.0 
+  nint = int(par.grd.n)
+  fx = brfft(fk, nint)
+  scale!(fx, c)
+  fx
+end
 

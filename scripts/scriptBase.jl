@@ -21,6 +21,7 @@ begin  #< ---- dependent run parameters
 	println("muK_per_arcmin = $(sqrt(nugget_at_each_pixel * (pixel_size_arcmin^2)))") # muK per arcmin
 	println("maskupP = $maskupP") # muK per arcmin
 	println("maskupC = $maskupC") # muK per arcmin
+	println("$(seed[1])") # muK per arcmin
 end
 const scale_grad =  2.0e-3
 const scale_hmc  =  0.8e-3

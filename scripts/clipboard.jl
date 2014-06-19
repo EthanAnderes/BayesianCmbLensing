@@ -1,4 +1,3 @@
-const seed = 10000; srand(seed)
 const percentNyqForC = 0.5 # used for T l_max
 const numofparsForP  = 1500  # used for P l_max
 const hrfactor = 2.0
@@ -15,18 +14,18 @@ begin  #< ---- dependent run parameters
   const maskupC  = min(9000.0, percentNyqForC * (2 * pi) / (2 * pixel_size_arcmin * pi / (180*60))) #l_max for for phi
 end
 push!(LOAD_PATH, pwd()*"/src")
-using Interp, PyPlot
+using Interp
 require("cmb.jl")
 require("fft.jl")
 require("funcs.jl") # use reload after editing funcs.jl
 # --------- generate cmb spectrum class for high res and low res
 parlr = setpar(
-pixel_size_arcmin, n, beamFWHM, nugget_at_each_pixel, 
-maskupC, maskupP
+  pixel_size_arcmin, n, beamFWHM, nugget_at_each_pixel, 
+  maskupC, maskupP
 )
 parhr = setpar(
-pixel_size_arcmin./hrfactor, hrfactor*n, beamFWHM, nugget_at_each_pixel, 
-maskupC, maskupP
+  pixel_size_arcmin./hrfactor, hrfactor*n, beamFWHM, nugget_at_each_pixel, 
+  maskupC, maskupP
 )
 # -------- Simulate data: ytx, maskvarx, phix, tildetx
 ytk_nomask, tildetk, phix, tx_hr = simulate_start(parlr);
@@ -43,24 +42,126 @@ ytk = fft2(ytx, parlr)
 
 
 tx_hr_curr  = zero(parhr.grd.x)
-ttx  = zero(parhr.grd.x)
-tttx  = zero(parhr.grd.x)
+ttx         = zero(parhr.grd.x)
 p1hr, p2hr  = zero(parhr.grd.x), zero(parhr.grd.x)
 phik_curr   = zero(fft2(ytx, parlr))
 tildetx_hr_curr = zero(parhr.grd.x) 
 
-cool =  linspace(100, 3000, 50)
-p1hr[:], p2hr[:] = gibbspass_td!(tx_hr_curr, ttx, tttx, phik_curr, ytx, 
+
+
+function  rft(fx, par::SpectrumGrids)
+  c = complex( (par.grd.deltx / √(2.0 * π))^2.0 )
+  fk = rfft(fx)
+  scale!(fk, c)
+  fk
+end
+function  irft(fk, par::SpectrumGrids)
+  c = (par.grd.deltk / √(2.0 * π))^2.0 
+  nint = int(par.grd.n)
+  fx = brfft(fk, nint)
+  scale!(fx, c)
+  fx
+end
+rwhite(ln, par::SpectrumGrids) = (par.grd.deltk/par.grd.deltx)*rft(randn(ln, ln), par)
+function gibbspass_t!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])
+    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
+    dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
+    tk    = rft(tx, parhr)
+    sk    = similar(tk)
+    gpass!(sx, sk, tx, tk, dx, Nx, parhr, coolingVec)
+    phidx1_hr_curr, phidx2_hr_curr
+end
+function gpass!(sx, sk, tx, tk, dx, Nx, par, cool)
+  ln    = size(tx, 1)
+  d2k   = par.grd.deltk * par.grd.deltk
+  d2x   = par.grd.deltx * par.grd.deltx
+  delt0 = 1 / d2k
+  barNx = 0.99 * minimum(Nx)
+  barNk = barNx * d2x * delt0 # var in fourier
+  tldNx = Nx .- barNx 
+  Sk    = scale(par.cTT[1:size(sk, 1),1:size(sk, 2)], delt0)
+  for uplim in cool
+    λbarNk = (uplim > 8000.0) ? barNk : max(barNk, delt0 * par.CTell2d[int(uplim)])  # var in fourier
+    λbarNx = λbarNk / (d2x * delt0)
+    # --- update s
+    tmpx   = 1 ./ (1 / λbarNk .+ 1 ./ Sk) 
+    sk[:]  = tmpx .* scale(tk, 1 / λbarNk) 
+    sk[:] += vec(rwhite(ln, par) .* √(tmpx))  
+    sx[:]  = irft(sk, par) 
+    # --- update t
+    tmpx  = 1 ./ (1 ./ tldNx .+ 1 / λbarNx) 
+    tx[:]   = tmpx .* (dx ./ tldNx + sx ./ λbarNx) 
+    tx[:]  += vec(randn(ln, ln) .* √(tmpx))        
+    tk[:]   = rft(tx, par)
+  end
+  nothing
+end
+
+
+
+
+cool =  linspace(100, 3000, 5)
+@time p1hr[:], p2hr[:] = gibbspass_t!(tx_hr_curr, ttx, phik_curr, ytx, 
       maskvarx, parlr, parhr, cool
-)
+      );
+@time p1hr[:], p2hr[:] = gibbspass_t_test!(tx_hr_curr, ttx, phik_curr, ytx, 
+      maskvarx, parlr, parhr, cool
+      ); 
 
 
-#p1hr[:], p2hr[:] = gibbspass_d!(tx_hr_curr, tttx, phik_curr, ytx, 
-#      maskvarx, parlr, parhr, linspace(100, 3000, 25)
-#)
-#p1hr[:], p2hr[:] = gibbspass_t!(tx_hr_curr, tttx, phik_curr, ytx, 
-#      maskvarx, parlr, parhr, fill(Inf, 25)
-#)
+
+srand(1)
+tx_hr_curr1  = zero(parhr.grd.x)
+ttx1         = zero(parhr.grd.x)
+ p1hr[:], p2hr[:] = gibbspass_t_test!(tx_hr_curr1, ttx1, phik_curr, ytx, 
+      maskvarx, parlr, parhr, cool
+      );
+
+
+srand(1)
+tx_hr_curr2  = zero(parhr.grd.x)
+ttx2         = zero(parhr.grd.x)
+ p1hr[:], p2hr[:] = gibbspass_t!(tx_hr_curr2, ttx2, phik_curr, ytx, 
+      maskvarx, parlr, parhr, cool
+      );
+
+
+plt.subplot(2,2,1)
+plt.imshow(ytx);
+plt.colorbar()
+
+plt.subplot(2,2,2)
+plt.imshow(tx_hr_curr2);
+plt.colorbar()
+
+plt.subplot(2,2,3)
+plt.imshow(tx_hr_curr1);
+plt.colorbar()
+ plt.show()
+
+
+
+
+
+
+
+
+
+# profile view this...
+sx = tx_hr_curr
+tx = ttx
+phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
+dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
+tk    = rft(tx, parhr)
+sk    = similar(tk)
+
+Profile.clear()  # in case we have any previous profiling data
+@profile  gpass!(sx, sk, tx, tk, dx, Nx, parhr, cool)
+using ProfileView
+ProfileView.view()
+
+
+
 
 
 imshow(tx_hr_curr)
