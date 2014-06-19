@@ -6,7 +6,7 @@
 # const simdir     =  "scriptBase_2593658006" 
 # const simdir     =  "scriptBase_3013427591" 
 # const simdir     =  "scriptBase_3635739710" 
-const simdir     =  "scriptBase_3510788596" 
+const simdir     =  "scriptNoMask_496819124" 
 const specc 	  = true  # plot the spectral coverage
 const pcorr 	  = true  # plot the empirical cross correlation
 const onedslice  = true  # plot the 1-d slices of phi

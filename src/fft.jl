@@ -20,7 +20,7 @@ function  ifft2r(fk, deltk::Real)
 	scale!(fx, c)
 	fx
 end
-fft2(fx ,par::SpectrumGrids) = fft2(fx, par.grd.deltx)
+fft2(fx, par::SpectrumGrids) = fft2(fx, par.grd.deltx)
 ifft2(fk, par::SpectrumGrids) = ifft2(fk, par.grd.deltk)
 ifft2r(fk, par::SpectrumGrids) = ifft2r(fk, par.grd.deltk)
 

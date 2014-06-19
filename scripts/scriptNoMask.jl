@@ -1,13 +1,8 @@
 #= 
-	julia scripts/scriptTest.jl
+	julia scripts/scriptNoMask.jl
 =#
-# I'm testing out a gibbst which only operates at low ell for the cooling step
-const scriptname = "scriptTest"
-# const seed = vec(readcsv("simulations/scriptBase_1632069791/seed.csv", Uint32))
-# const seed = vec(readcsv("simulations/scriptBase_3013427591/seed.csv", Uint32))
-# const seed = vec(readcsv("simulations/scriptBase_3635739710/seed.csv", Uint32))
-const seed = vec(readcsv("simulations/scriptBase_2593658006/seed.csv", Uint32))
-srand(seed)
+const scriptname = "scriptNoMask"
+const seed = Base.Random.RANDOM_SEED
 const savepath = joinpath("simulations", "$(scriptname)_$(seed[1])") #<--change the directory name here
 const percentNyqForC = 0.5 # used for T l_max
 const numofparsForP  = 1500  # used for P l_max
@@ -26,6 +21,7 @@ begin  #< ---- dependent run parameters
 	println("muK_per_arcmin = $(sqrt(nugget_at_each_pixel * (pixel_size_arcmin^2)))") # muK per arcmin
 	println("maskupP = $maskupP") # muK per arcmin
 	println("maskupC = $maskupC") # muK per arcmin
+	println("$(seed[1])") # muK per arcmin
 end
 const scale_grad =  2.0e-3
 const scale_hmc  =  0.8e-3
@@ -56,13 +52,9 @@ parhr = setpar(
 # -------- Simulate data: ytx, maskvarx, phix, tildetx
 ytk_nomask, tildetk, phix, tx_hr = simulate_start(parlr);
 phik = fft2(phix, parlr)
-tmpdo = maximum(parlr.grd.x)*0.3
-tmpup = maximum(parlr.grd.x)*0.4
-maskboolx = tmpdo .<= parlr.grd.x .<= tmpup
+maskboolx = falses(size(parlr.grd.x))
 maskvarx  = parlr.nugget_at_each_pixel .* ones(size(parlr.grd.x))
-maskvarx[maskboolx] = Inf
 ytx = ifft2r(ytk_nomask, parlr)
-ytx[maskboolx] = 0.0
 ytk = fft2(ytx, parlr)
 
 
@@ -98,14 +90,15 @@ function gibbsloop(its, parhr, parlr, ytx, maskvarx)
 	tildetx_hr_curr = zero(parhr.grd.x) 
 
 	for bglp = 1:its 
+		tic()
 		# ----- update tildetx_hr_curr
 		if bglp % 100 == 1
-			p1hr[:], p2hr[:] = gibbspass_ttest!(tx_hr_curr, ttx, phik_curr, ytx, 
-				maskvarx, parlr, parhr, linspace(4parhr.grd.deltk, 1.2maskupC, 1000)
+			p1hr[:], p2hr[:] = gibbspass_t!(tx_hr_curr, ttx, phik_curr, ytx, 
+				maskvarx, parlr, parhr, linspace(4parhr.grd.deltk, 1.2maskupC, 200)
 			)
 		end
 		p1hr[:], p2hr[:] = gibbspass_t!(tx_hr_curr, ttx, phik_curr, ytx, 
-			maskvarx, parlr, parhr, fill(Inf, 400)
+			maskvarx, parlr, parhr, fill(Inf, 50)
 		)
 
 		tildetx_hr_curr[:] = spline_interp2(
@@ -126,6 +119,7 @@ function gibbsloop(its, parhr, parlr, ytx, maskvarx)
 			writecsv("$savepath/phix_curr_$bglp.csv", ifft2r(phik_curr, parlr))
 			writecsv("$savepath/acceptclk.csv", acceptclk)	
 		end
+		toc()
 	end # for
 end # function
 gibbsloop(2500, parhr, parlr, ytx, maskvarx)
