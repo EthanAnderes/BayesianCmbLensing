@@ -4,7 +4,7 @@
 \usepackage{bm}
 \usepackage{graphics,epsfig,rotate,lscape,graphicx,amsmath,amsthm,amssymb,float,amsfonts,amsbsy,hyperref,delarray,sectsty,amsfonts,amscd,pifont}
 \usepackage{color,multirow}
-\usepackage{algorithmic}
+\usepackage{algorithmicx}
 \usepackage{algorithm}
 \usepackage{enumerate}
 \usepackage{microtype}
@@ -30,6 +30,7 @@
 \newcommand{\bk}{\boldsymbol k}
 \newcommand{\re}{\text{\,\rm re}}
 \newcommand{\im}{\text{\,\rm im}}
+\newcommand{\bs}{\boldsymbol}
 
 
 
@@ -239,14 +240,16 @@ Due to the fact that the expected size of the lensing displacement $\nabla\phi$ 
 \end{align}
 Indeed, the typical displacement size $\nabla \phi(x)$ is less than 3 arcmin whereas the correlation length scale of $\phi$ is on the order of degrees. In Figure \ref{antilensing plots} we show a simulation of  $-\phi$ (upper left) with the corresponding inverse lensing potential $-\phi^\text{inv}$ (upper right). The difference $\phi - \phi^\text{inv}$ is also shown (bottom left) along with the stream function $-\psi^\text{inv}$. Clearly, the magnitude of the difference  $\phi^\text{inv}-\phi$ and $-\psi^\text{inv}$ is sub-dominant to estimation error expected in current lensing experimental conditions.
 
-Regardless of the fact that $-\nabla\phi$ is a good approxiamtion to inverse lensing, the Hamiltonian sampler for $P(\phi | \widetilde T,  \text{\rm data})$, described below in Section \ref{Section: hamiltonian sampler section},  can be easily adjusted to sample from the inverse lensing stream and potential functions jointly $P(\phi^\text{inv},\psi^\text{inv} | \widetilde T,  \text{\rm data})$.   However, we have excluded it from our analysis since the magnitude of the lensing potential is at least an order of magnitude smaller than estimation error. 
 
-\begin{figure}[h]
+\begin{figure}[t]
 \label{antilensing plots}
 \includegraphics[height=2.4in]{graphics/anti_plt1.pdf}\includegraphics[height=2.4in]{graphics/anti_plt2.pdf}\\%
 \includegraphics[height=2.4in]{graphics/anti_plt3.pdf}\includegraphics[height=2.4in]{graphics/anti_plt4.pdf}
 \caption{The difference between anti-lensing and inverse lensing. {\em Upper left:} anti-lensing potential $-\phi$. {\em Upper right:} The inverse lensing potential $-\phi^\text{inv}$. {\em Bottom left:} The difference $\phi^\text{inv}-\phi$. {\em Bottom right:} The inverse lensing stream function $-\psi^\text{inv}$.}
 \end{figure}
+
+
+Regardless of the fact that $-\nabla\phi$ is a good approxiamtion to inverse lensing, the Hamiltonian sampler for $P(\phi | \widetilde T,  \text{\rm data})$, described below in Section \ref{Section: hamiltonian sampler section},  can be easily adjusted to sample from the inverse lensing stream and potential functions jointly $P(\phi^\text{inv},\psi^\text{inv} | \widetilde T,  \text{\rm data})$.   However, we have excluded it from our analysis since the magnitude of the lensing potential is at least an order of magnitude smaller than estimation error. 
 
 
 
@@ -262,7 +265,7 @@ Regardless of the fact that $-\nabla\phi$ is a good approxiamtion to inverse len
 % Section
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Hamiltonian sampler for $P(\phi | \widetilde T,  \text{\rm data})$}
+\section{Hamiltonian Monte Carlo sampler for $P(\phi | \widetilde T,  \text{\rm data})$}
 \label{Section: hamiltonian sampler section}
 
 
@@ -272,7 +275,7 @@ $f(x) =  \int_{\Bbb R^2} e^{i x\cdot l}  f_l \frac{dl}{2\pi}$
 where $l\in \Bbb R^2$ is a two dimensional frequency vector and $x\in \Bbb R^2$  is a two dimensional spatial coordinate.
 
 
-The follow claim shows that the gradient of the log density of $P(\phi|\widetilde T, \text{data})$, with respect to the Fourier basis of $\phi$, can be computed quickly with Fourier and inverse Fourier transforms. This claim makes the Hamiltonian MCMC algorithm possible.
+The follow claim shows that the gradient of the log density of $P(\phi|\widetilde T, \text{data})$, with respect to the Fourier basis of $\phi$, can be computed quickly with Fourier and inverse Fourier transforms. This claim makes the Hamiltonian Monte Carlo (HMC) algorithm possible.
 
 \begin{claim}
 \label{grad claim}
@@ -285,23 +288,48 @@ The follow claim shows that the gradient of the log density of $P(\phi|\widetild
  \end{align}
 \end{claim}
 
-
-
-Hamiltonian sampler algorithm...
-
-
 {\rm Remark:}
 We also remark that the gradient is also an un-normalized quadratic destimate when the noise is zero and ...
 
 
 
+The Hamiltonian Monte Carlo (HMC) algorithm is an iterative sampling algorithm designed to mitigate the low-acceptance rate of the Metropolis-Hastings algorithm when working in high dimension. A nice review of HMC can be found in \textcolor{red}{[cite Neal's paper]}. For applications of HMC in cosmology see \textcolor{red}{[add citations]}. We give a brief review here. 
 
+Let $\bs \phi$ denote the concatenation of the real and imaginary parts of $\phi_l$ as $l$ ranges through discrete frequencies $l$ ranging up to a pre-specified $|l|_{max}$ (but excluding  half of the Fourier frequencies due to the Hermitian symmetries associated with the Fourier transform of a real field). Note that $\bs \phi$ is a vector of real numbers. 
+Let $P(\bs \phi|\widetilde T, \text{data})$ denote the density of $\bs \phi$ given $\widetilde T$ and the data. 
+Let $\bs p$ denote a `momenta' vector and $\bs m$ denote a the `mass' vector, which are both the same length as $\bs \phi$. The Hamiltonian is a function of $\bs \phi$ and $\bs p$ defined as follows
+\[ H(\bs \phi, \bs p):= -\log P(\bs \phi|\widetilde T, \text{data})+\sum_k \frac{\bs p_k^2}{2\bs m_k^2}. \]
+This hamiltonian generates a time-dependent evolution of $\bs \phi$ and $\bs p$. 
+ This time evlotion  dynamics evlove is given by 
+\begin{align*}
+\frac{d\bs \phi^t}{dt} &= \phantom{-}\nabla_{\bs p} H(\bs \phi^t, \bs p^t) \\
+\frac{d\bs p^t}{dt}    &= -\nabla_{\bs \phi} H(\bs \phi^t, \bs p^t).
+\end{align*} 
+The HMC discreteizes  this time-dynamic equation (with a leapfrog method) to produce a Markov chain $(\bs \phi_1, \bs p_1), (\bs \phi_2, \bs p_2), \ldots$ where the $i+1$ iteration is given by the following algorithm
 
+\begin{algorithm}[H]
+\small
+\caption{ $i^\text{th}$ step of the Hamiltonian Markov Chain}
+\label{ith step of HMC}
+\begin{algorithmic}[1]
+\State Set $\bs \phi^0:= \bs \phi_{i-1}$ and simulate $\bs p^0 \sim \mathcal N(0,\Lambda_m^2 )$ where $\Lambda_m$ is diagonal with  $diag(\Lambda_m)=\bs m$.
+\State  Recursively compute $\bs \phi^{k\epsilon}$ and $\bs p^{k\epsilon}$ for $k=0,1,\ldots, n$ using the following equations:
+\begin{align*}
+\bs \phi^{t+\epsilon} &:= \bs \phi^{t} + \epsilon \Lambda_m^{-1} \left[ \bs p^t - \frac{\epsilon}{2} \nabla_{\bs \phi} H(\bs \phi^t, \bs p^t) \right]. \\
+\bs p^{t+\epsilon} &:= \bs p^{t} - \frac{\epsilon}{2}\Bigl[ \nabla_{\bs \phi} H(\bs \phi^t, \bs p^t) + \nabla_{\bs \phi} H(\bs \phi^{t+\epsilon}, \bs p^t)\Bigr]
+\end{align*}
+% \begin{align*}
+% \bs p^{t+\epsilon/2} &:= \bs p^{t} + \frac{\epsilon}{2} \nabla_{\bs \phi} H(\bs \phi^t, \bs p^t) \\
+% \bs \phi^{t+\epsilon} &:= \bs \phi^{t} + \frac{\epsilon}{2} \nabla_{\bs \phi} H(\bs \phi^t, \bs p^t) \\
+% \bs p^{(k+2)\epsilon} &:= \bs p^{(k+2)\epsilon/2} - \frac{\epsilon}{2}\Bigl[ \nabla_{\bs \phi} H(\bs \phi^t, \bs p^t) + \nabla_{\bs \phi} H(\bs \phi^{t+\epsilon}, \bs p^t)\Bigr]
+% \end{align*}
+\State Simulate $u\sim \mathcal U(0,1)$, and define $p:= \min\left(1,{e^{- H(\bs \phi^{n\epsilon}, \bs p^{n\epsilon})}}/{e^{-H(\bs \phi^0, \bs p^0)}}\right)$.
+\State  If $u< p$ then set $\bs \phi_{i}:= \bs \phi^{n\epsilon}$, otherwise set  $\bs \phi_{i}:= \bs \phi_{i-1}$.
+\end{algorithmic}
+\end{algorithm}
 
-
-
-
-
+The HMC algorithm is notoriously sensitive to tuning parameters. 
+The prevailing wisdom is that one should set $\bs m$ to match the posterior variance. For the problems given in the simulation simply set  $\bs m$ to be nearly proportional  to $C_l^{\phi\phi}$ (with slightly more attenuation at low wavenumber).  As is advocated in \textcolor{red}{[cite it]}, we  use a random $\epsilon$ to avoid resonant frequencies.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -311,17 +339,6 @@ We also remark that the gradient is also an un-normalized quadratic destimate wh
 \section{Iterative message passing algorithm for $ P(\widetilde T |  \phi,\text{\rm data})$}
 \label{Section: iterative message passing section}
 
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% Section
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Implementation Details}
-\label{Section: Implementation Details}
 
 
 
@@ -338,6 +355,7 @@ We also remark that the gradient is also an un-normalized quadratic destimate wh
 \label{Section: simulation examples}
 
 
+Be sure to give some of the exact details...like the fact that we initialize with gradient steps and that we do three hmc steps for each gibbs pass.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %

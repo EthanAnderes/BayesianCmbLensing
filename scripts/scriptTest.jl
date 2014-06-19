@@ -3,10 +3,10 @@
 =#
 # I'm testing out a gibbst which only operates at low ell for the cooling step
 const scriptname = "scriptTest"
-const seed = vec(readcsv("simulations/scriptBase_1632069791/seed.csv", Uint32))
+# const seed = vec(readcsv("simulations/scriptBase_1632069791/seed.csv", Uint32))
 # const seed = vec(readcsv("simulations/scriptBase_3013427591/seed.csv", Uint32))
 # const seed = vec(readcsv("simulations/scriptBase_3635739710/seed.csv", Uint32))
-# const seed = vec(readcsv("simulations/scriptBase_2593658006/seed.csv", Uint32))
+const seed = vec(readcsv("simulations/scriptBase_2593658006/seed.csv", Uint32))
 srand(seed)
 const savepath = joinpath("simulations", "$(scriptname)_$(seed[1])") #<--change the directory name here
 const percentNyqForC = 0.5 # used for T l_max
