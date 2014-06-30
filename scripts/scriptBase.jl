@@ -94,6 +94,7 @@ function gibbsloop(its, parhr, parlr, ytx, maskvarx)
 	tildetx_hr_curr = zero(parhr.grd.x) 
 
 	for bglp = 1:its 
+		tic()
 		# ----- update tildetx_hr_curr
 		if bglp % 100 == 1
 			p1hr[:], p2hr[:] = gibbspass_t!(tx_hr_curr, ttx, phik_curr, ytx, 
@@ -122,6 +123,7 @@ function gibbsloop(its, parhr, parlr, ytx, maskvarx)
 			writecsv("$savepath/phix_curr_$bglp.csv", ifft2r(phik_curr, parlr))
 			writecsv("$savepath/acceptclk.csv", acceptclk)	
 		end
+		toc()
 	end # for
 end # function
 gibbsloop(2500, parhr, parlr, ytx, maskvarx)

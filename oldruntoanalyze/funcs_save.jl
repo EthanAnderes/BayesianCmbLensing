@@ -1,11 +1,10 @@
 
-
 #------------------------------------
 # HMC sampler
 #--------------------------------------------
-function hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc = 1.0e-3)
-    ePs = scale_hmc * rand()
-    ulim =  30 
+function hmc!(phik_curr, tildetx_hr_curr, parlr, parhr)
+    ePs = 1.0e-3 * rand()
+    ulim =  30 # rand(30:50)
     h0 = smooth_heavy(parlr.grd.r, 0.5, 1, 1500, 1/200) .* parlr.cPP ./ (parlr.grd.deltk^2) 
     mk = 1.0e-2 ./ h0
     mk[parlr.pMaskBool] = 0.0
@@ -13,13 +12,13 @@ function hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc = 1.0e-3)
     phik_test = copy(phik_curr)
     rk   = white(parlr) .* sqrt(mk); # note that the variance of real(pk_init) and imag(pk_init) is mk/2
     grad, loglike   = ttk_grad_wlog(tildetx_hr_curr, phik_test, parlr, parhr)
-    h_at_zero = 0.5 * sum( abs2(rk[!parlr.pMaskBool])./(2*mk[!parlr.pMaskBool]/2)) - loglike # the 0.5 is out front since only half the sum is unique
+    h_at_zero = 0.5 * sum( abs2(rk[~parlr.pMaskBool])./(2*mk[~parlr.pMaskBool]/2)) - loglike # the 0.5 is out front since only half the sum is unique
     
     for HMCCounter = 1:ulim 
         loglike = lfrog!(phik_test, rk, tildetx_hr_curr, parlr, parhr, ePs, mk)
     end
     
-    h_at_end = 0.5 * sum( abs2(rk[!parlr.pMaskBool])./(2*mk[!parlr.pMaskBool]/2)) - loglike # the 0.5 is out front since only half the sum is unique
+    h_at_end = 0.5 * sum( abs2(rk[~parlr.pMaskBool])./(2*mk[~parlr.pMaskBool]/2)) - loglike # the 0.5 is out front since only half the sum is unique
     prob_accept = minimum([1, exp(h_at_zero - h_at_end)])
     if rand() < prob_accept
         phik_curr[:] = phik_test
@@ -30,8 +29,6 @@ function hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc = 1.0e-3)
         return 0
     end
 end
-
-
 function lfrog!(phik_curr, rk, tildetx_hr_curr, parlr, parhr, ePs, mk)
     grad, loglike   = ttk_grad_wlog(tildetx_hr_curr, phik_curr, parlr, parhr)
     rk_halfstep =  rk +  ePs .* grad ./ 2.0
@@ -45,70 +42,149 @@ end
 
 
 
+
 #-----------------------------
-#  messenger algorithm
+# messenger algorithms: dual messenger
 #------------------------------------
-rwhite(ln, par::SpectrumGrids) = (par.grd.deltk/par.grd.deltx)*rft(randn(ln, ln), par)
-function gibbspass_t!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])
+function gibbspass_coold!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, nruns)
     phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
     dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
-    tk    = rft(tx, parhr)
-    sk    = similar(tk)
-    gpass!(sx, sk, tx, tk, dx, Nx, parhr, coolingVec)
-    phidx1_hr_curr, phidx2_hr_curr
+    uplim = 4000.0
+    lwlim = 50.0
+    for upl in  linspace(lwlim, uplim, int(nruns/30))
+        wsim_gibbs_d!(sx, sbarx, dx, Nx, parhr, upl, 30)
+    end
+    sk = fft2(sx, parhr)
+    sk[parhr.grd.r .>= uplim] = 0.0
+    sx[:] = ifft2r(sk, parhr)
+    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
 end
-function gpass!(sx, sk, tx, tk, dx, Nx, par, cool)
-  ln    = size(tx, 1)
-  d2k   = par.grd.deltk * par.grd.deltk
-  d2x   = par.grd.deltx * par.grd.deltx
-  delt0 = 1 / d2k
-  barNx = 0.99 * minimum(Nx)
-  barNk = barNx * d2x * delt0 # var in fourier
-  tldNx = Nx .- barNx 
-  Sk    = scale(par.cTT[1:size(sk, 1),1:size(sk, 2)], delt0)
-  for uplim in cool
-    # !!!!! I'm trying a new version here... 10 times delt0...
-    λbarNk = (uplim > 8000.0) ? barNk : max(barNk, 10 * delt0 * par.CTell2d[int(uplim)])  # var in fourier
-    λbarNx = λbarNk / (d2x * delt0)
-    # --- update s
-    tmpx   = 1 ./ (1 / λbarNk .+ 1 ./ Sk) 
-    sk[:]  = tmpx .* scale(tk, 1 / λbarNk) 
-    sk[:] += vec(rwhite(ln, par) .* √(tmpx))  
-    sx[:]  = irft(sk, par) 
-    # --- update t
-    tmpx   = 1 ./ (1 ./ tldNx .+ 1 / λbarNx) 
-    tx[:]  = tmpx .* (dx ./ tldNx + sx ./ λbarNx) 
-    tx[:] += vec(randn(ln, ln) .* √(tmpx))        
-    tk[:]  = rft(tx, par)
-  end
-  nothing
+function gibbspass_d!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, nruns)
+    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
+    dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
+    wsim_gibbs_d!(sx, sbarx, dx, Nx, parhr, 4000, nruns)
+    sk = fft2(sx, parhr)
+    sk[parhr.grd.r .>= 4000] = 0.0
+    sx[:] = ifft2r(sk, parhr)
+    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
+end
+# ---- these are sub functions
+function  wsim_gibbs_d!(sx, sbarx, dx, Nx, par, uplim, its)
+    Sbark, Qx, Qk = get_SQ(uplim, par)
+    for cntr = 1:its
+        simd_sbarx!(sx, sbarx,  Sbark, Qk, par)
+        simd_sx!(sx, sbarx, dx, Sbark, Qx, Nx, par)
+    end
+end
+function simd_sx!(sx, sbarx, dx, Sbark, Qx::Float64, Nx, par)
+    tmp = 1.0 ./ (1.0./Nx .+ 1.0./Qx)
+    sx_wf  = tmp .* (dx./Nx .+ sbarx./Qx)  
+    sx_flx = randn(size(sx)) .* sqrt(tmp) 
+    sx[:] = sx_wf + sx_flx
+end  
+function simd_sbarx!(sx, sbarx, Sbark, Qk::Float64, par)
+    # tmp = 1.0 ./ (1.0./Qk + 1.0./Sbark) # this can work when Sbark is zeros by using the Wiener filter version 
+    tmp = Qk .* Sbark ./ (Sbark .+ Qk) # this can work when Sbark is zero
+    sbark_wf = tmp .* fft2(sx, par) ./ Qk
+    sbark_flx = white(par) .* sqrt(tmp)
+    sbark = sbark_wf + sbark_flx
+    sbarx[:] = ifft2r(sbark, par)
+end
+function get_SQ(lp_init, par)
+    delt0 = 1.0./par.grd.deltk^2.0
+    lam = delt0 .* par.CTell2d[round(lp_init)]
+    Sk = delt0 .* par.cTT # fourier variance
+    Sbark = Sk .- lam 
+    Sbark[Sbark .< 0.0]= 0.0
+    Sbark[1] = 0.0
+    Qk = lam    # so Qk + Sbark should be delt0.*par.cTT up to lp_init then lam after
+                # Qk / delt0 is the spectrum
+    Qx = Qk ./ (delt0 * par.grd.deltx^2.0) # to convert noise spectrum (i.e. Qk / delt0) to pixel varuance take spectrum / par.grd.deltx^2.0
+    Sbark, Qx, Qk
 end
 
 
+#-----------------------------
+# messenger algorithms: t messenger
+#------------------------------------
+function gibbspass_coolt!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, nruns)
+    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
+    dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
+    uplim = 4000.0
+    lwlim = 50.0
+    for upl in  linspace(lwlim, uplim, int(nruns/30))
+        wsim_gibbs_t!(sx, tx, dx, Nx, parhr, upl, 30)
+    end
+    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
+end
+function gibbspass_t!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, nruns)
+    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
+    dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
+    wsim_gibbs_t!(sx, tx, dx, Nx, parhr, Inf, nruns)
+    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr
+end
+# ---- these are sub functions
+function  wsim_gibbs_t!(sx, tx, dx, Nx, par, uplim, its)
+    Tx = 0.99 * minimum(Nx)
+    barNx = Nx .- Tx
+
+    delt0 = 1.0./par.grd.deltk^2.0
+    lamx = 1.0
+    if uplim == Inf
+        lamx = 1.0
+    else
+        lamk = delt0 .* par.CTell2d[round(uplim)]
+        lamx = lamk ./ (delt0 * par.grd.deltx^2.0)
+        lamx = max(1.0, lamx)
+    end
+
+    for cntr = 1:its
+        sim_sx!(sx, tx, lamx * Tx, barNx, par)
+        sim_tx!(sx, tx, dx, lamx * Tx, barNx, par)
+    end
+end
+function  wsim_gibbs_t!(sx, tx, dx, Nx, par, its)
+    Tx = 0.99 * minimum(Nx)
+    barNx = Nx - Tx
+    for cntr = 1:its
+        sim_sx!(sx, tx, Tx, barNx, par)
+        sim_tx!(sx, tx, dx, Tx, barNx, par)
+    end
+end
+function sim_sx!(sx, tx, Tx::Float64, barNx, par)
+    tk  = fft2(tx, par)
+    Tk  = Tx * par.grd.deltx * par.grd.deltx # this converts pixel space variance to spectrum
+    pargrddeltk2 = par.grd.deltk * par.grd.deltk
+    tmp    = 1.0./ (pargrddeltk2./par.cTT .+ pargrddeltk2./Tk) 
+    sk_wf  = tmp .* tk ./ (Tk ./ pargrddeltk2)
+    sk_flx = white(par) .* sqrt(tmp)
+    sx[:]  = ifft2r(sk_wf + sk_flx, par)
+end  
+function sim_tx!(sx, tx, dx, Tx::Float64, barNx, par)
+    tmp = 1.0./(1.0./barNx .+ 1.0./Tx)
+    tx_wf  = tmp .* (dx./barNx + sx./Tx)
+    tx_flx  = randn(size(tx)) .* sqrt(tmp) 
+    tx[:] = tx_wf + tx_flx
+end
 
 
 ##--------------------------------
 # gradient of phi given  tildetx
 #------------------------------------
-function gradupdate!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_grad=1.0e-3)
+function gradupdate!(phik_curr, tildetx_hr_curr, parlr, parhr)
     for cntr = 1:30
         grad, loglike = ttk_grad_wlog(tildetx_hr_curr, phik_curr, parlr, parhr)
         println(loglike)
-        phik_curr[:]  =  phik_curr + grad .* scale_grad .* smooth_heavy(parlr.grd.r, 1, 2, 1000, 1/200) .* parlr.cPP ./ (parlr.grd.deltk^2) 
+        phik_curr[:]  =  phik_curr + grad .* 1.0e-2 .* smooth_heavy(parlr.grd.r, 1, 2, 1000, 1/200) .* parlr.cPP ./ (parlr.grd.deltk^2) 
     end
 end
-
-###  ----- trying to optimze
 function ttk_grad_wlog(tildetx_hr_sim, phik_curr, parlr, parhr)
     parlrgrddeltk2 = parlr.grd.deltk * parlr.grd.deltk
     phidx1_lr =  ifft2r(complex(0.0,1.0) .* parlr.grd.k1 .* phik_curr, parlr)
     phidx2_lr =  ifft2r(complex(0.0,1.0) .* parlr.grd.k2 .* phik_curr, parlr)   
-    #----- the following is slightly more efficient when working with real transforms
-    tildetk_hr_sim   = rft(tildetx_hr_sim, parhr)
-    rd1, rd2 = size(tildetk_hr_sim)
-    tildetxd1   = irft(complex(0.0,1.0) .* parhr.grd.k1[1:rd1, 1:rd2] .* tildetk_hr_sim, parhr) 
-    tildetxd2   = irft(complex(0.0,1.0) .* parhr.grd.k2[1:rd1, 1:rd2] .* tildetk_hr_sim, parhr) 
-    # ---
+    tildetk_hr_sim   = fft2(tildetx_hr_sim, parhr)
+    tildetxd1   = ifft2r(complex(0.0,1.0) .* parhr.grd.k1 .* tildetk_hr_sim, parhr) 
+    tildetxd2   = ifft2r(complex(0.0,1.0) .* parhr.grd.k2 .* tildetk_hr_sim, parhr) 
     tildetx_unlensed     = spline_interp2(parhr.grd.x, parhr.grd.y, tildetx_hr_sim   , parlr.grd.x - phidx1_lr, parlr.grd.y - phidx2_lr, 0.01)
     tildetxd1_unlensed   = spline_interp2(parhr.grd.x, parhr.grd.y, tildetxd1  , parlr.grd.x - phidx1_lr, parlr.grd.y - phidx2_lr, 0.01)
     tildetxd2_unlensed   = spline_interp2(parhr.grd.x, parhr.grd.y, tildetxd2  , parlr.grd.x - phidx1_lr, parlr.grd.y - phidx2_lr, 0.01)
@@ -134,8 +210,6 @@ function ttk_grad_wlog(tildetx_hr_sim, phik_curr, parlr, parhr)
     term[parlr.pMaskBool] = 0.0
     term, loglike
 end
-
-
 
 
 
@@ -202,7 +276,7 @@ end
 # simluation algorithm for generating synthetic data
 #----------------------------------
 function  simulate_start(par::SpectrumGrids; pad_proportion = 0.01)
-    d = 2.0
+    d=2.0
     #    simulate noise for Q and U  on low res
     znt =  ((par.grd.deltk/par.grd.deltx)^(d/2.0))*fft2(randn(size(par.grd.x)),par.grd.deltx)
     ntk = znt.*sqrt(par.cNT)./(par.grd.deltk^(d/2.0)) 
@@ -259,9 +333,9 @@ function embedd(ytx, phidx1_lr, phidx2_lr, Nx_lowres, parlr, parhr; pad_proporti
     index_matrix1 = reshape(1:length(parhr.grd.x),size(parhr.grd.x)); #this index matrix only needs to be made once
     I_obs_into_xyfull = int(nearest_interp2(parhr.grd.x ,parhr.grd.y, index_matrix1, parlr.grd.x + phidx1_lr, parlr.grd.y + phidx2_lr; pad_proportion = pad_proportion))
     dx = zeros(Float64,size(parhr.grd.x))
-    dx[I_obs_into_xyfull]  = vec(ytx)
+    dx[I_obs_into_xyfull]  = ytx[:]
     NN = fill(Inf, size(dx))
-    NN[I_obs_into_xyfull]= vec(Nx_lowres)
+    NN[I_obs_into_xyfull]= Nx_lowres[:]
     dx, NN
 end
 function smooth_heavy(x,height1,height2,location, transition_sharpness)
@@ -282,8 +356,6 @@ function radialAve(Xk,par)
 end
 #  plt.semilogy(parglob.grd.r[:,1], radialAve(abs2(ttk1),parglob)[:,1]); plt.show()
 #  plt.semilogy(parglob.grd.r[:,1], radialAve(ttk_al(parglob),parglob)[:,1]); plt.show()
-
-
 function pos(x) 
         y = real(x)
         y[y.<0.0] = 0.0
@@ -291,102 +363,55 @@ function pos(x)
 end 
 
 
-#=
 
-function gibbspass_t!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])
-    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
-    dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
-    # ------ pre-allocate space
-    tk    = fft2(tx, parhr)
-    sk    = similar(tk)
-    tpx   = Array(Float64, size(tx))
-    Tx    = 0.99 * minimum(Nx)
-    barNx = Nx .- Tx
-    d2k   = parhr.grd.deltk * parhr.grd.deltk
-    d2x   = parhr.grd.deltx * parhr.grd.deltx
-    delt0 = 1 / d2k
-    Tk    = Tx * d2x # Tk is the spectrum, Tx is the pixelwise variance
-    # ------ gibbs with cooling:) 
-    for uplim in coolingVec
-        λ =  (uplim > 8000.0) ? 1.0 : max(1.0, parhr.CTell2d[int(uplim)]/Tk)
-        # ---- update s
-        tpx[:]   = 1 ./ (1 / (λ * Tk * delt0) .+ 1 ./ (parhr.cTT * delt0)) 
-        sk[:]    = tpx .* (tk / (λ * Tk * delt0))  # wiener filter
-        sk[:]   += vec(white(parhr) .* √(tpx))      # random fluctuation
-        sx[:]    = ifft2r(sk, parhr) 
-        # ---- update t
-        # whatever updates are done, they are only done on the low ell multipoles
-        tpx[:]  = 1 ./ (1 ./ barNx .+ 1 / (λ * Tx)) 
-        tx[:]   = tpx .* (dx ./ barNx + sx ./ (λ * Tx)) # wiener filter...weighted ave of dx and sx.
-        tx[:]  += vec(randn(size(tx)) .* √(tpx))            # random fluctuation
-        tk[:]   = fft2(tx, parhr)
-    end
-    phidx1_hr_curr, phidx2_hr_curr
+using PyCall
+@pyimport matplotlib.pyplot as plt
+#--------------------------------------
+#  quick viewing macro
+# to use it @imag qx
+#-----------------------------
+macro imag(ex)
+  #the quote allows us to splice in ex with $
+  quote  
+      plt.imshow($ex,interpolation = "nearest")
+      plt.colorbar()
+      plt.show()
+  end
+end
+macro imag2(ex1, ex2)
+  #the quote allows us to splice in ex with $
+  quote  
+      plt.figure(figsize=(12,6))
+      plt.subplot(1,2,1)
+      plt.imshow($ex1,interpolation = "nearest")
+      plt.colorbar()
+      plt.subplot(1,2,2)
+      plt.imshow($ex2,interpolation = "nearest")
+      plt.colorbar()
+      plt.show()
+  end
+end
+macro imag4(ex1, ex2, ex3, ex4)
+  #the quote allows us to splice in ex with $
+  quote  
+      plt.figure(figsize=(12,12))
+      plt.subplot(2,2,1)
+      plt.imshow($ex1,interpolation = "nearest")
+      plt.colorbar()
+      plt.subplot(2,2,2)
+      plt.imshow($ex2,interpolation = "nearest")
+      plt.colorbar()
+      plt.subplot(2,2,3)
+      plt.imshow($ex3,interpolation = "nearest")
+      plt.colorbar()
+      plt.subplot(2,2,4)
+      plt.imshow($ex4,interpolation = "nearest")
+      plt.colorbar()
+      plt.show()
+  end
 end
 
 
 
 
-function gibbspass_d!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])
-    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
-    dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
-    d2k = parhr.grd.deltk * parhr.grd.deltk
-    d2x = parhr.grd.deltx * parhr.grd.deltx
-    delt0 = 1 / d2k
-    for uplim in coolingVec
-        λk = delt0 .* parhr.CTell2d[min(8000, round(uplim))] 
-        λx = λk / (delt0 * d2x) 
-        Sbark = delt0 .* parhr.cTT .- λk 
-        Sbark[Sbark .< 0.0]= 0.0 
-        # ---- update sbarx
-        tmp      = λk .* Sbark ./ (Sbark .+ λk) # this can work when Sbark is zero
-        sbark    = tmp .* fft2(sx, parhr) ./ λk # wiener filter
-        sbark   += white(parhr) .* √(tmp)    # fluctuation
-        sbarx[:] = ifft2r(sbark, parhr)
-        # --- update sx
-        tmp    = 1 ./ (1 ./ Nx .+ 1 / λx)
-        sx[:]  = tmp .* (dx ./ Nx  .+ sbarx / λx)  
-        sx[:]  = vec(sx + randn(size(sx)) .* sqrt(tmp))
-    end
-    sk = fft2(sx, parhr)
-    sk[parhr.grd.r .> coolingVec[end]] = 0.0
-    sx[:] = ifft2r(sk, parhr)
-    phidx1_hr_curr, phidx2_hr_curr
-end
-=#
-
-#=
-function ttk_grad_wlog(tildetx_hr_sim, phik_curr, parlr, parhr)
-    parlrgrddeltk2 = parlr.grd.deltk * parlr.grd.deltk
-    phidx1_lr =  ifft2r(complex(0.0,1.0) .* parlr.grd.k1 .* phik_curr, parlr)
-    phidx2_lr =  ifft2r(complex(0.0,1.0) .* parlr.grd.k2 .* phik_curr, parlr)   
-    tildetk_hr_sim   = fft2(tildetx_hr_sim, parhr)
-    tildetxd1   = ifft2r(complex(0.0,1.0) .* parhr.grd.k1 .* tildetk_hr_sim, parhr) 
-    tildetxd2   = ifft2r(complex(0.0,1.0) .* parhr.grd.k2 .* tildetk_hr_sim, parhr) 
-    tildetx_unlensed     = spline_interp2(parhr.grd.x, parhr.grd.y, tildetx_hr_sim   , parlr.grd.x - phidx1_lr, parlr.grd.y - phidx2_lr, 0.01)
-    tildetxd1_unlensed   = spline_interp2(parhr.grd.x, parhr.grd.y, tildetxd1  , parlr.grd.x - phidx1_lr, parlr.grd.y - phidx2_lr, 0.01)
-    tildetxd2_unlensed   = spline_interp2(parhr.grd.x, parhr.grd.y, tildetxd2  , parlr.grd.x - phidx1_lr, parlr.grd.y - phidx2_lr, 0.01)
-    tildetk_unlensed     =  fft2(tildetx_unlensed  , parlr);  tildetk_unlensed[parlr.cMaskBool]   = 0.0
-    tildetkd1_unlensed   =  fft2(tildetxd1_unlensed, parlr);  tildetkd1_unlensed[parlr.cMaskBool] = 0.0
-    tildetkd2_unlensed   =  fft2(tildetxd2_unlensed, parlr);  tildetkd2_unlensed[parlr.cMaskBool] = 0.0
-    #--------------- log likelihood
-    loglike = 0.0
-    maskforpsi = one(phik_curr)
-    maskforpsi[parlr.pMaskBool] = 0.0
-    for k=2:length(phik_curr)
-        loglike += - 0.25 * abs2(maskforpsi[k] * phik_curr[k]) / (parlr.cPP[k] / (2.0 * parlrgrddeltk2))
-        loglike += - 0.25 * abs2(tildetk_unlensed[k]) / (parlr.cTT[k] / (2.0 * parlrgrddeltk2))
-    end
-    #--------------------------------------
-    Bk = tildetk_unlensed ./ (parlr.cTT)
-    Bk[parlr.cMaskBool] = 0.0
-    Bx = ifft2r(Bk, parlr)
-    constantterm =  complex(0.0,-2.0) * parlrgrddeltk2 # the minus is here to convert psi gradient to phi gradient
-    term  = constantterm * parlr.grd.k1 .* fft2(ifft2r(tildetkd1_unlensed, parlr) .* Bx, parlr)
-    term += constantterm * parlr.grd.k2 .* fft2(ifft2r(tildetkd2_unlensed, parlr) .* Bx, parlr)
-    term -= 2.0 * parlrgrddeltk2 *  phik_curr ./ parlr.cPP
-    term[parlr.pMaskBool] = 0.0
-    term, loglike
-end
-=#
 

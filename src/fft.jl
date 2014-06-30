@@ -23,10 +23,6 @@ end
 fft2(fx, par::SpectrumGrids) = fft2(fx, par.grd.deltx)
 ifft2(fk, par::SpectrumGrids) = ifft2(fk, par.grd.deltk)
 ifft2r(fk, par::SpectrumGrids) = ifft2r(fk, par.grd.deltk)
-
-
-
-
 function  rft(fx, par::SpectrumGrids)
   c = complex( (par.grd.deltx / √(2.0 * π))^2.0 )
   fk = rfft(fx)

@@ -3,6 +3,8 @@
 =#
 const scriptname = "scriptNoMask"
 const seed = Base.Random.RANDOM_SEED
+# seed = readcsv("simulations/scriptNoMask_496819124/seed.csv", Uint32) |> vec
+# srand(seed)
 const savepath = joinpath("simulations", "$(scriptname)_$(seed[1])") #<--change the directory name here
 const percentNyqForC = 0.5 # used for T l_max
 const numofparsForP  = 1500  # used for P l_max
