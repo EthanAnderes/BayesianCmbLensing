@@ -68,7 +68,7 @@ function gpass!(sx, sk, tx, tk, dx, Nx, par, cool)
   Sk    = scale(par.cTT[1:size(sk, 1),1:size(sk, 2)], delt0)
   for uplim in cool
     # !!!!! I'm trying a new version here... 10 times delt0...
-    λbarNk = (uplim > 8000.0) ? barNk : max(barNk, 10 * delt0 * par.CTell2d[int(uplim)])  # var in fourier
+    λbarNk = (uplim > 8000.0) ? barNk : max(barNk, delt0 * par.CTell2d[int(uplim)])  # var in fourier
     λbarNx = λbarNk / (d2x * delt0)
     # --- update s
     tmpx   = 1 ./ (1 / λbarNk .+ 1 ./ Sk) 
@@ -282,6 +282,12 @@ function radialAve(Xk,par)
 end
 #  plt.semilogy(parglob.grd.r[:,1], radialAve(abs2(ttk1),parglob)[:,1]); plt.show()
 #  plt.semilogy(parglob.grd.r[:,1], radialAve(ttk_al(parglob),parglob)[:,1]); plt.show()
+
+
+function repstretch(start, stop, rep::Int, total::Int) 
+    tdr = int(total / rep)
+    return vec(linspace(start, stop, tdr)' .* ones(rep, tdr))
+end
 
 
 function pos(x) 

@@ -82,8 +82,6 @@ al_lr = ttk_al(parlr)
 qex_lr = ifft2r(ttk_est(ytk_nomask, parlr) .* (parlr.cPP ./ (2.0 .* al_lr + parlr.cPP)) , parlr)
 writecsv("$savepath/qex_lr.csv", qex_lr)	
 
-
-
 # ------------------ initalized and run the gibbs 
 function gibbsloop(its, parhr, parlr, ytx, maskvarx)
 	acceptclk   = [1] #initialize acceptance record
@@ -98,7 +96,7 @@ function gibbsloop(its, parhr, parlr, ytx, maskvarx)
 		# ----- update tildetx_hr_curr
 		if bglp % 100 == 1
 			p1hr[:], p2hr[:] = gibbspass_t!(tx_hr_curr, ttx, phik_curr, ytx, 
-				maskvarx, parlr, parhr, linspace(4parhr.grd.deltk, 1.2maskupC, 1000)
+				maskvarx, parlr, parhr, repstretch(2.0, 1.2maskupC, 50, 1000) #linspace(4parhr.grd.deltk, 1.2maskupC, 1000)
 			)
 		end
 		p1hr[:], p2hr[:] = gibbspass_t!(tx_hr_curr, ttx, phik_curr, ytx, 
