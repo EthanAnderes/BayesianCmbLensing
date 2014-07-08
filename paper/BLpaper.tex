@@ -330,18 +330,14 @@ The prevailing wisdom is that one should set $\bs m$ to match the posterior vari
 
 
 
-The main challenge with working with $\widetilde T(x)$ directly is that the lensed CMB field is non-stationary which makes Gaussian simulation. In what follows, we describe how to use an approximate message passing algorithm for circumventing...At present this algorithm only works when the beam is small.
-
-
-
-Start by  transforming each pixel location $x$ to it's pre-lense location $x+\nabla \phi(x)$, while simultaneously preserving the data associated with that pixel. This  effectively de-lenses the data $\text{data}(x) = T(x+\nabla \phi(x))+n(x)$ but produces observations one an irregular grid. In particular one may switch to the lensed coordinates $y = x+\nabla\phi(x)$ so that
+Start by  transforming each pixel location $x$ to the pre-lense location $x+\nabla \phi(x)$, while simultaneously preserving the data associated with that pixel. This  effectively de-lenses the data $ T(x+\nabla \phi(x))+n(x)$ but produces observations on an irregular grid. In particular, one may switch to the lensed coordinates $y = x+\nabla\phi(x)$ so that
 \begin{align}
 \nonumber
 \underbrace{(x +\nabla \phi(x),\, \text{ data}(x))}_{\text{(pixel, data) tuple}} & = (y, \, T(y) + \tilde n(y)) 
 \end{align}
-$\tilde n$ evaluated at the pre-lense location $x+\nabla\phi(x)$ equals  the pre-lense noise $n(x)$.
-The observations of $T(y)+\tilde n(y)$ on an irregular grid $y = x +\nabla \phi(x)$.  We now embedd  $y$  to a high resllution grid by nearest nightbor interpation. The points $y$ which do not get assigned an obserbation $T(y)+\tilde n(y)$, under the interolation, we consider a mask. 
-Figure \ref{embed} illustrates this situation. The left hand plot shows the pre-lensed locations and the right hand plot shows the grid embedding. The filled dots correspond to the interplated pre-lensed pixel lcoations, which get assigned a data value $T(y) + \tilde n(y)$. The empty dots correpond to masking. 
+where $\tilde n(x+\nabla\phi(x))=n(x)$.  We now embed the irregularly sampled data $(y, \, T(y) + \tilde n(y))$ into a high resolution grid by nearest neighbor interpolation. The points $y$ which do not get assigned an observation $T(y)+\tilde n(y)$ under the interpolation we consider to be masked. 
+Figure \ref{embed} illustrates this situation. The left hand plot shows the irregularly sampled data $(x +\nabla \phi(x),\, \text{ data}(x))$ and the right hand plot shows the grid embedding. The filled dots represent observations of $T(y) + \tilde n(y)$ whereas the empty dots correspond to a masked observation of $T(y)$. 
+Finally we extend the definition of $\tilde n(y)$ to have infinite variance over the masked region, whereby producing data $T(y)+\tilde n(y)$ over a dense regular grid in $y$.
 
 
 
@@ -350,73 +346,56 @@ Figure \ref{embed} illustrates this situation. The left hand plot shows the pre-
 %{\includegraphics[height=2in]{Graphics/embed1.eps}}%
 {\includegraphics[height=2.5in]{Graphics/embed2.eps}}%
 {\includegraphics[height=2.6in]{Graphics/embed3.eps}}
-\caption{The embedding of the lensed grid into a high resolution regular grid. The open circles represent a masking, or observations with infinite variance additive noise.}
+\caption{The embedding of the lensed grid into a high resolution regular grid. The open circles represent masking.}
 \label{embed}
 \end{figure}
 
 
-
-
-
- We adapted a new method developed by Wandelt, Elsner and Lavaux for Gaussian conditional expectation and sampling when
-\[\text{data}(x) = S(x)  + N(x) \]
-where $S$ denotes a ``signal'' and $N$ denotes a noise process
- Assumption 1: the cov matrix~of $S(x)$ is diagonalized in Fourier (or spherical harmonic) space
-\begin{quote}
-i.e. $\text{cov}(S_{k_1}, S_{k_2})= 0$ when $k_1 \neq k_2$
-\end{quote}  Assumption 2: the cov matrix of $N(x)$ is diagonalized in Pixel space
-\begin{quote}
-i.e. $\text{cov}(N(x), N(y))= 0$ when $x \neq y$.
-\end{quote}
-
-
+As a intermediate step in producing a sample from  $P(\widetilde T |  \phi,\text{\rm data})$ we produce a conditional  sample of $T(y)$ given the observations $T(y) + \tilde n(y)$. The difficulty of this step is that $\tilde n(y)$ is non-homogeneous noise (from the masking at the minimum) and therefore it is not decorrelated by the Fourier transform.
+We adapted a new method developed by Wandelt, Elsner and Lavaux for Gaussian conditional expectation and sampling when the signal is diagonalized in harmonic space that the noise is diagonalized in pixel space. This method works particularly well for observations with large amounts of irregular masking, as in our case. The algorithm utilizes a messenger field which effectively behaves as a latent---signal plus white noise---model.
 
 
 
 \begin{algorithm}[H]
 \small
-\caption{Iterative message passing sampler  $ T + \tilde n$}
-\label{ith step of HMC}
+\caption{Iterative message passing sampler  $P(T | T + \tilde n)$}
+\label{IMP}
 \begin{algorithmic}[1]
-\State Set cooling schedule $\lambda_1, \ldots, \lambda_n$
-\State Initalize $M^0$ and $T^0$  to be zero
-\State Define $\bar\sigma^2 + \tilde\sigma_x^{2} = \text{var} n(x)$ and let $dx$ denotes the pixel grid area. 
-\State Recursively compute $T^k, M^k$ for $k=1, \ldots, n$ using the following equations:
+\State Set cooling schedule $\lambda^1\geq  \ldots \geq \lambda^n = 1$. 
+\State Define $Z^{1}(y), \ldots, Z^{n}(y)$ to be independent realizations of standard Gaussian noise, in the pixel domain, so that $E \bigl[ Z^{k}(y)Z^{k}(y^\prime)\bigr] = \delta_{yy^\prime}$.
+\State Define $W^{1}_l, \ldots, W^{n}_l$ to be independent realizations of Gaussian white noise, in the Fourier domain, so that $E\bigl[ W^{n}_l W^{n\,*}_{l^\prime}\bigr] = \delta_{l - l^\prime}$.
+\State Initialize the fields $M^0(y)$ and $T^0(y)$  to be zero.
+\State Decompose the noise variance $\text{var}(\tilde n(y))$ into a homogeneous part $\bar\sigma^2$ and a non-homogeneous part $\tilde\sigma_y^{2}$ so that $\text{var}(\tilde n(y)) = \bar\sigma^2 + \tilde\sigma_y^{2}$.
+\State Recursively compute $T^k, M^k$ for $k=1, \ldots, n$ as follows:
 \begin{align}
-M^{k+1}(y)&:=\text{data}^\prime(y)\frac{\lambda_k\bar\sigma^{2}}{\lambda_k\bar\sigma^2 + \tilde \sigma_y^2} + T^k(y)\frac{\tilde\sigma_y^{2}}{\lambda_k\bar\sigma^2 + \tilde \sigma_x^2}  + Z(y) \frac{1}{\sqrt{1/(\lambda_k\bar\sigma^{2}) + 1/\tilde\sigma_y^{2}}} \\
-T^{k+1}_l & \sim M_l^{k+1}\frac{C^{TT}_l}{C^{TT}_l + dx \, \lambda_k\bar\sigma^2} + W_l
-\frac{1}{\sqrt{1/C^{TT}_k + 1/(dx \lambda_k\bar\sigma^2)}} 
+M^{k}(y) &:= \bigl[T(y) + \tilde n(y) \bigr]\frac{\lambda^{k}\bar\sigma^{2}}{\lambda^{k} \bar\sigma^2 + \tilde \sigma_y^2} + T^{k-1}(y)\frac{\tilde\sigma_y^{2}}{\lambda^k\bar\sigma^2 + \tilde \sigma_y^2}  + Z^{k}(y) \frac{1}{\sqrt{1/(\lambda^k\bar\sigma^{2}) + 1/\tilde\sigma_y^{2}}} \\
+T^{k}_l &:= M_l^{k}\frac{C^{TT}_l}{C^{TT}_l + dy \, \lambda^k\bar\sigma^2} + W^{k}_l
+\frac{1}{\sqrt{1/C^{TT}_l + 1/(dy \lambda^k\bar\sigma^2)}} 
 \end{align}
+where  $dy$ denotes the pixel grid area. 
 \end{algorithmic}
 \end{algorithm}
 
 
+% Now, to produce a conditional sample $ P(\widetilde T |  \phi,\text{\rm data})$ we first produce a conditional sample sample from $T(y)$ given $T(y)+\tilde n(y)$ using Algorithm \ref{IMP}, then lense the sample of $T(y)$ to produce $\widetilde T(x)$. The following algorithm desribes this in detail
 
-
+The following algorithm now describes how to use Algorithm \ref{IMP} to produce a sample from $ P(\widetilde T |  \phi,\text{\rm data})$
 
 \begin{algorithm}[H]
 \small
 \caption{Sampling from $P(\widetilde T |  \phi,\text{\rm data})$}
 \label{ith step of HMC}
 \begin{algorithmic}[1]
-\State Embedded the de-lensed pixel/data pairs  $(x+\nabla\phi(x), \text{data}(x))$ by into observations of the form $(y, \text{data}^\prime(y))$ where $y$ ranges over a high resolution regular grid and $\text{data}^\prime(y) = T(y) + n^\prime(y)$. Here $\text{var}(n^\prime(y))=\infty$ for the $y$'s which don't have observations.
-\State Use the message passing algorithm for simulating from $T$ 
+\State Embedded the de-lensed pixel/data pairs  $(x+\nabla\phi(x), \text{data}(x))$, as illustrated in Figure \ref{embed}, into observations of the form $(y, T(y)+\tilde n(y))$ where $y$ ranges over a high resolution regular grid.
+\State Use Algorithm \ref{IMP} to produce a sample $T(y)\sim P(T(y)| T(y)+\tilde n(y))$
+\State Set $\widetilde T(x) = T(x+\nabla\phi(x))$.
 \end{algorithmic}
 \end{algorithm}
 
 
 
 
-
-under the assumption that $n(x)$ is whilte, $\tilde n(y)$ is independed  $\text{var}(\tilde n(y)) = \text{var}(n(x))$ (due to the assumption that $n(x)$ is white). Now tlia
-\textcolor{red}{work this..}
-
-
-
-This is the perfect situation for the message passenger algorithm for fast Wiener filtering and conditional simulation of $T$. Once I get that simulation I then set $\tilde T(y)$ as $T(y + \nabla \phi(y))$ which is obtained by re-lensing $T(y)$. This gives me a sample from $P(\widetilde T|\psi^{i},Y)$.
-.
-
-{\em Remark:} At present this algorithm only worksing with no, or very small, beam. ..
+{\em Remark:} At present this algorithm only working with no, or very small, beam. ..
  still represents independent Gaussian noise at the new pixel locations (only if $N$ was white noise to begin with...beams are another story). Therefore under the new coordinate system, $y$, the observations are simply unlensed CMB  corrupted with independent noise.
  
 
