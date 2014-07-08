@@ -1,17 +1,16 @@
 #=
 	include("scripts/makeFigsOffline.jl")
 =#
+# -- new ones 
+# const simdir     =  "scriptBase_1232358791" 
+# const simdir     =  "scriptBase_1743177682" 
+const simdir     =  "scriptBase_2657077506" 
+
+# -- old ones
 # const simdir     =  "scriptBase_1245382470" 
 # const simdir     =  "scriptBase_2110735524" 
-const simdir     =  "scriptBase_3870222763" 
+# const simdir     =  "scriptBase_3870222763" 
 
-# const simdir     =  "scriptBase_1671632039" 
-# const simdir     =  "scriptBase_2593658006" 
-# const simdir     =  "scriptBase_3013427591" 
-# const simdir     =  "scriptBase_3635739710" 
-# const simdir     =  "scriptNoMask_496819124" 
-# const simdir     =  "scriptNoMask_371582170" 
-# const simdir     =  "scriptNoMask_1266332765" 
 const specc 	 = true   # plot the spectral coverage
 const pcorr 	 = true   # plot the empirical cross correlation
 const onedslice  = true   # plot the 1-d slices of phi
@@ -19,7 +18,7 @@ const acc 	     = true   # take a look at the acceptance rate
 const imagsli    = false  # look at the images one by one
 const aveim      = true   # point-wise average.
 const mvie 	     = false  # <---- needs work
-const krang = 251:5:2000  # range of samples we are looking at
+const krang = 1:5:250  # range of samples we are looking at
 
 # --- copy these are from the runfile
 const percentNyqForC = 0.5 # used for T l_max
