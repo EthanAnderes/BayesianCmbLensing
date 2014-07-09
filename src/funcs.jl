@@ -98,7 +98,7 @@ function gradupdate!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_grad=1.0e-3
     end
 end
 
-###  ----- trying to optimze
+#not optimized
 function ttk_grad_wlog(tildetx_hr_sim, phik_curr, parlr, parhr)
     parlrgrddeltk2 = parlr.grd.deltk * parlr.grd.deltk
     phidx1_lr =  ifft2r(complex(0.0,1.0) .* parlr.grd.k1 .* phik_curr, parlr)
@@ -134,6 +134,9 @@ function ttk_grad_wlog(tildetx_hr_sim, phik_curr, parlr, parhr)
     term[parlr.pMaskBool] = 0.0
     term, loglike
 end
+
+
+
 
 
 

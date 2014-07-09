@@ -28,8 +28,10 @@ function  perodic_padd_xy(x,y,pad_proportion = 0.05)
 	
 	full_x, full_y
 end
+
+
 function  perodic_padd_z(z,pad_proportion = 0.05)
-	npad = round(pad_proportion*size(z,1));
+	npad = int(pad_proportion*size(z,1));
 	z_right = z[:, (end-npad+1):end]
 	z_left = z[:, 1:npad];
 	z_top = z[1:npad,:];

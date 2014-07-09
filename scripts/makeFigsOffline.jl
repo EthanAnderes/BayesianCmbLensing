@@ -2,9 +2,12 @@
 	include("scripts/makeFigsOffline.jl")
 =#
 # -- new ones 
+const simdir     =  "scriptBase_240332680" 
+
+
 # const simdir     =  "scriptBase_1232358791" 
 # const simdir     =  "scriptBase_1743177682" 
-const simdir     =  "scriptBase_2657077506" 
+# const simdir     =  "scriptBase_2657077506" 
 
 # -- old ones
 # const simdir     =  "scriptBase_1245382470" 
@@ -15,10 +18,10 @@ const specc 	 = true   # plot the spectral coverage
 const pcorr 	 = true   # plot the empirical cross correlation
 const onedslice  = true   # plot the 1-d slices of phi
 const acc 	     = true   # take a look at the acceptance rate
-const imagsli    = false  # look at the images one by one
+const imagsli    = true  # look at the images one by one
 const aveim      = true   # point-wise average.
 const mvie 	     = false  # <---- needs work
-const krang = 1:5:250  # range of samples we are looking at
+const krang = 1:5:350  # range of samples we are looking at
 
 # --- copy these are from the runfile
 const percentNyqForC = 0.5 # used for T l_max
@@ -29,12 +32,12 @@ const n = 2.0^9
 const beamFWHM = 0.0
 const nugget_at_each_pixel = (4.0)^2
 begin  #< ---- dependent run parameters
-	local deltx =  pixel_size_arcmin * pi / (180 * 60) #rads
+	local deltx =  pixel_size_arcmin * π / (180 * 60) #rads
 	local period = deltx * n # side length in rads
-	local deltk =  2 * pi / period
-	local nyq = (2 * pi) / (2 * deltx)
-	const maskupP  = √(deltk^2 * numofparsForP / pi)  #l_max for for phi
-	const maskupC  = min(9000.0, percentNyqForC * (2 * pi) / (2 * pixel_size_arcmin * pi / (180*60))) #l_max for for phi
+	local deltk =  2 * π / period
+	local nyq = (2 * π) / (2 * deltx)
+	const maskupP  = √(deltk^2 * numofparsForP / π)  #l_max for for phi
+	const maskupC  = min(9000.0, percentNyqForC * (2 * π) / (2 * pixel_size_arcmin * π / (180*60))) #l_max for for phi
 	println("muK_per_arcmin = $(sqrt(nugget_at_each_pixel * (pixel_size_arcmin^2)))") # muK per arcmin
 	println("maskupP = $maskupP") # muK per arcmin
 	println("maskupC = $maskupC") # muK per arcmin

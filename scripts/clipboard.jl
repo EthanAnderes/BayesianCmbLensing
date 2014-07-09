@@ -1,3 +1,87 @@
+
+# profile hmc etc to speed things up
+const percentNyqForC = 0.5 # used for T l_max
+const numofparsForP  = 1500  # used for P l_max
+const hrfactor = 2.0
+const pixel_size_arcmin = 2.0
+const n = 2.0^9
+const beamFWHM = 0.0
+const nugget_at_each_pixel = (4.0)^2
+begin  #< ---- dependent run parameters
+  local deltx =  pixel_size_arcmin * pi / (180 * 60) #rads
+  local period = deltx * n # side length in rads
+  local deltk =  2 * pi / period
+  local nyq = (2 * pi) / (2 * deltx)
+  const maskupP  = √(deltk^2 * numofparsForP / pi)  #l_max for for phi
+  const maskupC  = min(9000.0, percentNyqForC * (2 * pi) / (2 * pixel_size_arcmin * pi / (180*60))) #l_max for for phi
+end
+const scale_grad =  2.0e-3
+const scale_hmc  =  0.8e-3
+
+# ------------ load modules and functions
+push!(LOAD_PATH, pwd()*"/src")
+using Interp
+require("cmb.jl")
+require("fft.jl")
+require("funcs.jl") # use reload after editing funcs.jl
+
+# --------- generate cmb spectrum class for high res and low res
+parlr = setpar(
+  pixel_size_arcmin, n, beamFWHM, nugget_at_each_pixel, 
+  maskupC, maskupP
+)
+parhr = setpar(
+  pixel_size_arcmin./hrfactor, hrfactor*n, beamFWHM, nugget_at_each_pixel, 
+  maskupC, maskupP
+)
+
+# -------- Simulate data: ytx, maskvarx, phix, tildetx
+ytk_nomask, tildetk, phix, tx_hr = simulate_start(parlr);
+phik = fft2(phix, parlr)
+tmpdo = maximum(parlr.grd.x)*0.3
+tmpup = maximum(parlr.grd.x)*0.4
+maskboolx = tmpdo .<= parlr.grd.x .<= tmpup
+maskvarx  = parlr.nugget_at_each_pixel .* ones(size(parlr.grd.x))
+maskvarx[maskboolx] = Inf
+ytx = ifft2r(ytk_nomask, parlr)
+ytx[maskboolx] = 0.0
+ytk = fft2(ytx, parlr)
+
+acceptclk   = [1] #initialize acceptance record
+tx_hr_curr  = zero(parhr.grd.x)
+ttx         = zero(parhr.grd.x)
+p1hr, p2hr  = zero(parhr.grd.x), zero(parhr.grd.x)
+phik_curr   = zero(fft2(ytx, parlr))
+tildetx_hr_curr = zero(parhr.grd.x) 
+
+@time grad, loglike   = ttk_grad_wlog(tildetx_hr_curr, phik_curr, parlr, parhr)
+@time grad, loglike   = ttk_grad_wlog(tildetx_hr_curr, phik_curr, parlr, parhr);
+# lfrog!(phik_curr, phik_curr, tildetx_hr_curr, parlr, parhr, 0.0001, phik_curr)
+# hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc)
+
+Profile.clear()  # in case we have any previous profiling data
+@profile   grad, loglike   = ttk_grad_wlog(tildetx_hr_curr, phik_curr, parlr, parhr)
+# @profile lfrog!(phik_curr, phik_curr, tildetx_hr_curr, parlr, parhr, 0.0001, phik_curr)
+# @profile  hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc)
+using ProfileView
+ProfileView.view()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#######################################
 const percentNyqForC = 0.5 # used for T l_max
 const numofparsForP  = 1500  # used for P l_max
 const hrfactor = 2.0

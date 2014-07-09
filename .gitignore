@@ -4,3 +4,4 @@ simulations/*
 /paper/*
 !/paper/BLpaper.tex
 !/paper/BLpaper.pdf
+!/paper/refs.bib

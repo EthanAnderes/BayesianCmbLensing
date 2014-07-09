@@ -12,19 +12,19 @@ const n = 2.0^9
 const beamFWHM = 0.0
 const nugget_at_each_pixel = (4.0)^2
 begin  #< ---- dependent run parameters
-	local deltx =  pixel_size_arcmin * pi / (180 * 60) #rads
+	local deltx =  pixel_size_arcmin * π / (180 * 60) #rads
 	local period = deltx * n # side length in rads
-	local deltk =  2 * pi / period
-	local nyq = (2 * pi) / (2 * deltx)
-	const maskupP  = √(deltk^2 * numofparsForP / pi)  #l_max for for phi
-	const maskupC  = min(9000.0, percentNyqForC * (2 * pi) / (2 * pixel_size_arcmin * pi / (180*60))) #l_max for for phi
+	local deltk =  2 * π / period
+	local nyq = (2 * π) / (2 * deltx)
+	const maskupP  = √(deltk^2 * numofparsForP / π)  #l_max for for phi
+	const maskupC  = min(9000.0, percentNyqForC * (2 * π) / (2 * pixel_size_arcmin * π / (180*60))) #l_max for for phi
 	println("muK_per_arcmin = $(sqrt(nugget_at_each_pixel * (pixel_size_arcmin^2)))") # muK per arcmin
 	println("maskupP = $maskupP") # muK per arcmin
 	println("maskupC = $maskupC") # muK per arcmin
 	println("$(seed[1])") # muK per arcmin
 end
 const scale_grad =  2.0e-3
-const scale_hmc  =  0.8e-3
+const scale_hmc  =  2.0e-3
 
 
 
@@ -96,7 +96,7 @@ function gibbsloop(its, parhr, parlr, ytx, maskvarx)
 		# ----- update tildetx_hr_curr
 		if bglp % 100 == 1
 			p1hr[:], p2hr[:] = gibbspass_t!(tx_hr_curr, ttx, phik_curr, ytx, 
-				maskvarx, parlr, parhr, repstretch(2.0, 1.2maskupC, 50, 1000) #linspace(4parhr.grd.deltk, 1.2maskupC, 1000)
+				maskvarx, parlr, parhr, repstretch(2.0, 1.2maskupC, 75, 1000) 
 			)
 		end
 		p1hr[:], p2hr[:] = gibbspass_t!(tx_hr_curr, ttx, phik_curr, ytx, 
@@ -112,8 +112,6 @@ function gibbsloop(its, parhr, parlr, ytx, maskvarx)
 		if bglp <= 5 
 			gradupdate!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_grad) 
 		else
-			push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc))
-			push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc))
 			push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc))
 		end
 		if bglp % 5 == 1
