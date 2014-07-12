@@ -2,26 +2,27 @@
 	include("scripts/makeFigsOffline.jl")
 =#
 # -- new ones 
-const simdir     =  "scriptBase_240332680" 
+# const simdir     =  "scriptBase_2341978845" #  gumbel run5, one hmc with scalefactor 2.0e-3 ... really good one
+# const simdir     =  "scriptBase_240332680"  #  hilbert run4, one hmc with scalefactor 0.2e-3
 
 
-# const simdir     =  "scriptBase_1232358791" 
-# const simdir     =  "scriptBase_1743177682" 
-# const simdir     =  "scriptBase_2657077506" 
+# const simdir     =  "scriptBase_1232358791" # three hmc with scalefactor 0.8e-3
+const simdir     =  "scriptBase_1743177682" # three hmc with scalefactor 0.8e-3
+# const simdir     =  "scriptBase_2657077506" # really good one....three hmc with scalefactor 0.8e-3
 
 # -- old ones
 # const simdir     =  "scriptBase_1245382470" 
 # const simdir     =  "scriptBase_2110735524" 
 # const simdir     =  "scriptBase_3870222763" 
 
-const specc 	 = true   # plot the spectral coverage
-const pcorr 	 = true   # plot the empirical cross correlation
-const onedslice  = true   # plot the 1-d slices of phi
-const acc 	     = true   # take a look at the acceptance rate
-const imagsli    = true  # look at the images one by one
+const specc 	 = false   # plot the spectral coverage
+const pcorr 	 = false   # plot the empirical cross correlation
+const onedslice  = false   # plot the 1-d slices of phi
+const acc 	     = false   # take a look at the acceptance rate
+const imagsli    = false  # look at the images one by one
 const aveim      = true   # point-wise average.
 const mvie 	     = false  # <---- needs work
-const krang = 1:5:350  # range of samples we are looking at
+const krang = 201:15:1050  # range of samples we are looking at
 
 # --- copy these are from the runfile
 const percentNyqForC = 0.5 # used for T l_max

@@ -59,7 +59,7 @@
 The Plank satellite, along with
 ground based telescopes such as the Atacama Cosmology Telescope (ACT)  and  the South Pole Telescope (SPT), have mapped the  cosmic microwave background (CMB) at such an unprecedented resolution as too allow a detection of the subtle distortions  due to the gravitational influence of intervening  dark matter. This distortion is called  gravitational lensing and has become a  powerful probe of cosmology and the nature of dark matter.
 Estimating gravitational lensing  is important for two reasons. First, the weak lensing estimates can be used to construct a map of dark matter which would be invisible otherwise.
-Second,  weak lensing estimates can, in principle, un-lense the observed CMB to construct the original CMB radiation fluctuations. Both of these maps,  the unlensed CMB radiation field and the dark matter field, are deep probes into the nature of cosmology and cosmic structure. Bayesian techniques seem a perfect fit for the statistical analysis of lensing and the CMB. One reason is that the priors for the the unlensed CMB and the lensing potential are---very nearly---realizations of Gaussian random fields. The Gaussianity coming from physically predicted  quantum randomness in the early universe. However, challenges associated with a full Bayesian analysis have prevented previous attempts at  developing a working Bayesian prototype. 
+Second,  weak lensing estimates can, in principle, un-lense the observed CMB to construct the original CMB radiation fluctuations. Both of these maps,  the unlensed CMB radiation field and the dark matter field, are deep probes into the nature of cosmology and cosmic structure. Bayesian techniques seem a perfect fit for the statistical analysis of lensing and the CMB. One reason is that the priors for the unlensed CMB and the lensing potential are---very nearly---realizations of Gaussian random fields. The Gaussianity coming from physically predicted  quantum randomness in the early universe. However, challenges associated with a full Bayesian analysis have prevented previous attempts at  developing a working Bayesian prototype. 
 In this paper we solve many of these obstacles with a re-parameterization of the na\"ive lensing problem. This  allows us to obtain approximate draws from the  Bayesian lensing posterior of both the lensing potential and the unlensed CMB which converges remarkably fast. 
 \end{abstract}
 
@@ -368,8 +368,8 @@ As a intermediate step in producing a sample from  $P(\widetilde T |  \phi,\text
 \label{IMP}
 \begin{algorithmic}[1]
 \State Set cooling schedule $\lambda^1\geq  \ldots \geq \lambda^n = 1$. 
-\State Define $Z^{1}(y), \ldots, Z^{n}(y)$ to be independent realizations of standard Gaussian noise, in the pixel domain, so that $E \bigl[ Z^{k}(y)Z^{k}(y^\prime)\bigr] = \delta_{yy^\prime}$.
-\State Define $W^{1}_l, \ldots, W^{n}_l$ to be independent realizations of complex Gaussian white noise, in the Fourier domain, so that $E\bigl[ W^{n}_l W^{n\,*}_{l^\prime}\bigr] = \delta_{l - l^\prime}$.
+\State Simulate $Z^{1}(y), \ldots, Z^{n}(y)$ as independent realizations of standard Gaussian noise, in the pixel domain, so that $E \bigl[ Z^{k}(y)Z^{k}(y^\prime)\bigr] = \delta_{yy^\prime}$.
+\State Simulate $W^{1}_l, \ldots, W^{n}_l$ as independent realizations of complex Gaussian white noise, in the Fourier domain, so that $E\bigl[ W^{n}_l W^{n\,*}_{l^\prime}\bigr] = \delta_{l - l^\prime}$.
 \State Initialize the fields $M^0(y)$ and $T^0(y)$  to be zero.
 \State Decompose the noise variance $\text{var}(\tilde n(y))$ into a homogeneous part $\bar\sigma^2$ and a non-homogeneous part $\tilde\sigma_y^{2}$ so that $\text{var}(\tilde n(y)) = \bar\sigma^2 + \tilde\sigma_y^{2}$ (setting $\tilde \sigma_y^2 = \infty$ on all masked pixels $y$).
 \State Recursively compute the fields $T^k, M^k$ for $k=1, \ldots, n$ as follows:
@@ -418,6 +418,76 @@ The following algorithm describes how to use Algorithm \ref{IMP} to produce a sa
 \label{Section: simulation examples}
 
 \textcolor{red}{Work this section and be sure to add details about the cooling schedule.}
+
+
+\begin{figure}[H]
+{\includegraphics[height=3.0in]{fromParallel/data.pdf}}%
+{\includegraphics[height=3.0in]{fromParallel/tildex_est.pdf}}%
+% {\includegraphics[height=2in]{fromParallel/tildex.pdf}}
+\caption{{\em Left:} Data. {\em Middle:} posterior mean $E(\widetilde T(x)|\text{data})$.
+ % {\em Right:} simulation truth $\widetilde T(x)$. 
+ }
+\label{tilde fig}
+\end{figure}
+
+
+
+
+
+
+\begin{figure}[H]
+{\includegraphics[height=2.1in]{fromParallel/phix.pdf}}%
+{\includegraphics[height=2.1in]{fromParallel/phix_est.pdf}}%
+{\includegraphics[height=2.1in]{fromParallel/qex.pdf}}%
+\caption{{\em Left:} simulation truth $\phi(x)$. {\em Middle:} posterior mean $E(\phi(x)|\text{data})$. {\em Right: Quadratic estimate with additional masked data.}}
+\label{phix fig}
+\end{figure}
+
+
+
+\begin{figure}[H]
+{\includegraphics[height=2.5in]{fromParallel/phix_slice.pdf}}%
+{\includegraphics[height=2.5in]{fromParallel/tildex_ave_slice.pdf}}
+\caption{sliced posterior draws.}
+\label{slice fig}
+\end{figure}
+
+
+
+
+\begin{figure}[H]
+{\includegraphics[height=2.5in]{fromParallel/specP.pdf}}%
+{\includegraphics[height=2.5in]{fromParallel/corrP.pdf}}
+\caption{Spectral estimates. {\em Right:}Mode by mode correlation.}
+\label{spec fig}
+\end{figure}
+
+
+
+
+\begin{figure}[H]
+{\includegraphics[height=2.5in]{fromParallel/specT.pdf}}%
+{\includegraphics[height=2.5in]{fromParallel/corrT.pdf}}
+\caption{Spectral estimates. \textcolor{red}{put a mode- by mode correlation}}
+\label{spec fig}
+\end{figure}
+
+
+
+
+
+\begin{figure}[H]
+{\includegraphics[height=2.5in]{fromParallel/acceptRate.pdf}}%
+\caption{Acceptance rate on a sliding window of size $50$. }
+\label{acceptance rate}
+\end{figure}
+
+
+
+
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
