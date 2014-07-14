@@ -3,9 +3,10 @@
 =#
 
 
-krang = 51:10:1000 # range of samples we are looking at
+krang = 501:20:1500 # range of samples we are looking at
 jobs = 15
 savebool = true # set to true if you want the images saved
+# simdir     =  "scriptParallel_1743177682"
 simdir     =  "scriptParallel_2657077506"
 savefilepath = "/Users/ethananderes/Dropbox/BayesLense/paper/fromParallel"
 
@@ -109,7 +110,7 @@ phik_pwr_smpl = Array{Float64,1}[]
 tildek_pwr_smpl = Array{Float64,1}[]
 
 # 1-d slices
-propslice = 0.9 # btwn 0 and 1
+propslice = 0.80 # btwn 0 and 1
 phix_slice_samples = Array{Float64,1}[]
 tildex_slice_samples = Array{Float64,1}[]
 
