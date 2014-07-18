@@ -56,11 +56,8 @@
 \end{aug}
 
 \begin{abstract} 
-The Plank satellite, along with
-ground based telescopes such as the Atacama Cosmology Telescope (ACT)  and  the South Pole Telescope (SPT), have mapped the  cosmic microwave background (CMB) at such an unprecedented resolution as too allow a detection of the subtle distortions  due to the gravitational influence of intervening  dark matter. This distortion is called  gravitational lensing and has become a  powerful probe of cosmology and the nature of dark matter.
-Estimating gravitational lensing  is important for two reasons. First, the weak lensing estimates can be used to construct a map of dark matter which would be invisible otherwise.
-Second,  weak lensing estimates can, in principle, un-lense the observed CMB to construct the original CMB radiation fluctuations. Both of these maps,  the unlensed CMB radiation field and the dark matter field, are deep probes into the nature of cosmology and cosmic structure. Bayesian techniques seem a perfect fit for the statistical analysis of lensing and the CMB. One reason is that the priors for the unlensed CMB and the lensing potential are---very nearly---realizations of Gaussian random fields. The Gaussianity coming from physically predicted  quantum randomness in the early universe. However, challenges associated with a full Bayesian analysis have prevented previous attempts at  developing a working Bayesian prototype. 
-In this paper we solve many of these obstacles with a re-parameterization of the na\"ive lensing problem. This  allows us to obtain approximate draws from the  Bayesian lensing posterior of both the lensing potential and the unlensed CMB which converges remarkably fast. 
+The Plank satellite, along with ground based telescopes such as the Atacama Cosmology Telescope (ACT)  and  the South Pole Telescope (SPT), have mapped the  cosmic microwave background (CMB) at such an unprecedented resolution as too allow a detection of the subtle distortions  due to the gravitational influence of intervening  dark matter. This distortion is called  gravitational lensing and has become a  powerful probe of cosmology and dark matter. Estimating gravitational lensing  is important for two reasons. First, the weak lensing estimates can be used to construct a map of dark matter which would be invisible otherwise. Second,  weak lensing estimates can, in principle, un-lense the observed CMB to construct the original CMB radiation fluctuations. Both of these maps,  the unlensed CMB radiation field and the dark matter field, are deep probes of cosmology and cosmic structure. Bayesian techniques seem a perfect fit for the statistical analysis of lensing and the CMB. One reason is that the priors for the unlensed CMB and the lensing potential are---very nearly---realizations of Gaussian random fields. The Gaussianity coming from physically predicted  quantum randomness in the early universe. However, challenges associated with a full Bayesian analysis have prevented previous attempts at  developing a working Bayesian prototype. 
+In this paper we solve many of these obstacles with a re-parameterization of CMB lensing. This  allows us to obtain draws from the  Bayesian lensing posterior of both the lensing potential and the unlensed CMB which converges remarkably fast. 
 \end{abstract}
 
 \begin{keyword}
@@ -104,14 +101,15 @@ In Section \ref{two parameter system} we motivate our re-parameterization by ana
 \section{Weak lensing primer and a Bayesian challenge}
 \label{primer}
 
-In this section we describe the  basics of CMB lensing and Bayesian estimation.  The effect of weak lensing is to simply remap the CMB, preserving surface brightness.   Up to leading order, the remapping  displacements are given by $\nabla \phi$, where $\phi$ denotes a lensing potential and is the planer projection of a three dimensional gravitational potential (see Dodelson, S. (2003), for example). Therefore the lensed CMB can  be written $T(\bx + \nabla \phi(x))$ where $T(x)$ denotes the unlensed CMB temperature fluctuations projected to the observable sky and $x$ represents an observational direction on the unit sphere. For this paper we will be focusing on the small angle limit  so that $x$ is assumed to vary in a small patch of $ \Bbb R^2$. The lensed CMB is observed with additive noise (denoted $n(x)$) due to instrumental noise and a beam effect so  that the data can be written in the following form
+% In this section we describe the  basics of CMB lensing and Bayesian estimation. 
+The effect of weak lensing is to simply remap the CMB, preserving surface brightness.   Up to leading order, the remapping  displacements are given by $\nabla \phi$, where $\phi$ denotes a lensing potential and is the planer projection of a three dimensional gravitational potential (see Dodelson, S. (2003), for example). Therefore the lensed CMB can  be written $T(\bx + \nabla \phi(x))$ where $T(x)$ denotes the unlensed CMB temperature fluctuations projected to the observable sky and $x$ represents an observational direction on the unit sphere. For this paper we will be focusing on the small angle limit  so that $x$ is assumed to vary in a small patch of $ \Bbb R^2$. The lensed CMB is observed with additive noise (denoted $n(x)$) due to instrumental noise and a beam effect so  that the data can be written in the following form
 \begin{equation}
 \label{data model}
  \text{data}(x)= T(x + \nabla \phi(x))+ n(x).
 \end{equation}
 The goal of weak lensing surveys is to use the data in (\ref{data model}) to  estimate $\phi$, $T$  and possibly  the spectral densities of $T$ and $\phi$.  
 
-A very natural approach to develop a Bayesian lensing estimator is to generate posterior samples through a Gibbs algorithm which iteratively samples from the two conditionals: $P(T |  \phi,\text{data})$ and $P(\phi | T,  \text{data})$.
+A natural approach to develop a Bayesian lensing estimator is to generate posterior samples through a Gibbs algorithm which iteratively samples from the two conditionals: $P(T |  \phi,\text{data})$ and $P(\phi | T,  \text{data})$.
 Sampling from $P(T |  \phi,\text{data})$ is simply a Gaussian random field prediction problem since conditioning on $\phi$ models the data as
 \[ \text{data}(x) = T(\!\!\!\underbrace{x+\nabla\phi(x)}_\text{\tiny known obs locations}\!\!\!) + n(x).\]
 In other words, the data is a noisy version of  $T$ observed on an irregular grid. 
@@ -218,13 +216,13 @@ In Section \ref{Section: hamiltonian sampler section} we derive a Hamiltonian Ma
 In the two parameter analogy from Section \ref{two parameter system},  the relation between the sufficient parameter $\widetilde t$ and the ancillary parameter $t$ is given by $\widetilde t - \varphi = t$. The corresponding relation for CMB lensing we refer to as {\em anti-lensing}
 \begin{equation}
 \label{antilense}
- \widetilde T(\underbrace{x-\nabla\phi(x)}_\text{\small anti-lensing}) \approx T(x).% \quad\text{\bf\em analogous to}\quad \widetilde t - \varphi = t.
+ \widetilde T(\,\underbrace{x-\nabla\phi(x)}_\text{\small anti-lensing}\,) \approx T(x).% \quad\text{\bf\em analogous to}\quad \widetilde t - \varphi = t.
 \end{equation}
 Indeed,  anti-lensing is a key concept in this paper and allows sampling from both distributions (\ref{suff 1}) and (\ref{suff 2}).
 We distinguish between {\em inverse lensing} and  {\em anti-lensing}. Inverse lensing denotes the true coordinate displacement which, when applied to  $\widetilde T$, recovers the unlensed $T$. Conversely,  anti-lensing is  given by $-\nabla\phi$ and approximates inverse lensing.  
 To examine the difference between these two operations, start with a Helmholtz decomposition of the inverse lensing displacement: $-\nabla \phi^\text{inv}(x) - \nabla^\perp \psi^\text{inv}(x),$  where $\nabla^\perp \equiv \bigr(-\frac{\partial}{\partial y},\frac{\partial}{\partial x} \bigl)$ and  $\psi^\text{inv}$ denotes a stream function potential which models a field rotation. Now $\phi^\text{inv}$ and $\psi^\text{inv}$ are used to convert a lensed CMB $\widetilde T$ to $T$ as follows 
 \begin{align*}
-\widetilde T\bigl(x-\nabla \phi^\text{inv}(x) - \nabla^\perp \psi^\text{inv}(x)\bigr) &= T(x).
+\widetilde T\bigl(\,\underbrace{x-\nabla \phi^\text{inv}(x) - \nabla^\perp \psi^\text{inv}(x)}_\text{\small inverse lensing}\,\bigr) &= T(x).
 \end{align*}
 Due to the fact that the expected size of the lensing displacement $\nabla\phi$ is much smaller than the correlation length scale of $\phi$ we have
 \begin{align}
@@ -263,14 +261,14 @@ Regardless of the fact that $-\nabla\phi$ is a good approxiamtion to inverse len
 
 
 The Hamiltonian Monte Carlo (HMC) algorithm is an iterative sampling algorithm designed to mitigate the low-acceptance rate of the Metropolis-Hastings algorithm when working in high dimension. 
-A nice review of HMC can be found in \textcolor{red}{[cite Neal's paper]}. For applications of HMC in cosmology see \textcolor{red}{[add citations]}. In the present case we utilize the HMC algorithm to produce samples of $\phi$ from $P(\phi | \widetilde T,  \text{\rm data})$.  The key to making HMC work for lensing is to parameterize  $\phi$ in terms of it's Fourier transform. One can then utilize  Claim \ref{grad claim}, presented below, to efficiently compute the gradient of the log conditional density of $P(\phi | \widetilde T,  \text{\rm data})$, which is a the necessary component of the HMC algorithm.
+A nice review of HMC can be found in \textcolor{red}{[cite Neal's paper]}. For applications of HMC in cosmology see \textcolor{red}{[add citations]}. In the present case we utilize the HMC algorithm to produce samples of $\phi$ from $P(\phi | \widetilde T,  \text{\rm data})$.  The key to making HMC work for lensing is to parameterize  $\phi$ in terms of it's Fourier transform. One can then utilize  Claim \ref{grad claim}, presented below, to efficiently compute the gradient of the log conditional density of $P(\phi | \widetilde T,  \text{\rm data})$, which is a necessary computation for the HMC algorithm.
 
 {\em Notation:} Throughout the remainder of this paper, the Fourier transform of any function $f(x)$ will be denoted by $f_l$ or $f_k$ so that $f_l  =  \int_{\Bbb R^2} e^{-i x\cdot l}  f(x)\frac{dx}{2\pi}$ and
 $f(x) =  \int_{\Bbb R^2} e^{i x\cdot l}  f_l \frac{dl}{2\pi}$ 
 where $l\in \Bbb R^2$ is a two dimensional frequency vector and $x\in \Bbb R^2$  is a two dimensional spatial coordinate.
 
 
-To describe the HMC algorithm let $\bs \phi$ denote the concatenation of the real and imaginary parts of $\phi_l$ as $l$ ranges through discrete frequencies $l$ ranging up to a pre-specified $|l|_{max}$ (but excluding  half of the Fourier frequencies due to the Hermitian symmetries associated with the Fourier transform of a real field). Note that $\bs \phi$ is a vector of real numbers. 
+To describe the HMC algorithm let $\bs \phi$ denote the concatenation of the real and imaginary parts of $\phi_l$ as $l$ ranges through discrete frequencies $l$ ranging up to a pre-specified $|l|_{max}$ (but excluding  half of the Fourier frequencies due to the Hermitian symmetry associated with the Fourier transform of a real field). Note that $\bs \phi$ is a vector of real numbers. 
 Let $P(\bs \phi|\widetilde T, \text{data})$ denote the density of $\bs \phi$ given $\widetilde T$ and the data. 
 Let $\bs p$ denote a `momentum' vector and $\bs m$ denote a the `mass' vector, which are both the same length as $\bs \phi$. The Hamiltonian is a function of $\bs \phi$ and $\bs p$ and is defined as follows
 \[ H(\bs \phi, \bs p):= -\log P(\bs \phi|\widetilde T, \text{data})+\sum_k \frac{\bs p_k^2}{2\bs m_k^2}. \]
@@ -279,7 +277,8 @@ This Hamiltonian generates a time-dependent evolution of $\bs \phi$ and $\bs p$ 
 \frac{d\bs \phi^t}{dt} &= \phantom{-}\nabla_{\bs p} H(\bs \phi^t, \bs p^t) \\
 \frac{d\bs p^t}{dt}    &= -\nabla_{\bs \phi} H(\bs \phi^t, \bs p^t).
 \end{align*} 
-The HMC is a discrete version of  this time-dynamic equation, using a leapfrog method, which produces a Markov chain $(\bs \phi_1, \bs p_1), (\bs \phi_2, \bs p_2), \ldots$ where the $i+1$ iteration is given by the following algorithm
+The HMC is a discrete version of  this time-dynamic equation, using a leapfrog method, which produces a Markov chain $(\bs \phi_1, \bs p_1), (\bs \phi_2, \bs p_2), \ldots$ where the $i^\text{th}$ iteration is given by Algorithm \ref{ith step of HMC} below.
+
 \begin{algorithm}[H]
 \small
 \caption{ $i^\text{th}$ step of the Hamiltonian Markov Chain}
@@ -306,7 +305,7 @@ The prevailing wisdom is that one should set $\bs m$ to match the posterior vari
 
 
 The key computational difficulty in using algorithm \ref{ith step of HMC} is the computation of the $\nabla_{\bs \phi} H(\bs \phi^t, \bs p^t)$, or equvalently the computation of $\nabla_{\bs \phi} \log P(\bs \phi|\widetilde T, \text{data})$. The number of frequencies is extrememly large and therefore, any slow computation of the gradients will present a serious bottleneck. 
-The follow claim shows that the gradient of the log density of $P(\phi|\widetilde T, \text{data})$, with respect to the Fourier basis of $\phi$, can be computed quickly with Fourier and inverse Fourier transforms. This claim makes the Hamiltonian Monte Carlo (HMC) algorithm possible.
+The follow claim shows that the gradient of the log density of $P(\phi|\widetilde T, \text{data})$, with respect to the Fourier basis of $\phi$, can be computed quickly with Fourier and inverse Fourier transforms. This claim makes the HMC algorithm computationally feasible for CMB lensing.
 
 \begin{claim}
 \label{grad claim}
@@ -417,6 +416,12 @@ The following algorithm describes how to use Algorithm \ref{IMP} to produce a sa
 \section{Simulation examples}
 \label{Section: simulation examples}
 
+In this section we present an illustration of the methodology presented above. The simulation truth lensing potential is generated on the flat sky with periodic boundary conditions,  shown at left in Figure \ref{phix fig}. The data is shown at left in Figure \ref{tilde fig}. The pixel width is 2 arcmin with additive noise at each pixel with a variance of $16$. A vertical column in the data is masked which amounts to approximatly .. percent of the total pixels.
+
+The solid 
+
+
+The middle plots of both 
 \textcolor{red}{Work this section and be sure to add details about the cooling schedule.}
 
 

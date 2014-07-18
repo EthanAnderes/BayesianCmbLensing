@@ -1,3 +1,148 @@
+#######################
+#
+# test out a new messenger algorithm
+#
+#####################
+const percentNyqForC = 0.5 # used for T l_max
+const numofparsForP  = 1500  # used for P l_max
+const hrfactor = 2.0
+const pixel_size_arcmin = 2.0
+const n = 2.0^9
+const beamFWHM = 0.0
+const nugget_at_each_pixel = (3.0)^2
+begin  #< ---- dependent run parameters
+  local deltx =  pixel_size_arcmin * pi / (180 * 60) #rads
+  local period = deltx * n # side length in rads
+  local deltk =  2 * pi / period
+  local nyq = (2 * pi) / (2 * deltx)
+  const maskupP  = sqrt(deltk^2 * numofparsForP / pi)  #l_max for for phi
+  const maskupC  = min(9000.0, percentNyqForC * (2 * pi) / (2 * pixel_size_arcmin * pi / (180*60))) #l_max for for phi
+end
+# ------------ load modules and functions
+push!(LOAD_PATH, pwd()*"/src")
+using Interp, PyPlot
+require("cmb.jl"); require("fft.jl"); require("funcs.jl") # use reload after editing funcs.jl
+# --------- generate cmb spectrum class for high res and low res
+parlr = setpar(
+  pixel_size_arcmin, n, beamFWHM, nugget_at_each_pixel, 
+  maskupC, maskupP
+)
+parhr = setpar(
+  pixel_size_arcmin./hrfactor, hrfactor*n, beamFWHM, nugget_at_each_pixel, 
+  maskupC, maskupP
+)
+# -------- Simulate data: ytx, maskvarx, phix, tildetx
+ytk_nomask, tildetk, phix, tx_hr = simulate_start(parlr);
+tx = tx_hr[1:3:end, 1:3:end]
+tk = fft2(tx, parlr)
+
+tmpdo = maximum(parlr.grd.x)*0.3
+tmpup = maximum(parlr.grd.x)*0.4
+maskboolx = tmpdo .<= parlr.grd.x .<= tmpup
+maskvarx  = parlr.nugget_at_each_pixel .* ones(size(parlr.grd.x))
+maskvarx[maskboolx] = Inf
+
+
+function makeAmults(maskboolx, par)
+  function A_mult(sk)
+    maskAsx = ifft2r(sk, par)
+    maskAsx[maskboolx] = 0.0
+    maskAsx
+  end
+  function Astar_mult(zx)
+    maskzx = zeros(zx)
+    maskzx[!maskboolx] = zx[!maskboolx]
+    fft2(maskzx, par)
+  end
+  A_mult, Astar_mult
+end
+A_mult, Astar_mult = makeAmults(maskboolx, parlr)
+
+
+function binpower(fk::Matrix, kmag::Matrix, bin_mids::Range)
+  fpwr = Array(Float64, length(bin_mids))
+  fill!(fpwr, -1.0)
+  rtcuts  = collect(bin_mids +  step(bin_mids) / 2)  
+  lftcuts = collect(bin_mids -  step(bin_mids) / 2)  
+  lftcuts[1] = 0.1 # extend the left boundary all the way down, but not zero
+  for i in 1:length(bin_mids)
+    ibin = lftcuts[i] .<= kmag .< rtcuts[i]
+    fpwr[i] = fk[ibin] |> abs2 |> mean   
+    fpwr[i] = sum(abs2(fk[ibin])) / (length(fk[ibin]) - 2)
+  end
+  # --- now interpolate on to kmag
+  fpwr_matrix = zero(kmag)
+  for i in 1:size(kmag, 1), j in 1:size(kmag, 2)
+    fpwr_matrix[i, j] = fpwr[indmin(abs(kmag[i,j] - bin_mids))] 
+  end
+  fpwr_matrix
+end
+
+
+
+
+σ² = 10.0
+dx = A_mult(tk) + √(σ²) * randn(size(tildetk))
+
+sk = zero(tk)
+zx = zero(tx)
+δ = sum(!maskboolx)/length(maskboolx)
+λᵗ = 1e-5 * ones(size(sk)) 
+
+function amp_pass!(sk, zx, dx, σ², δ, λᵗ, par)
+  Δk     = par.grd.deltk * par.grd.deltk
+  Δx     = par.grd.deltx * par.grd.deltx
+  delt0  = 1 / Δk  
+  #σ² * Δx * delt0 # start lambda at the fourier noise variance
+  Sk     = delt0 * par.cTT
+  for cntr in 1:250
+    # --- update s
+    exps = Sk ./ (λᵗ + Sk)
+    exps[1] = 0.0
+    sk[:]  = exps .* (sk + Astar_mult(zx))
+    # --- update z
+    # zx[:]  = dx - A_mult(sk) +  zx .* mean(exps) / δ #!!!!! I don't understand this last term?? why does it
+                                                    # in particular why does it make sk + Astar_mult(zx) behave 
+                                                    # like truth plus noise.
+                                                    # is it possible to read the proof directly then reverse engerner
+                                                    # what it should be
+    zx[:]  = dx - A_mult(sk) + sum(exps) / δ # ./ (2par.grd.r + 1)        
+    # --- update λᵗ
+    # vars = λᵗ .* Sk ./ (λᵗ + Sk)
+    # λᵗ[:] =  pos( binpower(sk + Astar_mult(zx), par.grd.r, (2 * par.grd.deltk):(2 * par.grd.deltk):5_000 ) - Sk)
+    λᵗ = mean(abs2(zx)) / δ
+  end
+  λᵗ
+end
+
+λᵗ = amp_pass!(sk, zx, dx, σ², δ, λᵗ, parlr)
+
+figure(figsize = (14,5))
+subplot(1,2,1)
+imshow(ifft2r(sk, parlr))
+subplot(1,2,2)
+plot(λᵗ[1:10,1])
+plot(parlr.cTT[1:10,1] / parlr.grd.deltk / parlr.grd.deltk)
+#imshow( abs2(sk + Astar_mult(zx))- delt0 * par.cTT)
+
+
+
+dt = ifft2r(sk, parlr)-tx
+dd = dx-tx
+
+plot(dt[:,1])
+plot(dd[:,1])
+
+
+plot(tx[:,1])
+plot(ifft2r(sk, parlr)[:,1])
+plot(dx[:,1])
+
+
+
+
+
+
 
 # profile hmc etc to speed things up
 const percentNyqForC = 0.5 # used for T l_max

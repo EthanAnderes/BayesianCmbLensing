@@ -3,7 +3,7 @@
 =#
 
 
-krang = 501:20:1500 # range of samples we are looking at
+krang = 551:100:2500 # range of samples we are looking at
 jobs = 15
 savebool = true # set to true if you want the images saved
 # simdir     =  "scriptParallel_1743177682"
@@ -110,7 +110,7 @@ phik_pwr_smpl = Array{Float64,1}[]
 tildek_pwr_smpl = Array{Float64,1}[]
 
 # 1-d slices
-propslice = 0.80 # btwn 0 and 1
+propslice = 0.75 # btwn 0 and 1
 phix_slice_samples = Array{Float64,1}[]
 tildex_slice_samples = Array{Float64,1}[]
 
@@ -215,6 +215,8 @@ while true
 end
 fg = figure()
 plot(sliding_ave)
+plot(zero(sliding_ave))
+plot(zero(sliding_ave)+1)
 ylabel("acceptance rate")
 xlabel("iteration")
 if savebool; savefig(joinpath(savefilepath, "acceptRate.pdf"), dpi=200, bbox_inches="tight") end 
@@ -226,18 +228,18 @@ close(fg)
 
 # ---------- spectral coverage for phi
 fg = figure()
-plot(elp, dirac_0 .* elp.^4 .* cpl, "-k")
-plot(bin_mids_P, phb_truth, "or", label = "truth")
+plot(elp, elp.^4 .* cpl / 4, "-k", label = L"$l^4C_l^{\phi\phi}/4$")
+plot(bin_mids_P, phb_truth / dirac_0 / 4, "or", label = L"$l^4 |\phi_l|^2/ (\delta_0 4)$")
 rtcuts  = collect(bin_mids_P +  step(bin_mids_P) / 2)  
 lftcuts = collect(bin_mids_P -  step(bin_mids_P) / 2)  
 lftcuts[1] = 0.1 # extend the left boundary all the way down, but not zero
 errorbar(
 	bin_mids_P,
-	map(median,  phb_pwr),
+	map(median,  phb_pwr / dirac_0 / 4),
 	xerr = Array{Float64,1}[bin_mids_P-lftcuts, rtcuts-bin_mids_P],  
-	yerr = Array{Float64,1}[map(x-> median(x)-quantile(x,0.025), phb_pwr), map(x-> quantile(x,0.975)-median(x), phb_pwr)],
+	yerr = Array{Float64,1}[map(x-> median(x)-quantile(x,0.025), phb_pwr / dirac_0 / 4), map(x-> quantile(x,0.975)-median(x), phb_pwr / dirac_0 / 4)],
 	fmt="*b",
-	label = "95\% posterior region"
+	label = L"95% posterior for $l^4 |\phi_l|^2/ (\delta_0 4)$"
 )
 plot(collect(bin_mids_P), zero(bin_mids_P), ":k")
 xlabel("wavenumber")
@@ -274,7 +276,7 @@ close(fg)
 #=
 
 # -------- corrlation btwn fourier modes
-md = 4
+md = 10
 scatter(tib_pwr[md], tib_pwr[md+1])
 xlabel("power at wave number $(bin_mids_T[md])")
 ylabel("power at wave number $(bin_mids_T[md+1])")
