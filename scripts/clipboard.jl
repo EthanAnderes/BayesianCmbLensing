@@ -56,7 +56,26 @@ function makeAmults(maskboolx, par)
   end
   A_mult, Astar_mult
 end
-A_mult, Astar_mult = makeAmults(maskboolx, parlr)
+
+
+
+function makeAmultsv2(maskboolx, par)
+  # this one has the spectral multiplier in here too
+  delt0 = 1 / par.grd.deltk ^ 2
+  function A_mult(sk)
+    maskAsx = ifft2r(√(delt0 * par.cTT) .* sk, par)
+    maskAsx[maskboolx] = 0.0
+    maskAsx
+  end
+  function Astar_mult(zx)
+    maskzx = zeros(zx)
+    maskzx[!maskboolx] = zx[!maskboolx]
+    tmpk = fft2(maskzx, par) .* √(delt0 * par.cTT)
+    tmpk[1] = complex(0.0)
+    tmpk
+  end
+  A_mult, Astar_mult
+end
 
 
 function binpower(fk::Matrix, kmag::Matrix, bin_mids::Range)
@@ -79,16 +98,13 @@ function binpower(fk::Matrix, kmag::Matrix, bin_mids::Range)
 end
 
 
-
-
+#=
+A_mult, Astar_mult = makeAmults(maskboolx, parlr)
 σ² = 10.0
 dx = A_mult(tk) + √(σ²) * randn(size(tildetk))
-
 sk = zero(tk)
 zx = zero(tx)
 δ = sum(!maskboolx)/length(maskboolx)
-λᵗ = 1e-5 * ones(size(sk)) 
-
 function amp_pass!(sk, zx, dx, σ², δ, λᵗ, par)
   Δk     = par.grd.deltk * par.grd.deltk
   Δx     = par.grd.deltx * par.grd.deltx
@@ -114,12 +130,56 @@ function amp_pass!(sk, zx, dx, σ², δ, λᵗ, par)
   end
   λᵗ
 end
-
+λᵗ = 1e-5 * ones(size(sk)) 
 λᵗ = amp_pass!(sk, zx, dx, σ², δ, λᵗ, parlr)
+
+=#
+
+function smooth(zx, par)
+  zk = fft2(zx, par) 
+  zk[par.grd.r .≥ 200.0] = 0.0
+  ifft2r(zk, par)
+end
+
+
+
+A_mult, Astar_mult = makeAmultsv2(maskboolx, parlr)
+delt0 =  1 / parlr.grd.deltk / parlr.grd.deltk
+σ² = 10.0
+tmpk = tk ./ √(parlr.cTT * delt0)
+tmpk[1] = complex(0.0)
+dx = A_mult(tmpk) + √(σ²) * randn(size(tildetk))
+sk = zero(tk)
+zx = zero(tx)
+δ = sum(!maskboolx)/length(maskboolx)
+function amp_passv2!(sk, zx, dx, σ², δ, λᵗ, par)
+  Δk     = par.grd.deltk * par.grd.deltk
+  Δx     = par.grd.deltx * par.grd.deltx
+  delt0  = 1 / Δk  
+  for cntr in 1:50
+    # --- update s
+    exps = λᵗ
+    sk[:]  = exps .* (sk + Astar_mult(zx))
+    # --- update z
+    zx[:]  = dx - A_mult(sk)  #+ exps # 
+    # --- update λᵗ
+    # λᵗ = mean(abs2(zx)) 
+    # λᵗ = mean(abs2(sk + Astar_mult(zx))) 
+    λᵗ = smooth(abs2(sk + Astar_mult(zx)), par)
+  end
+  λᵗ
+end
+λᵗ = 1.0
+λᵗ = amp_passv2!(sk, zx, dx, σ², δ, λᵗ, parlr)
+subplot(1,2,1)
+imshow(ifft2r(√(delt0 * parlr.cTT) .* sk, parlr))
+subplot(1,2,2)
+imshow(tx)
+
 
 figure(figsize = (14,5))
 subplot(1,2,1)
-imshow(ifft2r(sk, parlr))
+imshow(ifft2r(√(delt0 * par.cTT) .* sk, parlr))
 subplot(1,2,2)
 plot(λᵗ[1:10,1])
 plot(parlr.cTT[1:10,1] / parlr.grd.deltk / parlr.grd.deltk)

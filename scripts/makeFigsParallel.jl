@@ -2,20 +2,31 @@
 	include("scripts/makeFigsParallel.jl")
 =#
 
-
-krang = 551:100:2500 # range of samples we are looking at
+ 
+# run this for the paper
+krang = 551:100:2501 # range of samples we are looking at
 jobs = 15
 savebool = true # set to true if you want the images saved
-# simdir     =  "scriptParallel_1743177682"
 simdir     =  "scriptParallel_2657077506"
 savefilepath = "/Users/ethananderes/Dropbox/BayesLense/paper/fromParallel"
 
+
+
+#=
+# run this for experimentation
+krang = 1:10:200 # range of samples we are looking at
+jobs = 15
+savebool = true # set to true if you want the images saved
+simdir     =  "scriptParallel_1743177682"
+savefilepath = "/Users/ethananderes/Desktop"
+=#
 
 using PyPlot
 push!(LOAD_PATH, pwd()*"/src")
 using Interp
 require("cmb.jl")
 require("fft.jl")
+require("funcs.jl")
 
 
 const percentNyqForC = 0.5 # used for T l_max
@@ -51,10 +62,10 @@ dirac_0 = 1/parlr.grd.deltk^d
 elp = parlr.ell[10:int(maskupP)] 
 elt = parlr.ell[10:1000] 
 cpl = parlr.CPell2d[10:int(maskupP)]
-ctl = parlr.CTell2d[10:1000]
+ctl = parlr.CTell2dLen[10:1000]
 r2 = parlr.grd.r.^2
-bin_mids_P = (parlr.grd.deltk*2):(parlr.grd.deltk):maskupP
-bin_mids_T = (parlr.grd.deltk*2):(parlr.grd.deltk):1000
+bin_mids_P = (parlr.grd.deltk*1.5):(parlr.grd.deltk):maskupP
+bin_mids_T = (parlr.grd.deltk*1.5):(parlr.grd.deltk):1000
 
 
 
@@ -229,7 +240,7 @@ close(fg)
 # ---------- spectral coverage for phi
 fg = figure()
 plot(elp, elp.^4 .* cpl / 4, "-k", label = L"$l^4C_l^{\phi\phi}/4$")
-plot(bin_mids_P, phb_truth / dirac_0 / 4, "or", label = L"$l^4 |\phi_l|^2/ (\delta_0 4)$")
+plot(bin_mids_P, phb_truth / dirac_0 / 4, "or", label = L"$l^4 |\phi_l|^2/(4\delta_0)$")
 rtcuts  = collect(bin_mids_P +  step(bin_mids_P) / 2)  
 lftcuts = collect(bin_mids_P -  step(bin_mids_P) / 2)  
 lftcuts[1] = 0.1 # extend the left boundary all the way down, but not zero
@@ -239,7 +250,7 @@ errorbar(
 	xerr = Array{Float64,1}[bin_mids_P-lftcuts, rtcuts-bin_mids_P],  
 	yerr = Array{Float64,1}[map(x-> median(x)-quantile(x,0.025), phb_pwr / dirac_0 / 4), map(x-> quantile(x,0.975)-median(x), phb_pwr / dirac_0 / 4)],
 	fmt="*b",
-	label = L"95% posterior for $l^4 |\phi_l|^2/ (\delta_0 4)$"
+	label = L"95% posterior for $l^4 |\phi_l|^2/ (4 \delta_0)$"
 )
 plot(collect(bin_mids_P), zero(bin_mids_P), ":k")
 xlabel("wavenumber")
@@ -252,18 +263,18 @@ close(fg)
 
 # ---------- spectral coverage for T
 fg = figure()
-plot(elt, dirac_0 .* elt.^2 .* ctl, "-k")
-plot(bin_mids_T, tib_truth, "or", label = "truth")
+plot(elt,  elt.^2 .* ctl, "-k", label = L"$l^2C_l^{ \tilde T\tilde T}$")
+plot(bin_mids_T, tib_truth / dirac_0 , "or", label =  L"$l^2 |\widetilde T_l|^2/ \delta_0$")
 rtcuts  = collect(bin_mids_T +  step(bin_mids_T) / 2)  
 lftcuts = collect(bin_mids_T -  step(bin_mids_T) / 2)  
 lftcuts[1] = 0.1 # extend the left boundary all the way down, but not zero
 errorbar(
 	bin_mids_T,
-	map(median,  tib_pwr),
+	map(median,  tib_pwr /  dirac_0),
 	xerr = Array{Float64,1}[bin_mids_T-lftcuts, rtcuts-bin_mids_T],  
-	yerr = Array{Float64,1}[map(x-> median(x)-quantile(x,0.025), tib_pwr), map(x-> quantile(x,0.975)-median(x), tib_pwr)],
+	yerr = Array{Float64,1}[map(x-> median(x)-quantile(x,0.025), tib_pwr /  dirac_0), map(x-> quantile(x,0.975)-median(x), tib_pwr /  dirac_0)],
 	fmt="*b",
-	label = "95\% posterior region"
+	label = L"95\% posterior region for $l^2 |\widetilde T_l|^2/ \delta_0$"
 )
 plot(collect(bin_mids_T), zero(bin_mids_T), ":k")
 xlabel("wavenumber")
@@ -281,9 +292,35 @@ scatter(tib_pwr[md], tib_pwr[md+1])
 xlabel("power at wave number $(bin_mids_T[md])")
 ylabel("power at wave number $(bin_mids_T[md+1])")
 
-
-
 =#
+
+
+
+# ------- cooling schedule
+fg = plt.figure()
+lcool = repstretch(2.0, 1.2maskupC, 75, 1000)
+λcool = Float64[]
+d2x   = parlr.grd.deltx * parlr.grd.deltx
+d2k   = parlr.grd.deltk * parlr.grd.deltk
+delt0 = 1 / d2k
+barNx = 0.99 * parlr.nugget_at_each_pixel
+barNk = barNx * d2x * delt0 # var in fourier
+for l in lcool
+	λbarNk = (l > 8000.0) ? barNk : max(barNk, delt0 * parlr.CTell2d[int(l)]) 
+	push!(λcool, λbarNk / barNk)
+end
+semilogy(λcool)
+xlabel(L"message passing iteration $k$", fontsize=22)
+ylabel(L"$\lambda^k$", fontsize=28)
+axis("tight")
+if savebool; savefig(joinpath(savefilepath, "cooling.pdf"), dpi=200, bbox_inches="tight") end 
+close(fg)
+
+
+
+
+
+
 
 # -------- cross correlation for phi
 fg = plt.figure()
@@ -309,7 +346,7 @@ close(fg)
 
 
 
-# -------- cross correlation for phi
+# -------- cross correlation for T
 fg = plt.figure()
 rtcuts  = collect(bin_mids_T +  step(bin_mids_T) / 2)  
 lftcuts = collect(bin_mids_T -  step(bin_mids_T) / 2)  
@@ -321,7 +358,7 @@ errorbar(
 	yerr = Array{Float64,1}[map(x-> median(x)-quantile(x,0.025), tib_cov), 
 							map(x-> quantile(x,0.975)-median(x), tib_cov)],
 	fmt="*b",
-	label = L"empirical cross correlation with $\phi_l$"
+	label = L"empirical cross correlation with $\widetilde T_l$"
 )
 plot(collect(bin_mids_T), zero(bin_mids_T), ":k")
 xlabel("wavenumber")
@@ -433,7 +470,6 @@ fg = figure()
 plot(x_slice, phix_slice_samples[:,1], color="blue", alpha=0.15, label=L"posterior samples of $\phi(x)$")
 plot(x_slice, phix_slice_samples[:,2:end], color="blue", alpha=0.15)
 plot(x_slice, phix_true_slice, color = "red",  linewidth=1.5, linestyle="-", label=L"simluation true $\phi(x)$")
-legend(loc="upper left")
 annotate("mask",
          xy=(maskmin, 0), xycoords="data",
          xytext=(-50, -50), textcoords="offset points", fontsize=16,
@@ -441,6 +477,7 @@ annotate("mask",
 xlabel("radians")
 axis("tight")
 axvspan(maskmin, maskmax,  facecolor="0.5", alpha=0.3, label="mask region")
+legend(loc="upper left")
 if savebool; savefig(joinpath(savefilepath, "phix_slice.pdf"), dpi=200, bbox_inches="tight") end 
 close(fg)
 
@@ -456,10 +493,10 @@ annotate("mask",
          xy=(maskmin, 0), xycoords="data",
          xytext=(-70, 10), textcoords="offset points", fontsize=16,
          arrowprops={:arrowstyle=>"->"})
-legend(loc="upper left")
 xlabel("radians")
 axis("tight")
 axvspan(maskmin, maskmax,  facecolor="0.5", alpha=0.3, label="mask region")
+legend(loc="upper right")
 if savebool; savefig(joinpath(savefilepath, "phix_ave_slice.pdf"), dpi=200, bbox_inches="tight") end 
 close(fg)
 
@@ -475,13 +512,11 @@ plot(x_slice[zoom], tildex_slice_samples[zoom,1], color="blue", alpha=0.15, labe
 plot(x_slice[zoom], tildex_slice_samples[zoom,2:end], color="blue", alpha=0.15)
 plot(x_slice[zoom], tildex_true_slice[zoom], color = "red",  linewidth=1.4, linestyle="-", label=L"simulation true $\tilde T(x)$")
 axis("tight")
-legend(loc="upper right")
 axvspan(maskmin, maskmax,  facecolor="0.5", alpha=0.3, label="mask region")
 annotate("mask", xy=(maskmin, 0), xycoords="data", xytext=(-50, -50), textcoords="offset points", fontsize=16, arrowprops={:arrowstyle=>"->"})
-
 xlabel("radians")
 axis("tight")
-axvspan(maskmin, maskmax,  facecolor="0.5", alpha=0.3, label="mask region")
+legend(loc="upper left")
 if savebool; savefig(joinpath(savefilepath, "tildex_ave_slice.pdf"), dpi=200, bbox_inches="tight") end 
 close(fg)
 

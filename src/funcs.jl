@@ -67,7 +67,6 @@ function gpass!(sx, sk, tx, tk, dx, Nx, par, cool)
   tldNx = Nx .- barNx 
   Sk    = scale(par.cTT[1:size(sk, 1),1:size(sk, 2)], delt0)
   for uplim in cool
-    # !!!!! I'm trying a new version here... 10 times delt0...
     λbarNk = (uplim > 8000.0) ? barNk : max(barNk, delt0 * par.CTell2d[int(uplim)])  # var in fourier
     λbarNx = λbarNk / (d2x * delt0)
     # --- update s
@@ -98,7 +97,6 @@ function gradupdate!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_grad=1.0e-3
     end
 end
 
-#not optimized
 function ttk_grad_wlog(tildetx_hr_sim, phik_curr, parlr, parhr)
     parlrgrddeltk2 = parlr.grd.deltk * parlr.grd.deltk
     phidx1_lr =  ifft2r(complex(0.0,1.0) .* parlr.grd.k1 .* phik_curr, parlr)
@@ -108,7 +106,7 @@ function ttk_grad_wlog(tildetx_hr_sim, phik_curr, parlr, parhr)
     rd1, rd2 = size(tildetk_hr_sim)
     tildetxd1   = irft(complex(0.0,1.0) .* parhr.grd.k1[1:rd1, 1:rd2] .* tildetk_hr_sim, parhr) 
     tildetxd2   = irft(complex(0.0,1.0) .* parhr.grd.k2[1:rd1, 1:rd2] .* tildetk_hr_sim, parhr) 
-    # ---
+   
     tildetx_unlensed     = spline_interp2(parhr.grd.x, parhr.grd.y, tildetx_hr_sim   , parlr.grd.x - phidx1_lr, parlr.grd.y - phidx2_lr, 0.01)
     tildetxd1_unlensed   = spline_interp2(parhr.grd.x, parhr.grd.y, tildetxd1  , parlr.grd.x - phidx1_lr, parlr.grd.y - phidx2_lr, 0.01)
     tildetxd2_unlensed   = spline_interp2(parhr.grd.x, parhr.grd.y, tildetxd2  , parlr.grd.x - phidx1_lr, parlr.grd.y - phidx2_lr, 0.01)
