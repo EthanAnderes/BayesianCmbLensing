@@ -1,7 +1,9 @@
 .DS_Store
-simulations/*
+!/simulations
+/simulations/*
 !/paper
 /paper/*
 !/paper/BLpaper.tex
 !/paper/BLpaper.pdf
 !/paper/refs.bib
+/scripts/clipboard.jl
