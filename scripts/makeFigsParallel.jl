@@ -1,25 +1,38 @@
-#=
-	include("scripts/makeFigsParallel.jl")
-=#
+#= 
+	This file generates figures based on the run from `scriptParallel`. 
+	Currently you need to edit the top of this script to set the directly to load data from and to set the 
+	directory to save the images to.
 
+	There are two ways to run this file, both which requires launching Julia in the top directory. 
+	The first way is to run the following command from the terminal
+
+	```
+	$ julia scripts/makeFigsParallel.jl 
+	```
+
+	The second way is the launch the script from withing julia. When launching form Julia you can 
+	disable saving the figures to file and simply view them dynamically. 
+
+	```
+	$ julia
+	julia> include("scripts/makeFigsParallel.jl")
+	```
+=#
  
-# run this for the paper
-krang = 551:100:2501 # range of samples we are looking at
-jobs = 15
-savebool = true # set to true if you want the images saved
-simdir     =  "scriptParallel_2657077506"
+ 
+# ------ adjust these for source/sink directories and burning/thinning
+savebool     = true # set to true if you want the images saved
+simdir       =  "scriptParallel_2657077506"
 savefilepath = "/Users/ethananderes/Dropbox/BayesLense/paper/fromParallel"
+krang = 551:100:2501 # this controles the thinning and the burn in.
 
 
+# --- automatically detect the number of parallel runs
+jobs = 1 
+while isdir("simulations/$simdir/job$(jobs+1)")
+	jobs += 1
+end
 
-#=
-# run this for experimentation
-krang = 1:10:200 # range of samples we are looking at
-jobs = 15
-savebool = true # set to true if you want the images saved
-simdir     =  "scriptParallel_1743177682"
-savefilepath = "/Users/ethananderes/Desktop"
-=#
 
 using PyPlot
 push!(LOAD_PATH, pwd()*"/src")

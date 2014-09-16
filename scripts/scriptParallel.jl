@@ -1,23 +1,47 @@
 #= 
-	include("scripts/scriptParallel.jl")
-=#
-numprocs = 15 
-addprocs(numprocs)
+	This script generates multiple simulated gibbs runs in parallel, all on the same simulated data.
+	There are two ways to run this file, both which requires launching Julia in the top diretory. 
+	The first way is to run the following command from the terminal
+	```
+	$ julia -p 10 scripts/scriptParallel.jl 
+	```
+	In the above command julia is started with 10 independent workers and simulations are made in parallel.
+	You can change this to the number of cores/workers you want.
 
-const scriptname = "scriptParallel"
+	The second way is the launch the script from withing julia:
+	```
+	$ julia
+	julia> addprocs(10)   # start 10 parallel workers
+	julia> include("scripts/scriptParallel.jl")
+	```
+=#
+
+
+#--- set the seed or generate a random one
+const seed = Base.Random.RANDOM_SEED
 # const seed = Uint32[2657077506, 531413685, 532641760, 1678774672] # big bump
-const seed = Uint32[1743177682, 59847886, 1211810022, 297006524] # corner diag bump
+# const seed = Uint32[1743177682, 59847886, 1211810022, 297006524] # corner diag bump
 srand(seed)
+
+
+
+# ---- set directory name for the simulation
+const scriptname = "scriptParallel"
 const savepath = joinpath("simulations", "$(scriptname)_$(seed[1])") #<--change the directory name here
-const percentNyqForC = 0.5 # used for T l_max
+
+
+
+# ---- parameters of the simulation run
+const maxiter = 2500  # sets the maximum number of gibbs iterations for each worker
+const percentNyqForC = 0.5   # used for T l_max
 const numofparsForP  = 1500  # used for P l_max
 const hrfactor = 2.0
 const pixel_size_arcmin = 2.0
 const n = 2.0^9
 const beamFWHM = 0.0
 const nugget_at_each_pixel = (4.0)^2
-begin  #< ---- dependent run parameters
-	local deltx =  pixel_size_arcmin * π / (180 * 60) #rads
+begin  
+	local deltx =  pixel_size_arcmin * π / (180 * 60) # rads
 	local period = deltx * n # side length in rads
 	local deltk =  2 * π / period
 	local nyq = (2 * π) / (2 * deltx)
@@ -30,6 +54,8 @@ begin  #< ---- dependent run parameters
 end
 const scale_grad =  2.0e-3
 const scale_hmc  =  2.0e-3
+
+
 
 # ------------ load modules and functions
 @everywhere push!(LOAD_PATH, pwd()*"/src")
@@ -89,6 +115,8 @@ al_lr = ttk_al(parlr)
 qex_lr = ifft2r(ttk_est(ytk_nomask, parlr) .* (parlr.cPP ./ (2.0 .* al_lr + parlr.cPP)) , parlr)
 writecsv("$savepath/qex_lr.csv", qex_lr)	
 
+
+
 # ------------------ initalized and run the gibbs 
 @everywhere function gibbsloop(its, parhr, parlr, ytx, maskvarx, maskupC, savepath, r, scale_grad, scale_hmc, hrfactor)
 	acceptclk   = [1] #initialize acceptance record
@@ -131,6 +159,8 @@ writecsv("$savepath/qex_lr.csv", qex_lr)
 end # function
 
 
-@parallel for r = 1:numprocs
-	gibbsloop(2500, parhr, parlr, ytx, maskvarx, maskupC, savepath, r, scale_grad, scale_hmc, hrfactor)
+
+# ------- run parallel jobs
+@parallel for r = 1:workers()
+	gibbsloop(maxiter, parhr, parlr, ytx, maskvarx, maskupC, savepath, r, scale_grad, scale_hmc, hrfactor)
 end
