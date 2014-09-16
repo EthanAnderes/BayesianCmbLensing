@@ -6,9 +6,9 @@
 
 Requirements: 
 
-	* Julia v0.3+ 
-	* packages PyCall and PyPlot.
-	* Python 2.7 with numpy, scipy and matplotlib
+ * Julia v0.3+ 
+ * packages PyCall and PyPlot.
+ * Python 2.7 with numpy, scipy and matplotlib
 
 Note: to install the Julia packages execute the following commands at the Julia command line:
 
@@ -19,7 +19,7 @@ julia> Pkg.add("PyPlot")
 
 
 
-# Generating a simulation and gibbs chains in parallel
+# Generating a lensed CMB simulation and run gibbs chain
 
 This script generates multiple simulated gibbs runs in parallel, all on the same simulated data.
 There are two ways to run this file, both which requires launching Julia in the top diretory. 
