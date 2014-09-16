@@ -19,13 +19,7 @@ julia> Pkg.add("PyPlot")
 
 # Generating a lensed CMB simulation and a Gibbs run
 
-The script `scripts/scriptParallel.jl` generates a lensed CMB simulation and multiple Gibbs chains, in parallel, for sampling from the posterior on the lensing potential and the noise-free lensed CMB. Parameters of the run can be set withing the script. There are two ways to run this file, both which requires launching Julia in the main directory. The first way is to run the following command from the terminal
-
-```
-$ julia -p 10 scripts/scriptParallel.jl 
-```
-
-In the above command Julia is started with 10 parallel workers. You can change this number to match the number of cores desired. The second way is the launch the script is from within Julia:
+The script `scripts/scriptParallel.jl` generates a lensed CMB simulation and multiple Gibbs chains, in parallel, for sampling from the posterior on the lensing potential and the noise-free lensed CMB. Parameters of the run can be set within the script. To run this script launch Julia within the main directory:
 
 ```julia
 $ julia
@@ -38,17 +32,12 @@ The data will be saved to the directory `simulations/` with an serial number ide
 
 # Generating Figures
 
-The script file `scripts/makeFigsParallel.jl` contains the commands to generate figures from the data saved by `scripts/scriptParallel.jl`. Currently you need to edit the top of this script to set the source/sink directories. There are two ways to run this file, both which requires launching Julia in the main directory. 
-The first way is to run the following command from the terminal
-
-```
-$ julia scripts/makeFigsParallel.jl 
-```
-
-The second way is the launch the script from within Julia. When launching form Julia you can 
-disable saving the figures and simply view them dynamically. 
+The script file `scripts/makeFigsParallel.jl` contains the commands to generate figures from the data saved by `scripts/scriptParallel.jl`. Currently you need to edit the top of this script to set the source/sink directories. To run this file you need to launching Julia in the main directory. 
+ 
 
 ```julia
 $ julia
 julia> include("scripts/makeFigsParallel.jl")
 ```
+
+You by editing the script file you can disable saving the figures and instead view them dynamically. 
