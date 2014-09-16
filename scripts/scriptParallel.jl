@@ -95,7 +95,7 @@ ytk = fft2(ytx, parlr)
 # -----------  set the save directory and save stuff 
 isdir(savepath) && run(`rm -rf $savepath`) 
 run(`mkdir $savepath`)
-for r = 1:numprocs
+for r in workers()
 	run(`mkdir $savepath/job$r`)
 end
 run(`cp src/funcs.jl $savepath/funcs_save.jl`)
@@ -161,6 +161,6 @@ end # function
 
 
 # ------- run parallel jobs
-@sync @parallel for r = 1:workers()
+@sync @parallel for r in workers()
 	gibbsloop(maxiter, parhr, parlr, ytx, maskvarx, maskupC, savepath, r, scale_grad, scale_hmc, hrfactor)
 end

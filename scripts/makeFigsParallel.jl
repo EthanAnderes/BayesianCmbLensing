@@ -28,9 +28,14 @@ krang = 551:100:2501 # this controles the thinning and the burn in.
 
 
 # --- automatically detect the number of parallel runs
-jobs = 1 
-while isdir("simulations/$simdir/job$(jobs+1)")
-	jobs += 1
+jobs = Int[]
+if isdir("simulations/$simdir/job1")
+	push!(jobs, 1)
+else
+	push!(jobs, 2)
+	while isdir("simulations/$simdir/job$(jobs[end]+1)")
+		push!(jobs,jobs[end]+1 )
+	end
 end
 
 
@@ -145,7 +150,7 @@ tildetx_lr_sum = zero(phix)
 
 
 cntr = 0
-for r in 1:jobs, k in krang
+for r in jobs, k in krang
 	if isfile("simulations/$simdir/job$r/phix_curr_$k.csv") 
 	
 		phix_curr = readcsv("simulations/$simdir/job$r/phix_curr_$k.csv")
