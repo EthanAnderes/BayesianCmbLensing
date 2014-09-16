@@ -7,3 +7,7 @@
 !/paper/BLpaper.pdf
 !/paper/refs.bib
 /scripts/clipboard.jl
+/scripts/clipboard.jl
+/scripts/makeFigsOffline.jl
+/scripts/scriptBase.jl
+/scripts/scriptNoMask.jl
