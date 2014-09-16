@@ -161,6 +161,6 @@ end # function
 
 
 # ------- run parallel jobs
-@async @parallel for r = 1:workers()
+@sync @parallel for r = 1:workers()
 	gibbsloop(maxiter, parhr, parlr, ytx, maskvarx, maskupC, savepath, r, scale_grad, scale_hmc, hrfactor)
 end
