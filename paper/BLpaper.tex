@@ -102,7 +102,6 @@ In Section \ref{two parameter system} we motivate our re-parameterization by ana
 \section{Weak lensing primer and a Bayesian challenge}
 \label{primer}
 
-% In this section we describe the  basics of CMB lensing and Bayesian estimation. 
 The effect of weak lensing is to simply remap the CMB, preserving surface brightness.   Up to leading order, the remapping  displacements are given by $\nabla \phi$, where $\phi$ denotes a lensing potential and is the planer projection of a three dimensional gravitational potential (see Dodelson, S. \cite{dodelson2003modern}, for example). Therefore the lensed CMB can  be written $T(\bx + \nabla \phi(x))$ where $T(x)$ denotes the unlensed CMB temperature fluctuations projected to the observable sky and $x$ represents an observational direction on the unit sphere. For this paper we will be focusing on the small angle limit  so that $x$ is assumed to vary in a small patch of $ \Bbb R^2$. The lensed CMB is observed with additive noise (denoted $n(x)$) due to instrumental noise and a beam effect so  that the data can be written in the following form
 \begin{equation}
 \label{data model}
@@ -388,8 +387,6 @@ where  $dy$ denotes the pixel grid area.
 \end{algorithm}
 
 
-% Now, to produce a conditional sample $ P(\widetilde T |  \phi,\text{\rm data})$ we first produce a conditional sample sample from $T(y)$ given $T(y)+\tilde n(y)$ using Algorithm \ref{IMP}, then lense the sample of $T(y)$ to produce $\widetilde T(x)$. The following algorithm desribes this in detail
-
 The following algorithm describes how to use Algorithm \ref{IMP} to produce a sample from $ P(\widetilde T |  \phi,\text{\rm data})$.
 
 \begin{algorithm}[H]
@@ -426,13 +423,11 @@ In this section we present a simulation to illustrate the methodology presented 
 
 
 \begin{wrapfigure}{r}{0.5\textwidth}
-%\begin{figure}[H]
 {\includegraphics[height=2.0in]{fromParallel/cooling.pdf}}%
 \caption{
 Cooling schedule for the message passing algorithm. This schedule is applied every $100^\text{th}$ step in the Gibbs algorithm.
  }
 \label{cooling}
-%\end{figure}
 \end{wrapfigure}
 
  
@@ -451,9 +446,7 @@ Figures \ref{tilde fig}, \ref{phix fig} and \ref{slice fig}  illustrate the post
 \begin{figure}[h]
 {\includegraphics[height=2.8in]{fromParallel/data.pdf}}%
 {\includegraphics[height=2.8in]{fromParallel/tildex_est.pdf}}%
-% {\includegraphics[height=2in]{fromParallel/tildex.pdf}}
 \caption{{\em Left:} Data. {\em Middle:} posterior mean $E(\widetilde T(x)|\text{data})$.
- % {\em Right:} simulation truth $\widetilde T(x)$. 
  }
 \label{tilde fig}
 \end{figure}
@@ -503,18 +496,6 @@ In Figures \ref{p spec fig} and \ref{t spec fig} we summarize the posterior draw
 
 
 
-% \begin{figure}[H]
-% {\includegraphics[height=2.5in]{fromParallel/acceptRate.pdf}}%
-% \caption{Acceptance rate on a sliding window of size $50$. }
-% \label{acceptance rate}
-% \end{figure}
-
-
-
-
-
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -544,7 +525,6 @@ Notice that both sampling steps $P(\phi |\widetilde T)$ and $P(\widetilde T|\phi
 \appendix
 
 \section{}
-%\section{Proofs}
 
 Before we proceed to the proofs we say a few words regarding notation.
 First, we do not differentiate, notationally, from the case of smooth random field with periodic boundary conditions defined on $(-L/2, L/2]^2$ and the case where $L\rightarrow \infty$ so that the Fourier series $\sum_{l \in \frac{2\pi}{L}\Bbb Z }   e^{i x\cdot l}  f_l \frac{2\pi/ L}{2\pi} $ converges to the continuous Fourier transform $\int_{\Bbb R^2}  e^{i x\cdot l}  f_l \frac{dl}{2\pi} $. %Indeed,  $\int_{\Bbb R^2}  e^{i x\cdot l}  f_l \frac{dl}{2\pi} $ is simply equivalent notation for the Riemann sum, with $L$ near infinity.
@@ -563,7 +543,6 @@ P(\phi|\widetilde T, \text{\rm data}) &= P(\phi|\widetilde T)\propto P(\widetild
 Since $\phi(x)$ is an isotropic random field with spectral density $C_l^{\phi\phi}$ we have that $E(\phi^{\phantom{*}}_l \phi_{l^\prime}^*) = \delta_{l - l^\prime}C_l^{\phi\phi}$. 
 Therefore  $E(\phi_l^{\phantom{*}}\phi_l^*) = \delta_{0}C_l^{\phi\phi}$ and $E(\phi_l\phi_{l}) = 0$ one gets that the random variables $\re \phi_l$, $\im \phi_l$ are independent $\mathcal N(0, \frac{1}{2}\delta_0 C_l^{\phi\phi})$ for each fixed $l$.
 Moreovoer  $\phi(x)$ takes values in $\Bbb R$ so that  $\phi_l = \phi_{-l}^*$.  This implies 
-% (\textcolor{red}{what exactly implies what here? clearly the moments don't tell us exactly that they are independent since $E(z w^*)=0$ could happen when $w = z^*$, and $(\re z, \im z)^t\sim \mathcal N(0,\sigma^2 I)$. But I think this is the only case where $E(zw^*)=0$ when we know $z$ and $w$ are marginally Gaussian.}) 
 that $\phi_l$ and are independent random variables over all $l$ which are restricted to the a Hermitian half of the Fourier grid, denoted $\Bbb H$. In particular,  if we exclude the zero frequency $l = 0$ we get
 \begin{align}
 \log P(\phi) - c_1 &=  - \frac{1}{2}\sum_{k \in \Bbb H\setminus \{0 \}}  \left[\frac{(\re \phi_k)^2}{\frac{1}{2}\delta_0 C_k^{\phi\phi}} +  \frac{(\im \phi_k)^2}{\frac{1}{2}\delta_0 C_k^{\phi\phi}} \right] = - \frac{1}{2}\int_{\Bbb R^2} \frac{|\phi_k|^2}{C_k^{\phi\phi}} dk \label{dr1} \\
