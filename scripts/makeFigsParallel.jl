@@ -19,12 +19,13 @@
 	```
 =#
  
- 
-# ------ adjust these for source/sink directories and burning/thinning
-savebool     = true # set to true if you want the images saved
-simdir       =  "scriptParallel_2657077506"
+# -------- adjust these for source/sink directories
+savebool     = true   # set to true if you want the images saved
+simdir       =  "scriptParallel_4127758087"
 savefilepath = "/Users/ethananderes/Dropbox/BayesLense/paper/fromParallel"
-krang = 551:100:2501 # this controles the thinning and the burn in.
+
+# ------  burning/thinning
+krang = 551:100:2501 
 
 
 # --- automatically detect the number of parallel runs
@@ -231,7 +232,7 @@ tib_truth = binpower(sqrt(r2) .* tildek, parlr.grd.r, bin_mids_T)
 
 
 # ------  acceptance rate plots
-accptrec = readcsv("simulations/$simdir/job1/acceptclk.csv")		
+accptrec = readcsv("simulations/$simdir/job$(jobs[1])/acceptclk.csv")		
 # plots the acceptence rate in a sliding window of 10, after removing the gradient records
 sliding_ave = Float64[]
 k = 1
