@@ -45,19 +45,23 @@
 \runtitle{Bayesian CMB lensing}
 \begin{aug}
    \author{\fnms{Ethan}  \snm{Anderes}\corref{}\thanksref{t1}\thanksref{a}}
-   \author{\fnms{Benjamin} \snm{Wandelt}\thanksref{b}}
+   \author{\fnms{Benjamin} \snm{Wandelt}\thanksref{b}\thanksref{c}\thanksref{d}}
    \and
-   \author{\fnms{Guilhem}  \snm{Lavaux}\thanksref{b}}%
+   \author{\fnms{Guilhem}  \snm{Lavaux}\thanksref{b}\thanksref{c}}%
    \ead[label=u1, url]{https://github.com/EthanAnderes/BayesianCmbLensing.git}
    \address[a]{Department of Statistics, University of California, Davis CA 95616, USA.}
-   \address[b]{Institut d' Astrophysique de Paris. }
+   \address[b]{
+   Sorbonne Universités, UPMC Univ Paris 06, UMR7095, Institut
+  d’Astrophysique de Paris, F-75014, Paris, France}
+  \address[c]{CNRS, UMR7095, Institut d’Astrophysique de Paris, F-75014, Paris, France}
+  \address[d]{Chaire d'excellence, Lagrange Institute (ILP) 98 bis, boulevard Arago 75014 Paris France}
    \thankstext{t1}{Research supported by: NSF DMS-1007480, NSF CAREER DMS-1252795}
    \thankstext{t2}{Code available at \printead{u1}}
    \runauthor{E. Anderes et al.}
 \end{aug}
 
 \begin{abstract} 
-The Plank satellite, along with ground based telescopes such as the Atacama Cosmology Telescope (ACT)  and  the South Pole Telescope (SPT), have mapped the  cosmic microwave background (CMB) at such an unprecedented resolution as too allow a detection of the subtle distortions  due to the gravitational influence of intervening  dark matter. This distortion is called  gravitational lensing and has become a  powerful probe of cosmology and dark matter. Estimating gravitational lensing  is important for two reasons. First, the weak lensing estimates can be used to construct a map of dark matter which would be invisible otherwise. Second,  weak lensing estimates can, in principle, un-lense the observed CMB to construct the original CMB radiation fluctuations. Both of these maps,  the unlensed CMB radiation field and the dark matter field, are deep probes of cosmology and cosmic structure. Bayesian techniques seem a perfect fit for the statistical analysis of lensing and the CMB. One reason is that the priors for the unlensed CMB and the lensing potential are---very nearly---realizations of Gaussian random fields. The Gaussianity coming from physically predicted  quantum randomness in the early universe. However, challenges associated with a full Bayesian analysis have prevented previous attempts at  developing a working Bayesian prototype. 
+The Plank satellite, along with ground based telescopes such as the Atacama Cosmology Telescope (ACT)  and  the South Pole Telescope (SPT), have mapped the  cosmic microwave background (CMB) at such an unprecedented resolution as too allow a detection of the subtle distortions  due to the gravitational influence of intervening  dark matter. This distortion is called  gravitational lensing and has become a  powerful probe of cosmology and dark matter. Estimating gravitational lensing  is important for two reasons. First, the weak lensing estimates can be used to construct a map of dark matter which would be invisible otherwise. Second,  weak lensing estimates can, in principle, un-lense the observed CMB to construct the original CMB radiation fluctuations. Both of these maps,  the unlensed CMB radiation field and the dark matter field, are deep probes of cosmology and cosmic structure. Bayesian techniques seem a perfect fit for the statistical analysis of lensing and the CMB. One reason is that the priors for the unlensed CMB and the lensing potential are---very nearly---Gaussian random fields. The Gaussianity coming from physically predicted  quantum randomness in the early universe. However, challenges associated with a full Bayesian analysis have prevented previous attempts at  developing a working Bayesian prototype. 
 In this paper we solve many of these obstacles with a re-parameterization of CMB lensing. This  allows us to obtain draws from the  Bayesian lensing posterior of both the lensing potential and the unlensed CMB which converges remarkably fast. 
 \end{abstract}
 
@@ -76,9 +80,9 @@ In this paper we solve many of these obstacles with a re-parameterization of CMB
 
 
 
- Over the past few years, data from ground based telescopes (ACT, SPT and Bicep2) and the Plank satellite and have resulted in an unprecedented detection of weak gravitational lensing of the cosmic microwave background (CMB) \cite{das2011detection,van2012measurement,ade2013planck}.  This new data not only probes the nature of dark matter but also constrains cosmological models of gravity waves and dark energy \textcolor{red}{[add citations]}. The state-of-the-art estimator of CMB gravitational lensing, the quadratic estimator developed by Hu and Okomoto \cite{hu2001mapping,hu2002mass}, works in part through a delicate cancellation of terms in an infinite Taylor expansion of the lensing effect on the CMB. The effect of this cancellation is particularly sensitive to foreground contaminants and sky masking, which  if not fully accounted for,  limits  the statistical inferential power of this new data.  
+ Over the past few years, data from ground based telescopes (ACT, SPT and Bicep2) and the Plank satellite and have resulted in an unprecedented detection of weak gravitational lensing of the cosmic microwave background (CMB) \cite{das2011detection,van2012measurement,ade2013planck}.  This new data not only probes the nature of dark matter but also constrains cosmological models of gravity waves and dark energy. The state-of-the-art estimator of CMB gravitational lensing, the quadratic estimator developed by Hu and Okomoto \cite{hu2001mapping,hu2002mass}, works in part through a delicate cancellation of terms in an infinite Taylor expansion of the lensing effect on the CMB. The effect of this cancellation is particularly sensitive to foreground contaminants and sky masking, which  if not fully accounted for,  limits  the statistical inferential power of this new data.  
 
- Possibly the most promising alternative to the quadratic estimator is Bayesian lensing. Indeed, Bayesian techniques applied to the lensed CMB observations have the potential for drastically changing the way lensing is estimated and used for inference.  Current frequentest estimators of the unknown lensing potential treat the unlensed CMB as a source of shape noise which is marginalized out. Conversely, a Bayesian lensing posterior treats the lensing potential {\em and} the unlensed CMB as joint unknowns, whereby obtaining scientific constrains jointly rather than marginally. Moreover, the  posterior distribution is easier to interpret and sequentially update with additional data. From the geometry of weak lensing, most of the lensing power comes from matter at a redshift $z\approx 2$ \textcolor{red}{(check the facts here)}. At these distances the matter distribution is well approximated by linear theory which predicts the matter density fluctuations are nearly Gaussian. In addition, the unlensed CMB is, at present, indistinguishable from an isotropic Gaussian random field.  From a statistical perspective, this is a perfect scenario for Bayesian methods in that both the observations and the unknown lensing potential are {\em physically predicted} to be Gaussian random fields.  
+ Possibly the most promising alternative to the quadratic estimator is Bayesian lensing. Indeed, Bayesian techniques applied to the lensed CMB observations have the potential for drastically changing the way lensing is estimated and used for inference.  Current frequentest estimators of the unknown lensing potential treat the unlensed CMB as a source of shape noise which is marginalized out. Conversely, a Bayesian lensing posterior treats the lensing potential {\em and} the unlensed CMB as joint unknowns, whereby obtaining scientific constrains jointly rather than marginally. Moreover, the  posterior distribution is easier to interpret and sequentially update with additional data. From the geometry of weak lensing, most of the lensing power comes from matter at high redshift. At these distances the matter distribution on large scales is well approximated by Gaussian density fluctuations. In addition, the unlensed CMB is, at present, indistinguishable from an isotropic Gaussian random field.  From a statistical perspective, this is a perfect scenario for Bayesian methods in that both the observations and the unknown lensing potential are {\em physically predicted} to be Gaussian random fields.  
  
 Physicists have known, for some time, that Bayesian methods could potentially provide next-generation lensing estimates. In their seminal review \cite{Lewis20061}, authors Lewis and Challinor  discuss the possibility of obtaining posterior draws from the lensing potential and the unlensed CMB jointly. However, they acknowledge the main obstacle for naive Gibbs implementations:
 \begin{quote}
@@ -102,7 +106,7 @@ In Section \ref{two parameter system} we motivate our re-parameterization by ana
 \section{Weak lensing primer and a Bayesian challenge}
 \label{primer}
 
-The effect of weak lensing is to simply remap the CMB, preserving surface brightness.   Up to leading order, the remapping  displacements are given by $\nabla \phi$, where $\phi$ denotes a lensing potential and is the planer projection of a three dimensional gravitational potential (see Dodelson, S. \cite{dodelson2003modern}, for example). Therefore the lensed CMB can  be written $T(\bx + \nabla \phi(x))$ where $T(x)$ denotes the unlensed CMB temperature fluctuations projected to the observable sky and $x$ represents an observational direction on the unit sphere. For this paper we will be focusing on the small angle limit  so that $x$ is assumed to vary in a small patch of $ \Bbb R^2$. The lensed CMB is observed with additive noise (denoted $n(x)$) due to instrumental noise and a beam effect so  that the data can be written in the following form
+The effect of weak lensing is to simply remap the CMB, preserving surface brightness.   Up to leading order, the remapping  displacements are given by $\nabla \phi$, where $\phi$ denotes the lensing potential and is the planer projection of the three dimensional gravitational potential (see Dodelson, S. \cite{dodelson2003modern}, for example). Therefore the lensed CMB can  be written $T(x + \nabla \phi(x))$ where $T(x)$ denotes the unlensed CMB temperature fluctuations and $x$ represents an observational direction on the unit sphere. For this paper we will be focusing on the small angle limit  so that $x$ is assumed to vary in a small patch of $ \Bbb R^2$. However, do not expect the fast convergence properties of our algorithm to be sensitive to the small angle approximation and the methodology presented here should hold for a full treatment on the sphere.  The lensed CMB is observed with additive noise (denoted $n(x)$) to result in data of the form
 \begin{equation}
 \label{data model}
  \text{data}(x)= T(x + \nabla \phi(x))+ n(x).
@@ -119,10 +123,10 @@ Conversely, when sampling from $P(\phi | T,\text{data})$ the data is of the form
 \[
 \text{data}(x) = \underbrace{\!\!T\!\!}_{\text{\tiny known}}(x+\nabla\phi(x)) + n(x). 
 \]
-To see how one might approximate this conditional notice first that the CMB field $T(x)$ is very smooth. Indeed, Silk damping \textcolor{red}{[cite]} predicts  a exponentially \textcolor{red}{[check the facts here]} decaying power spectrum. Therefore a linear Taylor approximation,  $\text{data}(x) \approx T(x) + \nabla T(x)\cdot \nabla\phi(x) + n(x)$, may be useful. In fact, the derivation of the quadratic estimator explicitly uses this linear approximation. 
+To see how one might approximate this conditional notice first that the CMB field $T(x)$ is very smooth. Indeed, Silk damping  predicts  a exponentially decaying power spectrum. Therefore a linear Taylor approximation,  $\text{data}(x) \approx T(x) + \nabla T(x)\cdot \nabla\phi(x) + n(x)$, may be useful. In fact, the derivation of the quadratic estimator explicitly uses this linear approximation. 
 If one is willing to use this linear approximation then the conditional $P(\phi | T,\text{data})$ is simply a Bayesian regression problem since $T$ (and thus $\nabla T$) are both known with a Gaussian prior on $\nabla \phi$.
 
-Unfortunately, the structure of both of these conditionals make the Gibbs very slow to converge. The case is exacerbated in the situation when noise level is small. For example, in the second conditional, if $T$ is known and fixed, the extent of the possible $\phi$'s under $P(\phi|T,\text{data})$  is very small compared to the possible $\phi$'s marginalized out of $P(\phi, T| \text{data})$. 
+Unfortunately, the structure of both of these conditionals make the Gibbs very slow to converge. The case is exacerbated in the situation when noise level is small. For example, in the second conditional, if $T$ is known and fixed, the extent of the likely $\phi$'s under $P(\phi|T,\text{data})$  is very small compared to the likely $\phi$'s under $P(\phi, T| \text{data})$. 
 This suggests a highly dependent posterior $P(\phi, T| \text{data})$. 
 
 
@@ -203,7 +207,7 @@ The sufficient chain then proceeds as
 \label{suff 1} \widetilde T^{i+1}&\sim P(\widetilde T |  \phi^{i},\text{data}) \\
 \label{suff 2} \phi^{i+1}&\sim P(\phi | \widetilde T^{i+1},  \text{data}).
 \end{align}
-In Section \ref{Section: hamiltonian sampler section} we derive a Hamiltonian Markov Chain algorithm to sample from (\ref{suff 2}). In Section \ref{Section: iterative message passing section} we adapt an iterative message passing algorithm, originally developed in \cite{elsner2013efficient,jasche2014matrix}, for Wiener filtering and sampling from (\ref{suff 1}). Both these algorithms rely heavily on an approximation---motivated again by the two parameter system---we call {\em anti-lensing}.
+In Section \ref{Section: iterative message passing section} we adapt an iterative message passing algorithm, originally developed in \cite{elsner2013efficient,jasche2014matrix}, for Wiener filtering and sampling from (\ref{suff 1}). In Section \ref{Section: hamiltonian sampler section} we derive a Hamiltonian Markov Chain algorithm to sample from (\ref{suff 2}). Our Hamiltonian Markov Chain algorithm relies on an approximation---motivated again by the two parameter system---we call {\em anti-lensing}.
 
 
 
@@ -217,13 +221,13 @@ In Section \ref{Section: hamiltonian sampler section} we derive a Hamiltonian Ma
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Anti-lensing approximation}
+\label{section: Anti-lensing approximation}
 
 In the two parameter analogy from Section \ref{two parameter system},  the relation between the sufficient parameter $\widetilde t$ and the ancillary parameter $t$ is given by $\widetilde t - \varphi = t$. The corresponding relation for CMB lensing we refer to as {\em anti-lensing}
 \begin{equation}
 \label{antilense}
  \widetilde T(\,\underbrace{x-\nabla\phi(x)}_\text{\small anti-lensing}\,) \approx T(x).% \quad\text{\bf\em analogous to}\quad \widetilde t - \varphi = t.
 \end{equation}
-Indeed,  anti-lensing is a key concept in this paper and allows sampling from both distributions (\ref{suff 1}) and (\ref{suff 2}).
 We distinguish between {\em inverse lensing} and  {\em anti-lensing}. Inverse lensing denotes the true coordinate displacement which, when applied to  $\widetilde T$, recovers the unlensed $T$. Conversely,  anti-lensing is  given by $-\nabla\phi$ and approximates inverse lensing.  
 To examine the difference between these two operations, start with a Helmholtz decomposition of the inverse lensing displacement: $-\nabla \phi^\text{inv}(x) - \nabla^\perp \psi^\text{inv}(x),$  where $\nabla^\perp \equiv \bigr(-\frac{\partial}{\partial y},\frac{\partial}{\partial x} \bigl)$ and  $\psi^\text{inv}$ denotes a stream function potential which models a field rotation. Now $\phi^\text{inv}$ and $\psi^\text{inv}$ are used to convert a lensed CMB $\widetilde T$ to $T$ as follows 
 \begin{align*}
@@ -234,7 +238,7 @@ Due to the fact that the expected size of the lensing displacement $\nabla\phi$ 
 \label{anti approx}
 -\nabla\phi &\approx -\nabla\phi^\text{inv} \approx -\nabla\phi^\text{inv}- \nabla^\perp \psi^\text{inv}.
 \end{align}
-Indeed, the typical displacement size $\nabla \phi(x)$ is less than 3 arcmin whereas the correlation length scale of $\phi$ is on the order of degrees. In Figure \ref{antilensing plots} we show a simulation of  $-\phi$ (upper left) with the corresponding inverse lensing potential $-\phi^\text{inv}$ (upper right). The difference $\phi - \phi^\text{inv}$ is also shown (bottom left) along with the stream function $-\psi^\text{inv}$. Clearly, the magnitude of the difference  $\phi^\text{inv}-\phi$ and $-\psi^\text{inv}$ is sub-dominant to estimation error expected in current lensing experimental conditions.
+Indeed, the typical displacement size $\nabla \phi(x)$ is less than 3 arcmin whereas the correlation length scale of $\phi$ is on the order of degrees. In Figure \ref{antilensing plots} we show a simulation of  $-\phi$ (upper left) with the corresponding inverse lensing potential $-\phi^\text{inv}$ (upper right). The difference $\phi - \phi^\text{inv}$ is also shown (bottom left) along with the stream function $-\psi^\text{inv}$. Clearly, the magnitude of the difference  $\phi^\text{inv}-\phi$ and $-\psi^\text{inv}$ is sub-dominant to estimation error expected in current lensing experimental conditions. 
 
 
 \begin{figure}[t]
@@ -243,11 +247,6 @@ Indeed, the typical displacement size $\nabla \phi(x)$ is less than 3 arcmin whe
 \includegraphics[height=2.4in]{graphics/anti_plt3.pdf}\includegraphics[height=2.4in]{graphics/anti_plt4.pdf}
 \caption{The difference between anti-lensing and inverse lensing. {\em Upper left:} anti-lensing potential $-\phi$. {\em Upper right:} The inverse lensing potential $-\phi^\text{inv}$. {\em Bottom left:} The difference $\phi^\text{inv}-\phi$. {\em Bottom right:} The inverse lensing stream function $-\psi^\text{inv}$.}
 \end{figure}
-
-
-Regardless of the fact that $-\nabla\phi$ is a good approximation to inverse lensing, the Hamiltonian sampler for $P(\phi | \widetilde T,  \text{\rm data})$, described below in Section \ref{Section: hamiltonian sampler section},  can be easily adjusted to sample from the inverse lensing stream and potential functions jointly $P(\phi^\text{inv},\psi^\text{inv} | \widetilde T,  \text{\rm data})$.   However, we have excluded it from our analysis since the magnitude of the lensing potential is at least an order of magnitude smaller than estimation error. 
-
-
 
 
 
@@ -266,7 +265,7 @@ Regardless of the fact that $-\nabla\phi$ is a good approximation to inverse len
 
 
 The Hamiltonian Monte Carlo (HMC) algorithm is an iterative sampling algorithm designed to mitigate the low-acceptance rate of the Metropolis-Hastings algorithm when working in high dimension. 
-A nice review of HMC can be found in \cite{neal2011mcmc}. For applications of HMC in cosmology see \cite{taylor2008fast,elsner2010local}, for example. In the present case we utilize the HMC algorithm to produce samples of $\phi$ from $P(\phi | \widetilde T,  \text{\rm data})$.  The key to making HMC work for lensing is to parameterize  $\phi$ in terms of it's Fourier transform. One can then utilize  Claim \ref{grad claim}, presented below, to efficiently compute the gradient of the log conditional density of $P(\phi | \widetilde T,  \text{\rm data})$, which is a necessary computation for the HMC algorithm.
+A nice review of HMC can be found in \cite{neal2011mcmc}. For applications of HMC in cosmology see \cite{PhysRevD.75.083525, taylor2008fast, elsner2010local, 2010MNRAS.409..355J, 2012MNRAS.425.1042J, jasche2013bayesian, jasche2013methods}. In the present case we utilize the HMC algorithm to produce samples of $\phi$ from $P(\phi | \widetilde T,  \text{\rm data})$.  The key to making HMC work for lensing is to parameterize  $\phi$ in terms of it's Fourier transform. One can then utilize  Claim \ref{grad claim}, presented below, to efficiently compute the gradient of the log conditional density of $P(\phi | \widetilde T,  \text{\rm data})$, which is a necessary computation for the HMC algorithm.
 
 {\em Notation:} Throughout the remainder of this paper, the Fourier transform of any function $f(x)$ will be denoted by $f_l$ or $f_k$ so that $f_l  =  \int_{\Bbb R^2} e^{-i x\cdot l}  f(x)\frac{dx}{2\pi}$ and
 $f(x) =  \int_{\Bbb R^2} e^{i x\cdot l}  f_l \frac{dl}{2\pi}$ 
@@ -314,7 +313,7 @@ The follow claim shows that the gradient of the log density of $P(\phi|\widetild
 
 \begin{claim}
 \label{grad claim}
- Under the anti-lensing approximation (\ref{antilense}) for any nonzero frequecy vector $l\equiv (l_1, l_2) \in \Bbb R^2$ 
+ Under the anti-lensing approximation (\ref{antilense}) for any nonzero frequency vector $l\equiv (l_1, l_2) \in \Bbb R^2$ 
 \begin{equation}
 \label{grad claim eq}
  \frac{\partial}{\partial \phi_l}\log P(\phi | \widetilde T,  \text{\rm data}) \propto -  \frac{\phi_l}{C^{\phi\phi}_{l}} -  \sum_{q=1,2} i  l_q \int_{\Bbb R^2} e^{-i x\cdot l} A^q(x)B(x) \frac{dx}{2\pi}  
@@ -326,8 +325,12 @@ The follow claim shows that the gradient of the log density of $P(\phi|\widetild
  \end{align}
 \end{claim}
 
-{\em Remark:}
-It is interesting to note that the above gradient evaluated at $\phi = 0$, equals the un-normalized quadratic estimate in the case of a noise free observation. Indeed, an approximate Newton step, using (\ref{grad claim eq}), is an accurate approximation to the regular quadratic estimate. This gives an indication that the parameterization $(\widetilde T, \phi)$ results in fast convergence of the corresponding Gibbs chain.
+
+Notice the anti-lensing approximation (\ref{anti approx}) is used in both terms of the right hand side of (\ref{grad claim eq}). Clearly the term $ \sum_{q=1,2} i  l_q \int_{\Bbb R^2} e^{-i x\cdot l} A^q(x)B(x) \frac{dx}{2\pi}  $ uses the anti-lensing approximation. However, one can adjust this term  to incorporate the inverse stream and potential functions $\psi^\text{inv}$ and $\phi^\text{inv}$, discussed in Section \ref{section: Anti-lensing approximation}. The main advantage of anti-lensing, then, is in the Gaussian prior term $\phi_l/{C^{\phi\phi}_{l}}$. 
+Indeed, without the anti-lensing approximation one can no longer use a Gaussian prior on $\phi^\text{inv}$. This follows since the inverse lensing displacement is a lensed version of $-\nabla \phi$, hence the non-Gaussianity.  Therefore the advantage of  the anti-lensing approximation (\ref{anti approx}) is that it greatly simplifies the gradient computation (\ref{grad claim eq}) and allows a Gaussian approximation for the prior distribution of inverse lensing. 
+
+{\em Remark:} It is interesting to note that the gradient in Claim \ref{grad claim} evaluated at $\phi = 0$, equals the un-normalized quadratic estimate in the case of a noise free observation. Indeed, an approximate Newton step, using (\ref{grad claim eq}), is an accurate approximation to the regular quadratic estimate. This gives an indication that the parameterization $(\widetilde T, \phi)$ results in fast convergence of the corresponding Gibbs chain.
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -338,7 +341,7 @@ It is interesting to note that the above gradient evaluated at $\phi = 0$, equal
 \section{Iterative message passing algorithm for $ P(\widetilde T |  \phi,\text{\rm data})$}
 \label{Section: iterative message passing section}
 
-There are two typical ways to model the lensed CMB $\widetilde T$. If one marginalizes out $\phi$, then $\widetilde T$ is modeled as a {\em non-Gaussian} but isotropic random field. Conversely, if one conditions on $\phi$ the field $\widetilde T$ is modeled as a {\em non-isotropic} but Gaussian random field. The latter case is relevant for sampling from $ P(\widetilde T |  \phi,\text{\rm data})$ which  is, therefore,  simply a Gaussian conditional simulation problem. Unfortunately, the non-isotropic (indeed, non-stationary) nature of the conditional distribution of $\widetilde T$ presents serious computational challenges. In what follows we utilize a new iterative algorithm developed by  Wandelt, Elsner, Jasche and Lavaux for Gaussian conditional expectation and sampling when the signal is diagonalized in harmonic space that the noise is diagonalized in pixel space \cite{elsner2013efficient,jasche2014matrix}. 
+There are two natural ways to model the lensed CMB $\widetilde T$. If one marginalizes out $\phi$, then $\widetilde T$ is modeled as a {\em non-Gaussian} but isotropic random field. Conversely, if one conditions on $\phi$ the field $\widetilde T$ is modeled as a {\em non-isotropic} but Gaussian random field. The latter case is relevant for sampling from $ P(\widetilde T |  \phi,\text{\rm data})$ which  is, therefore,  simply a Gaussian conditional simulation problem. Unfortunately, the non-isotropic (indeed, non-stationary) nature of the conditional distribution of $\widetilde T$ presents serious computational challenges. In what follows we utilize a new iterative algorithm developed by  Wandelt and Elsner \cite{elsner2013efficient} for Gaussian conditional expectation when the signal is diagonalized in harmonic space that the noise is diagonalized in pixel space. The method we present here is similar to the Gibbs sampling adaptation of Jasche and Lavaux \cite{jasche2014matrix}. 
 
 
 Start by transforming each pixel location $x$ to it's pre-lensed location $x+\nabla \phi(x)$, while simultaneously preserving the data associated with that pixel. This  effectively de-lenses  $\text{data}(x)= T(x+\nabla \phi(x))+n(x)$ but produces observations on an irregular grid. In particular, one may switch to the lensed coordinates $y = x+\nabla\phi(x)$ so that
@@ -362,13 +365,13 @@ Finally we extend the definition of $\tilde n(y)$ to have infinite variance over
 \end{figure}
 
 
-As a intermediate step in producing a sample from  $P(\widetilde T |  \phi,\text{\rm data})$ we produce a conditional  sample of $T(y)$ given the observations $T(y) + \tilde n(y)$. The difficulty of this step is that $\tilde n(y)$ is non-homogeneous noise---from the masking and any inhomogeneity in $n(x)$---and therefore it is not decorrelated by the Fourier transform. To handle this situation we adapted a new method developed by Wandelt, Elsner, Jasche and Lavaux for Gaussian conditional expectation and sampling \cite{elsner2013efficient,jasche2014matrix}. This method works particularly well for observations with large amounts of irregular masking, as in our case. The algorithm utilizes a messenger field which effectively behaves as a latent---signal plus white noise---model.
+As a intermediate step in producing a sample from  $P(\widetilde T |  \phi,\text{\rm data})$ we produce a conditional  sample of $T(y)$ given the observations $T(y) + \tilde n(y)$. The difficulty of this step is that $\tilde n(y)$ is non-homogeneous noise---from the masking and any inhomogeneity in $n(x)$---and therefore it is not decorrelated by the Fourier transform. To handle this situation we adapted a new method developed by Wandelt and Elsner for Gaussian conditional expectation \cite{elsner2013efficient}. This method works particularly well for observations with large amounts of irregular masking, as in our case. The algorithm utilizes a messenger field which effectively behaves as a latent---signal plus white noise---model which is amenable to Gibbs sampling \cite{jasche2014matrix}.
 
 
 
 \begin{algorithm}[H]
 \small
-\caption{Iterative message passing for sampling $P(T | T + \tilde n)$}
+\caption{Iterative message passing for sampling from $P(T | T + \tilde n)$}
 \label{IMP}
 \begin{algorithmic}[1]
 \State Set cooling schedule $\lambda^1\geq  \ldots \geq \lambda^n = 1$. 
@@ -403,7 +406,7 @@ The following algorithm describes how to use Algorithm \ref{IMP} to produce a sa
 
 
 
-{\em Remark:} At present, Algorithm \ref{after HMC} only works when the noise $n(x)$ has a beam which is sufficiently small compared to the magnitude of $\nabla \phi(x)$. The reason is that one needs to be able to transform the data $(x+\nabla\phi(x), \text{data}(x))$ to $(y, T(y) + \tilde n(y))$  in such a way that $T$ is diagonalized in harmonic space and $\tilde n$ is diagonalized in pixel space. The presence of a large beam implies that $\tilde n(y)$ has complicated noise structure which is not diagonalized in either pixel space or harmonic space.
+{\em Remark:} At present, Algorithm \ref{after HMC} is designed for the situation when the pixels are sufficiently small compared to the magnitude of $\nabla \phi(x)$ and the noise is approximately white on these scales.  The reason is that one needs to be able to transform the data $(x+\nabla\phi(x), \text{data}(x))$ to $(y, T(y) + \tilde n(y))$  in such a way that $T$ is diagonalized in harmonic space and $\tilde n$ is diagonalized in pixel space. 
 
 
 
@@ -419,7 +422,8 @@ The following algorithm describes how to use Algorithm \ref{IMP} to produce a sa
 \section{Simulation example}
 \label{Section: simulation examples}
 
-In this section we present a simulation to illustrate the methodology presented above. The simulated lensing potential used in this section, shown at left in Figure \ref{phix fig}, is generated on a flat sky with periodic boundary conditions. The data, shown at left in Figure \ref{tilde fig}, is generated on 2 arcmin pixels with independent additive noise and masking. The variance of the noise at each pixel is set to $16.0$ and the masking covers approximately 10\% of the pixels.  The parameters of the Bayesian lensing procedure are the Fourier modes of $\widetilde T$ and $\phi$. For the lensing potential we set $|l|_\text{max}$ to $~460$ which corresponds to $1500$ unknown Fourier coefficients. The $|l|_\text{max}$ of $2700$ for the unlensed temperature $T$ is set in Algorithm \ref{IMP} and corresponds to half of the Nyquist limit at $2$ arcmin pixels. 
+In this section we present a simulation to illustrate the methodology presented above. The simulated lensing potential used in this section, shown at left in Figure \ref{phix fig}, is generated on a flat sky with periodic boundary conditions. The data, shown at left in Figure \ref{tilde fig}, is generated on 2 arcmin pixels with independent additive noise and masking. The noise level is set to $8.0$ $\mu K$ arcmin and the masking covers approximately 10\% of the pixels.  The parameters of the Bayesian lensing procedure are the Fourier modes of $\widetilde T$ and $\phi$. For the lensing potential we set $|l|_\text{max}$ to $~460$. 
+For this patch size the scale-resolution in Fourier space  $\delta l = 21$ yields $1500$ unknown Fourier coefficients for $\phi_l$. The $|l|_\text{max}$ of $2700$ for the unlensed temperature $T$ is set in Algorithm \ref{IMP} and corresponds to half of the Nyquist limit at $2$ arcmin pixels. 
 
 
 \begin{wrapfigure}{r}{0.5\textwidth}
@@ -470,7 +474,7 @@ Figures \ref{tilde fig}, \ref{phix fig} and \ref{slice fig}  illustrate the post
 
 
 
-In Figures \ref{p spec fig} and \ref{t spec fig} we summarize the posterior draws for $\phi$ and $\widetilde T$ in the Fourier domain. The left plot shows $95\%$ posterior regions for  $l^4|\phi_l|^2/(4\delta_0)$  averaged over $l$ in wavenumber bins. For comparison the simulation true values of  $l^4|\phi_l|^2/(4\delta_0)$ are shown in red and the spectral density $l^4 C^{\phi\phi}_l/4$ is plotted in the black solid line. In the right plot of Figure \ref{p spec fig} we show the expected cross correlation of the posterior draws over wavenumber bins with the simulation truth. In particular, the correlation between $\phi^\text{true}_l$ and  $\phi_l$ over all $l$  in a fixed wavenumber bin, where $\phi^\text{true}$ denotes the simulation truth and $\phi_l$ denotes a posterior draw.  The corresponding plots for $\widetilde T_l$ are shown in Figure \ref{t spec fig}.
+In Figures \ref{p spec fig} and \ref{t spec fig} we summarize the posterior draws for $\phi$ and $\widetilde T$ in the Fourier domain. The left plot shows $95\%$ posterior regions for  $l^4|\phi_l|^2/(4\delta_0)$  averaged over $l$ in wavenumber bins. For comparison the simulation true values of  $l^4|\phi_l|^2/(4\delta_0)$ are shown in red and the spectral density $l^4 C^{\phi\phi}_l/4$ is plotted in the black solid line. In the right plot of Figure \ref{p spec fig} we show the empirical cross correlation of the posterior draws over wavenumber bins with the simulation truth. In particular, the correlation between $\phi^\text{true}_l$ and  $\phi_l$ over all $l$  in a fixed wavenumber bin, where $\phi^\text{true}$ denotes the simulation truth and $\phi_l$ denotes a posterior draw.  The corresponding plots for $\widetilde T_l$ are shown in Figure \ref{t spec fig}.
 
 
 
@@ -506,10 +510,10 @@ In Figures \ref{p spec fig} and \ref{t spec fig} we summarize the posterior draw
 
 In this paper we construct a prototype algorithm which establishes that it is possible to construct a fast Gibbs sampler of the Bayesian posterior for the unknown lensing potential and the de-noised CMB temperature map. This prototype solves one of the fundamental obstacles in a Gibbs implementation of the Bayesian lensing: the na\"ive parameterization $(T, \phi)$ is extremely slow. We identify the ancillary and sufficient parametrization duality for this problem and notice that the slowness of the Gibbs chain for the ancillary parametrization  $(T, \phi)$ translates to a fast chain for the sufficient parametrization  $(\widetilde T, \phi)$. This observation is one of the main contributions of this paper. The second contribution is the use of the anti-lensing approximation along with Claim \ref{grad claim} which makes feasible the development of a Hamiltonian Markov Chain algorithm for sampling from  $P(\phi | \widetilde T)$. Without the Fourier transform characterization in Claim \ref{grad claim} the HMC would be computational prohibitive. The third contribution of this paper is to recognize that a new messenger algorithm \cite{elsner2013efficient,jasche2014matrix} can be adapted for high resolution conditional Gaussian sampling under the irregular sampling scenario needed for $P(\widetilde T|\phi, \text{data})$.  Finally all the code presented here is written in the language {\em Julia} \cite{bezanson2012julia}  and is publicly available through the on-line github repository.  
 
-In contrast to enumerating the contributions, as above, we also discuss what has not been done, open problems and future work. First, we emphasize that what we present here is a prototype which does not yet handle the full suite of complexities present in the state-of-the-art Planck data set. Indeed, although the high resolution embedding works very well for moderately sized surveys (with small beams), the high resolution approach becomes untenable in the Planck setting due to the fact that the large number of pixels ($\sim 10$ million) makes high resolution embedding difficult. Moreover, the size of the Planck beam, we conjecture, is too large for our de-lensing approach. 
-Another extension of our prototype, necessary for Planck scientific contributions, is to incorporate spectral density uncertainties and/or parameter estimation in the Gibbs algorithm.
+% In contrast to enumerating the contributions, as above, we also discuss what has not been done, open problems and future work. First, we emphasize that what we present here is a prototype which does not yet handle the full suite of complexities present in the state-of-the-art Planck data set. Indeed, although the high resolution embedding works very well for moderately sized surveys (with small beams), the high resolution approach becomes untenable in the Planck setting due to the fact that the large number of pixels ($\sim 10$ million) makes high resolution embedding difficult. Moreover, the size of the Planck beam, we conjecture, is too large for our de-lensing approach. 
+% Another extension of our prototype, necessary for Planck scientific contributions, is to incorporate spectral density uncertainties and/or parameter estimation in the Gibbs algorithm.
 
-Notice that both sampling steps $P(\phi |\widetilde T)$ and $P(\widetilde T|\phi, \text{data})$ in our algorithm utilize a high resolution embedding for $\widetilde T$. In this paragraph we discuss what is needed to avoid using this embedding for scaling up to Planck size data sets. When sampling from the conditional $P(\phi |\widetilde T)$, the main challenge is to compute $A^q(x)$ and $B(x)$, as defined in Claim  \ref{grad claim}.  Within the HMC algorithm, a proposed lensing potential $\phi$ changes iteratively. A each iteration  one requires a new computation of $A^q(x)$ and $B(x)$. In our prototype, a spline interpolation performs the task of fast anti-lensing required for  $A^q(x)$ and $B(x)$. It is an open problem how to compute this fast anti-lensing without the need for a high resolution $\widetilde T$. Simulating from $P(\widetilde T|\phi, \text{data})$ also requires a high resolution embedding in our prototype. This simply expresses the fact that given $\phi$ the field $\widetilde T$ is modeled as a non-stationary random field. To circumvent this difficulty we  transform to lensed coordinates as illustrated in Figure \ref{embed}. The challenge when avoiding this high resolution embedding, then, is to directly generate conditional simulations of the non-stationary $\widetilde T$ given $\text{data}(x)=\widetilde T(x)+ n(x)$ and the lensing potential $\phi(x)$. The number of pixels combined with the non-stationarity of $\widetilde T$ and the fact that this simulation must be repeated each Gibbs iteration makes this a formidable challenge indeed.
+Notice that both sampling steps $P(\phi |\widetilde T)$ and $P(\widetilde T|\phi, \text{data})$ in our algorithm utilize a high resolution embedding for $\widetilde T$. In this paragraph we discuss what is needed to avoid using this embedding for scaling up this algorithm. When sampling from the conditional $P(\phi |\widetilde T)$, the main challenge is to compute $A^q(x)$ and $B(x)$, as defined in Claim  \ref{grad claim}.  Within the HMC algorithm, a proposed lensing potential $\phi$ changes iteratively. A each iteration  one requires a new computation of $A^q(x)$ and $B(x)$. In our prototype, a spline interpolation performs the task of fast anti-lensing required for  $A^q(x)$ and $B(x)$. It is an open problem how to compute this fast anti-lensing without the need for a high resolution $\widetilde T$. Simulating from $P(\widetilde T|\phi, \text{data})$ also requires a high resolution embedding in our prototype. This simply expresses the fact that given $\phi$ the field $\widetilde T$ is modeled as a non-stationary random field. To circumvent this difficulty we  transform to lensed coordinates as illustrated in Figure \ref{embed}. The challenge when avoiding this high resolution embedding, then, is to directly generate conditional simulations of the non-stationary $\widetilde T$ given $\text{data}(x)=\widetilde T(x)+ n(x)$ and the lensing potential $\phi(x)$. The non-stationarity of $\widetilde T$ and the fact that this simulation must be repeated at each Gibbs iteration makes this an interesting challenge.
 
 \bibliography{refs}
 
@@ -528,7 +532,7 @@ Notice that both sampling steps $P(\phi |\widetilde T)$ and $P(\widetilde T|\phi
 
 Before we proceed to the proofs we say a few words regarding notation.
 First, we do not differentiate, notationally, from the case of smooth random field with periodic boundary conditions defined on $(-L/2, L/2]^2$ and the case where $L\rightarrow \infty$ so that the Fourier series $\sum_{l \in \frac{2\pi}{L}\Bbb Z }   e^{i x\cdot l}  f_l \frac{2\pi/ L}{2\pi} $ converges to the continuous Fourier transform $\int_{\Bbb R^2}  e^{i x\cdot l}  f_l \frac{dl}{2\pi} $. %Indeed,  $\int_{\Bbb R^2}  e^{i x\cdot l}  f_l \frac{dl}{2\pi} $ is simply equivalent notation for the Riemann sum, with $L$ near infinity.
-For example, at times we will refer to an infinitesimal area element $dl$ or $dk$ in Fourier space, which simply equals $\frac{2\pi}{L}$ for large $L$. In this case $\delta_l$ denotes a discrete dirac delta function which we equate with $1/dk$ when $l=0$ and zero otherwise. 
+For example, at times we will refer to an infinitesimal area element $dl$ or $dk$ in Fourier space, which simply equals $(2\pi / L)^2$ for large $L$. In this case $\delta_l$ denotes a discrete dirac delta function which we equate with $1/dk$ when $l=0$ and zero otherwise. 
 Secondly, for any function $f(x)$ let $f^\phi(x) = f(x-\nabla \phi(x))$ denote anti-lensing of $f$ and $f^\phi_l$ denote the Fourier transform of  $f^\phi(x)$.
 
 
@@ -541,9 +545,9 @@ Since $\widetilde T$ is sufficient for the unknown $\phi$ we have that
 P(\phi|\widetilde T, \text{\rm data}) &= P(\phi|\widetilde T)\propto P(\widetilde T|\phi)P(\phi).
 \end{align*}
 Since $\phi(x)$ is an isotropic random field with spectral density $C_l^{\phi\phi}$ we have that $E(\phi^{\phantom{*}}_l \phi_{l^\prime}^*) = \delta_{l - l^\prime}C_l^{\phi\phi}$. 
-Therefore  $E(\phi_l^{\phantom{*}}\phi_l^*) = \delta_{0}C_l^{\phi\phi}$ and $E(\phi_l\phi_{l}) = 0$ one gets that the random variables $\re \phi_l$, $\im \phi_l$ are independent $\mathcal N(0, \frac{1}{2}\delta_0 C_l^{\phi\phi})$ for each fixed $l$.
+Therefore  $E(\phi_l^{\phantom{*}}\phi_l^*) = \delta_{0}C_l^{\phi\phi}$ and $E(\phi_l\phi_{l}) = 0$ implies that the random variables $\re \phi_l$, $\im \phi_l$ are independent $\mathcal N(0, \frac{1}{2}\delta_0 C_l^{\phi\phi})$ for each fixed $l$.
 Moreovoer  $\phi(x)$ takes values in $\Bbb R$ so that  $\phi_l = \phi_{-l}^*$.  This implies 
-that $\phi_l$ and are independent random variables over all $l$ which are restricted to the a Hermitian half of the Fourier grid, denoted $\Bbb H$. In particular,  if we exclude the zero frequency $l = 0$ we get
+that $\phi_l$ and are independent random variables over all $l$ which are restricted to the Hermitian half of the Fourier grid, denoted $\Bbb H$ here. In particular,  if we exclude the zero frequency $l = 0$ we get
 \begin{align}
 \log P(\phi) - c_1 &=  - \frac{1}{2}\sum_{k \in \Bbb H\setminus \{0 \}}  \left[\frac{(\re \phi_k)^2}{\frac{1}{2}\delta_0 C_k^{\phi\phi}} +  \frac{(\im \phi_k)^2}{\frac{1}{2}\delta_0 C_k^{\phi\phi}} \right] = - \frac{1}{2}\int_{\Bbb R^2} \frac{|\phi_k|^2}{C_k^{\phi\phi}} dk \label{dr1} \\
 \log P(\widetilde T| \phi) - c_2 &=  - \frac{1}{2}\sum_{k \in \Bbb H\setminus \{0 \}}  \left[\frac{(\re \widetilde T_k^\phi)^2}{\frac{1}{2}\delta_0 C_k^{TT}} +  \frac{(\im \widetilde T_k^\phi)^2}{\frac{1}{2}\delta_0 C_k^{TT}} \right] = - \frac{1}{2}\int_{\Bbb R^2} \frac{\bigl|\widetilde T_k^\phi\bigr|^2}{C_k^{TT}} dk \label{dr2}
@@ -574,7 +578,7 @@ Taking derivatives in (\ref{dr2}) gives
 %&=  - dk\sum_{k \in \Bbb H}2 \re \Bigl( \frac{\partial \widetilde T_k^\phi}{\partial \im\phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}} \Bigr) \\
 &=  -\re \int_{\Bbb R^2}\frac{\partial \widetilde T_k^{\phi}}{\partial \im\phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}} \, dk \label{ll2}.
 \end{align}
-Taking linear combinations of the two equalities in Lemma \ref{partialconj} we get
+Taking linear combinations of the two equalities in Lemma \ref{partialconj} below we get
 \begin{align}
 \frac{\partial \widetilde T^\phi_k}{\partial \re \phi_{l}}  &= 
 \frac{1}{2}\frac{\partial \widetilde T^\phi_k}{\partial\phi_{l}} + \frac{1}{2}\frac{\partial \widetilde T^\phi_k}{\partial\phi^*_{l}}
@@ -585,13 +589,13 @@ Taking linear combinations of the two equalities in Lemma \ref{partialconj} we g
 =
 \frac{ dk}{2 \pi} \sum_{q=1,2} l_q\left\{ -[(\nabla^q\widetilde T)^\phi]_{k-l}  -   [(\nabla^q\widetilde T)^\phi]_{k+l}  \right\}.
 \end{align}
-Now the above two equations establish, by Lemma \ref{forreal}, that  both integrals $\int_{\Bbb R^2} \frac{\partial \widetilde T_k^\phi}{\partial \re\phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}}  \,dk$ and $\int_{\Bbb R^2}\frac{\partial \widetilde T_k^\phi}{\partial \im\phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}} \, dk$ are real
+Now the above two equations establish, by Lemma \ref{forreal} below, that  both integrals $\int_{\Bbb R^2} \frac{\partial \widetilde T_k^\phi}{\partial \re\phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}}  \,dk$ and $\int_{\Bbb R^2}\frac{\partial \widetilde T_k^\phi}{\partial \im\phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}} \, dk$ are real
 which implies
 \begin{align*}
  \frac{\partial}{\partial \phi_l}\log P(\widetilde T| \phi) &= -\int_{\Bbb R^2} \frac{\partial \widetilde T_k^\phi}{\partial \phi_l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}}  \,dk  \\
  &= -\frac{dk}{ \pi} \sum_{q=1,2} il_q \int_{\Bbb R^2}  [(\nabla^q\widetilde T)^\phi]_{k+l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}}  \,dk \\
  &= -  i 2 (dk) \sum_{q=1,2} l_q \int_{\Bbb R^2}  [(\nabla^q\widetilde T)^\phi]_{k+l} \, \frac{\widetilde T_k^{\phi^*}}{C_k^{TT}}  \,\frac{dk}{2\pi} \\
- & = -  i 2 (dk) \sum_{q=1,2} l_q \int_{\Bbb R^2} e^{-i x\cdot l} A^q(x) \, B(x)  \,\frac{dx}{2\pi},\quad\text{by Lemma \ref{conv}}
+ & = -  i 2 (dk) \sum_{q=1,2} l_q \int_{\Bbb R^2} e^{-i x\cdot l} A^q(x) \, B(x)  \,\frac{dx}{2\pi},\quad\text{by Lemma \ref{conv} below}
  \end{align*}
  where $A^q(x) \equiv (\nabla^q\widetilde T)^\phi(x)$ and $B_k\equiv (\widetilde T_k^{\phi})^* / C_k^{TT}$.
 \end{proof}
