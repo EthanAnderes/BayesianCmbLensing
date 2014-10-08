@@ -607,8 +607,8 @@ which implies
 \begin{lemma} 
 \label{partialconj}
 \begin{align}
-\frac{\partial \widetilde T^\phi_k}{\partial \phi_{ l} }  &= \frac{  dk}{\pi}\sum_{q=1,2} -il_q[(\nabla^q\widetilde T)^\phi]_{k+l} \\
-\frac{\partial \widetilde T^\phi_k}{\partial \phi^*_{ l} }  & = \frac{ dk }{\pi}\sum_{q=1,2} \phantom{-}\!\!il_q [(\nabla^q\widetilde T)^\phi]_{k-l}
+\frac{\partial \widetilde T^\phi_k}{\partial \phi_{ l} }  &= \frac{  dk}{\pi}\sum_{q=1,2} \phantom{-}il_q[(\nabla^q\widetilde T)^\phi]_{k+l} \\
+\frac{\partial \widetilde T^\phi_k}{\partial \phi^*_{ l} }  & = \frac{ dk }{\pi}\sum_{q=1,2} -il_q [(\nabla^q\widetilde T)^\phi]_{k-l}
 \end{align}
 where $\nabla^q \widetilde T\equiv \frac{\partial \widetilde T}{\partial x_q}$.
 \end{lemma}
@@ -625,24 +625,24 @@ First notice
 This implies
 \begin{align}
 \nonumber \frac{\partial \widetilde T^\phi_k}{\partial \phi_{ l} } 
-&=  \frac{\partial}{\partial  \phi_{ l} } \int_{\Bbb R^2}  e^{-ix \cdot k}\widetilde T(x+\nabla \phi(x))\frac{dx}{2\pi} \\
-\nonumber &= \sum_{q=1,2}  \int_{\Bbb R^2} e^{-ix \cdot k} \nabla^q\widetilde T(x+\nabla \phi(x))\left[ \frac{\partial}{\partial \re \phi_{ l}}\frac{\partial\phi(x)}{ \partial x_q} +i  \frac{\partial}{\partial \im \phi_{ l}}\frac{\partial\phi(x)}{ \partial x_q}\right]\frac{dx}{2\pi}\\
-% <-----extra detail
-%  &= \frac{d k}{2\pi} \sum_{q=1,2}  \int_{\Bbb R^2} e^{-ix \cdot k} \nabla^q\widetilde T(x+\nabla \phi(x))\left[ i  l_q e^{ix \cdot  l}  - i  l_q e^{-i x \cdot  l}  + i(-  l_q e^{ix \cdot  l}  -  l_q e^{-i x \cdot  l})  \right]\frac{dx}{2\pi} \\
-% &= \frac{d k}{2\pi}  \sum_{q=1,2} i l_q \int_{\Bbb R^2} e^{-ix \cdot k} \nabla^q\widetilde T(x+\nabla \phi(x))\left[ e^{ix \cdot  l}  -  e^{-i x \cdot  l}  -  e^{ix \cdot  l}  -  e^{-i x \cdot  l} \right]\frac{dx}{2\pi}\\
-% <-----
-\nonumber &= \sum_{q=1,2}\frac{ - il_q  dk}{\pi}  \int_{\Bbb R^2} e^{- ix \cdot (k+l)} \nabla^q\widetilde T(x+\nabla \phi(x))\frac{dx}{2\pi},\quad\text{by (\ref{partial1}) and (\ref{partial2})} \\
-&=\sum_{q=1,2}\frac{ - il_q dk}{\pi} [(\nabla^q\widetilde T)^\phi]_{k+l}
+&=  \frac{\partial}{\partial  \phi_{ l} } \int_{\Bbb R^2}  e^{-ix \cdot k}\widetilde T(x-\nabla \phi(x))\frac{dx}{2\pi} \\
+\nonumber &= \sum_{q=1,2}  \int_{\Bbb R^2} e^{-ix \cdot k} \nabla^q\widetilde T(x-\nabla \phi(x))\left[ -\frac{\partial}{\partial \re \phi_{ l}}\frac{\partial\phi(x)}{ \partial x_q} -i  \frac{\partial}{\partial \im \phi_{ l}}\frac{\partial\phi(x)}{ \partial x_q}\right]\frac{dx}{2\pi}\\
+% %<-----extra detail
+%  &= \frac{-d k}{2\pi} \sum_{q=1,2}  \int_{\Bbb R^2} e^{-ix \cdot k} \nabla^q\widetilde T(x+\nabla \phi(x))\left[ i  l_q e^{ix \cdot  l}  - i  l_q e^{-i x \cdot  l}  + i(-  l_q e^{ix \cdot  l}  -  l_q e^{-i x \cdot  l})  \right]\frac{dx}{2\pi} \\
+% &= \frac{-d k}{2\pi}  \sum_{q=1,2} i l_q \int_{\Bbb R^2} e^{-ix \cdot k} \nabla^q\widetilde T(x+\nabla \phi(x))\left[ e^{ix \cdot  l}  -  e^{-i x \cdot  l}  -  e^{ix \cdot  l}  -  e^{-i x \cdot  l} \right]\frac{dx}{2\pi}\\
+% %<-----
+\nonumber &= \sum_{q=1,2}\frac{ il_q  dk}{\pi}  \int_{\Bbb R^2} e^{- ix \cdot (k+l)} \nabla^q\widetilde T(x-\nabla \phi(x))\frac{dx}{2\pi},\quad\text{by (\ref{partial1}) and (\ref{partial2})} \\
+&=\sum_{q=1,2}\frac{  il_q dk}{\pi} [(\nabla^q\widetilde T)^\phi]_{k+l}
 \end{align}
 Similarly 
 \begin{align}
 \frac{\partial \widetilde T^\phi_k }{\partial \phi^*_l } 
-% <-----extra detail
-% &= \frac{d k}{2\pi}\sum_{q=1,2}  \int_{\Bbb R^2} e^{-ix \cdot k} \nabla^q\widetilde T(x+\nabla \phi(x))\left[ i  l_q e^{ix \cdot  l}  - i  l_q e^{-i x \cdot  l}  - i(-  l_q e^{ix \cdot  l}  -  l_q e^{-i x \cdot  l})  \right]\frac{dx}{2\pi} \\
-% &= \frac{d k}{2\pi} \sum_{q=1,2}  \int_{\Bbb R^2} e^{-ix \cdot k} \nabla^q\widetilde T(x+\nabla \phi(x))\left[ i  l_q e^{ix \cdot  l}  - i  l_q e^{-i x \cdot  l}  + i  l_q e^{ix \cdot  l}  +i  l_q e^{-i x \cdot  l}  \right]\frac{dx}{\pi} \\
-&= \sum_{q=1,2}  \frac{i l_qd k}{\pi}\int_{\Bbb R^2} e^{-ix \cdot (k-l)} \nabla^q\widetilde T(x+\nabla \phi(x))\frac{dx}{\pi} \\
-% <-------
- &=\sum_{q=1,2}\frac{ il_q dk}{\pi} [(\nabla^q\widetilde T)^\phi]_{k-l}.
+% % <-----extra detail
+% &= \frac{-d k}{2\pi}\sum_{q=1,2}  \int_{\Bbb R^2} e^{-ix \cdot k} \nabla^q\widetilde T(x-\nabla \phi(x))\left[ i  l_q e^{ix \cdot  l}  - i  l_q e^{-i x \cdot  l}  - i(-  l_q e^{ix \cdot  l}  -  l_q e^{-i x \cdot  l})  \right]\frac{dx}{2\pi} \\
+% &= \frac{-d k}{2\pi} \sum_{q=1,2}  \int_{\Bbb R^2} e^{-ix \cdot k} \nabla^q\widetilde T(x-\nabla \phi(x))\left[ i  l_q e^{ix \cdot  l}  - i  l_q e^{-i x \cdot  l}  + i  l_q e^{ix \cdot  l}  +i  l_q e^{-i x \cdot  l}  \right]\frac{dx}{\pi} \\
+% &= \sum_{q=1,2}  \frac{-i l_qd k}{\pi}\int_{\Bbb R^2} e^{-ix \cdot (k-l)} \nabla^q\widetilde T(x-\nabla \phi(x))\frac{dx}{\pi} \\
+% % <-------
+ &=\sum_{q=1,2}\frac{ -il_q dk}{\pi} [(\nabla^q\widetilde T)^\phi]_{k-l}.
 \end{align}
 \end{proof}
 
