@@ -63,7 +63,7 @@ const scale_hmc  =  2.0e-3
 require("cmb.jl")
 require("fft.jl")
 require("funcs.jl") # use reload after editing funcs.jl
-
+require("Interp.jl")
 
 
 
