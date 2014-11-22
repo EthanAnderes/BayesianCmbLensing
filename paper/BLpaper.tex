@@ -515,9 +515,17 @@ In this paper we construct a prototype algorithm which establishes that it is po
 
 Notice that both sampling steps $P(\phi |\widetilde T)$ and $P(\widetilde T|\phi, \text{data})$ in our algorithm utilize a high resolution embedding for $\widetilde T$. In this paragraph we discuss what is needed to avoid using this embedding for scaling up this algorithm. When sampling from the conditional $P(\phi |\widetilde T)$, the main challenge is to compute $A^q(x)$ and $B(x)$, as defined in Claim  \ref{grad claim}.  Within the HMC algorithm, a proposed lensing potential $\phi$ changes iteratively. A each iteration  one requires a new computation of $A^q(x)$ and $B(x)$. In our prototype, a spline interpolation performs the task of fast anti-lensing required for  $A^q(x)$ and $B(x)$. It is an open problem how to compute this fast anti-lensing without the need for a high resolution $\widetilde T$. Simulating from $P(\widetilde T|\phi, \text{data})$ also requires a high resolution embedding in our prototype. This simply expresses the fact that given $\phi$ the field $\widetilde T$ is modeled as a non-stationary random field. To circumvent this difficulty we  transform to lensed coordinates as illustrated in Figure \ref{embed}. The challenge when avoiding this high resolution embedding, then, is to directly generate conditional simulations of the non-stationary $\widetilde T$ given $\text{data}(x)=\widetilde T(x)+ n(x)$ and the lensing potential $\phi(x)$. The non-stationarity of $\widetilde T$ and the fact that this simulation must be repeated at each Gibbs iteration makes this an interesting challenge.
 
+%%%%%%%%%%%%%%%%%%%%
+%
+%  acknowledgments
+%
+%%%%%%%%%%%%%%%%%%%%%%
+
+\section*{Acknowledgments}
+BW acknowledges funding through his Chaire dÕExcellence from the Agence Nationale
+de la Recherche (ANR-10-CEXC-004-01). This work has been done within the Labex ILP (reference ANR-10-LABX-63) part of the Idex SUPER, and received financial state aid managed by the Agence Nationale de la Recherche, as part of the programme Investissements d'avenir under the reference ANR-11-IDEX-0004-02.
+
 \bibliography{refs}
-
-
 
 
 
