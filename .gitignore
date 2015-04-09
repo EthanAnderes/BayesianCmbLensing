@@ -1,9 +1,4 @@
 .DS_Store
 !/simulations
 /simulations/*
-/paper/RevisionReport.gdoc
-/scripts/clipboard.jl
-/scripts/clipboard.jl
-/scripts/makeFigsOffline.jl
-/scripts/scriptBase.jl
-/scripts/scriptNoMask.jl
+/paper/RevisionReport.rtf
