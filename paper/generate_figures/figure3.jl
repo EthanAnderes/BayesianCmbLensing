@@ -7,7 +7,8 @@ Generate figure 3 which shows embedding of the lensed grid from Section 6.
 Load packages. Set prelim grids etc.
 ----------------------------------------------------- """
 srcpath  = "/Users/ethananderes/Dropbox/BayesLense/src/"
-savepath = "/Users/ethananderes/Google\ Drive/BayesLenseRev1/paper_rev2/"
+savepath = "/Users/ethananderes/Dropbox/BayesLense/paper/"
+
 
 include(srcpath*"Interp.jl")
 include(srcpath*"cmb.jl")

@@ -11,7 +11,7 @@ Load modules and set load and save links
 """
 simdir   =  "/Users/ethananderes/Dropbox/BayesLense/simulations/scriptParallel_2657077506/" # contains the simulation
 srcpath  =  "/Users/ethananderes/Dropbox/BayesLense/src/"
-savepath =  "/Users/ethananderes/Google\ Drive/BayesLenseRev1/paper_rev2/"
+savepath = "/Users/ethananderes/Dropbox/BayesLense/paper/"
 
 include(srcpath*"Interp.jl")
 include(srcpath*"cmb.jl")

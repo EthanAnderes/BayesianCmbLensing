@@ -4,7 +4,7 @@ Generate figure 1 which shows the two parameter gibbs toy model
 
 using PyPlot
 srcpath  = "/Users/ethananderes/Dropbox/BayesLense/src/"
-savepath = "/Users/ethananderes/Google\ Drive/BayesLenseRev1/paper_rev2/"
+savepath = "/Users/ethananderes/Dropbox/BayesLense/paper/"
 seed = 1
 srand(seed)
 

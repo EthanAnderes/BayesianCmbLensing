@@ -7,7 +7,7 @@ Generate figure 2 which the difference between anti-lensing and inverse lensing
 Load packages. Set grid etc.
 ----------------------------------------------------- """
 srcpath  = "/Users/ethananderes/Dropbox/BayesLense/src/"
-savepath = "/Users/ethananderes/Google\ Drive/BayesLenseRev1/paper_rev2/"
+savepath = "/Users/ethananderes/Dropbox/BayesLense/paper/"
 
 include(srcpath*"Interp.jl")
 include(srcpath*"cmb.jl")
