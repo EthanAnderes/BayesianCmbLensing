@@ -1,0 +1,9 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Weak lensing primer and a Bayesian challenge}{}% 2
+\BOOKMARK [1][-]{section.3}{Two parameter analogy}{}% 3
+\BOOKMARK [1][-]{section.4}{Ancillary versus sufficient parameters for the lensed CMB}{}% 4
+\BOOKMARK [2][-]{subsection.4.1}{Anti-lensing approximation}{section.4}% 5
+\BOOKMARK [1][-]{section.5}{Hamiltonian Monte Carlo sampler for P\(| T"0365T, data\)}{}% 6
+\BOOKMARK [1][-]{section.6}{Iterative message passing algorithm for \040P\(T"0365T | ,data\)}{}% 7
+\BOOKMARK [1][-]{section.7}{Simulation example}{}% 8
+\BOOKMARK [1][-]{section.8}{Concluding remarks}{}% 9

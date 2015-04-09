@@ -19,7 +19,7 @@ function hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc = 1.0e-3)
         loglike = lfrog!(phik_test, rk, tildetx_hr_curr, parlr, parhr, ePs, mk)
     end
     
-    h_at_end = 0.5 * sum( abs2(rk[!parlr.pMaskBool])./(2*mk[!parlr.pMaskBool]/2)) - loglike # the 0.5 is out front since only half the sum is unique
+    h_at_end = 0.5 * sum( abs2(rk[!parlr.pMaskBool])./(2*mk[!parlr.pMaskBool]/2) ) - loglike # the 0.5 is out front since only half the sum is unique
     prob_accept = minimum([1, exp(h_at_zero - h_at_end)])
     if rand() < prob_accept
         phik_curr[:] = phik_test
@@ -82,7 +82,6 @@ function gpass!(sx, sk, tx, tk, dx, Nx, par, cool)
   end
   nothing
 end
-
 
 
 
@@ -296,104 +295,4 @@ function pos(x)
         y[y.<0.0] = 0.0
         y
 end 
-
-
-#=
-
-function gibbspass_t!(sx, tx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])
-    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
-    dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
-    # ------ pre-allocate space
-    tk    = fft2(tx, parhr)
-    sk    = similar(tk)
-    tpx   = Array(Float64, size(tx))
-    Tx    = 0.99 * minimum(Nx)
-    barNx = Nx .- Tx
-    d2k   = parhr.grd.deltk * parhr.grd.deltk
-    d2x   = parhr.grd.deltx * parhr.grd.deltx
-    delt0 = 1 / d2k
-    Tk    = Tx * d2x # Tk is the spectrum, Tx is the pixelwise variance
-    # ------ gibbs with cooling:) 
-    for uplim in coolingVec
-        λ =  (uplim > 8000.0) ? 1.0 : max(1.0, parhr.CTell2d[int(uplim)]/Tk)
-        # ---- update s
-        tpx[:]   = 1 ./ (1 / (λ * Tk * delt0) .+ 1 ./ (parhr.cTT * delt0)) 
-        sk[:]    = tpx .* (tk / (λ * Tk * delt0))  # wiener filter
-        sk[:]   += vec(white(parhr) .* √(tpx))      # random fluctuation
-        sx[:]    = ifft2r(sk, parhr) 
-        # ---- update t
-        # whatever updates are done, they are only done on the low ell multipoles
-        tpx[:]  = 1 ./ (1 ./ barNx .+ 1 / (λ * Tx)) 
-        tx[:]   = tpx .* (dx ./ barNx + sx ./ (λ * Tx)) # wiener filter...weighted ave of dx and sx.
-        tx[:]  += vec(randn(size(tx)) .* √(tpx))            # random fluctuation
-        tk[:]   = fft2(tx, parhr)
-    end
-    phidx1_hr_curr, phidx2_hr_curr
-end
-
-
-
-
-function gibbspass_d!(sx, sbarx, phik_curr, ytx, maskvarx, parlr, parhr, coolingVec = [Inf for k=1:100])
-    phidx1_hr_curr, phidx2_hr_curr, phidx1_lr_curr, phidx2_lr_curr = phi_easy_approx(phik_curr, parlr, parhr)
-    dx, Nx = embedd(ytx, phidx1_lr_curr, phidx2_lr_curr, maskvarx, parlr, parhr)
-    d2k = parhr.grd.deltk * parhr.grd.deltk
-    d2x = parhr.grd.deltx * parhr.grd.deltx
-    delt0 = 1 / d2k
-    for uplim in coolingVec
-        λk = delt0 .* parhr.CTell2d[min(8000, round(uplim))] 
-        λx = λk / (delt0 * d2x) 
-        Sbark = delt0 .* parhr.cTT .- λk 
-        Sbark[Sbark .< 0.0]= 0.0 
-        # ---- update sbarx
-        tmp      = λk .* Sbark ./ (Sbark .+ λk) # this can work when Sbark is zero
-        sbark    = tmp .* fft2(sx, parhr) ./ λk # wiener filter
-        sbark   += white(parhr) .* √(tmp)    # fluctuation
-        sbarx[:] = ifft2r(sbark, parhr)
-        # --- update sx
-        tmp    = 1 ./ (1 ./ Nx .+ 1 / λx)
-        sx[:]  = tmp .* (dx ./ Nx  .+ sbarx / λx)  
-        sx[:]  = vec(sx + randn(size(sx)) .* sqrt(tmp))
-    end
-    sk = fft2(sx, parhr)
-    sk[parhr.grd.r .> coolingVec[end]] = 0.0
-    sx[:] = ifft2r(sk, parhr)
-    phidx1_hr_curr, phidx2_hr_curr
-end
-=#
-
-#=
-function ttk_grad_wlog(tildetx_hr_sim, phik_curr, parlr, parhr)
-    parlrgrddeltk2 = parlr.grd.deltk * parlr.grd.deltk
-    phidx1_lr =  ifft2r(complex(0.0,1.0) .* parlr.grd.k1 .* phik_curr, parlr)
-    phidx2_lr =  ifft2r(complex(0.0,1.0) .* parlr.grd.k2 .* phik_curr, parlr)   
-    tildetk_hr_sim   = fft2(tildetx_hr_sim, parhr)
-    tildetxd1   = ifft2r(complex(0.0,1.0) .* parhr.grd.k1 .* tildetk_hr_sim, parhr) 
-    tildetxd2   = ifft2r(complex(0.0,1.0) .* parhr.grd.k2 .* tildetk_hr_sim, parhr) 
-    tildetx_unlensed     = spline_interp2(parhr.grd.x, parhr.grd.y, tildetx_hr_sim   , parlr.grd.x - phidx1_lr, parlr.grd.y - phidx2_lr, 0.01)
-    tildetxd1_unlensed   = spline_interp2(parhr.grd.x, parhr.grd.y, tildetxd1  , parlr.grd.x - phidx1_lr, parlr.grd.y - phidx2_lr, 0.01)
-    tildetxd2_unlensed   = spline_interp2(parhr.grd.x, parhr.grd.y, tildetxd2  , parlr.grd.x - phidx1_lr, parlr.grd.y - phidx2_lr, 0.01)
-    tildetk_unlensed     =  fft2(tildetx_unlensed  , parlr);  tildetk_unlensed[parlr.cMaskBool]   = 0.0
-    tildetkd1_unlensed   =  fft2(tildetxd1_unlensed, parlr);  tildetkd1_unlensed[parlr.cMaskBool] = 0.0
-    tildetkd2_unlensed   =  fft2(tildetxd2_unlensed, parlr);  tildetkd2_unlensed[parlr.cMaskBool] = 0.0
-    #--------------- log likelihood
-    loglike = 0.0
-    maskforpsi = one(phik_curr)
-    maskforpsi[parlr.pMaskBool] = 0.0
-    for k=2:length(phik_curr)
-        loglike += - 0.25 * abs2(maskforpsi[k] * phik_curr[k]) / (parlr.cPP[k] / (2.0 * parlrgrddeltk2))
-        loglike += - 0.25 * abs2(tildetk_unlensed[k]) / (parlr.cTT[k] / (2.0 * parlrgrddeltk2))
-    end
-    #--------------------------------------
-    Bk = tildetk_unlensed ./ (parlr.cTT)
-    Bk[parlr.cMaskBool] = 0.0
-    Bx = ifft2r(Bk, parlr)
-    constantterm =  complex(0.0,-2.0) * parlrgrddeltk2 # the minus is here to convert psi gradient to phi gradient
-    term  = constantterm * parlr.grd.k1 .* fft2(ifft2r(tildetkd1_unlensed, parlr) .* Bx, parlr)
-    term += constantterm * parlr.grd.k2 .* fft2(ifft2r(tildetkd2_unlensed, parlr) .* Bx, parlr)
-    term -= 2.0 * parlrgrddeltk2 *  phik_curr ./ parlr.cPP
-    term[parlr.pMaskBool] = 0.0
-    term, loglike
-end
-=#
 

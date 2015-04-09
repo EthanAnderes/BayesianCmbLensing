@@ -1,0 +1,203 @@
+\begin{thebibliography}{27}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+\expandafter\ifx\csname bibnamefont\endcsname\relax
+  \def\bibnamefont#1{#1}\fi
+\expandafter\ifx\csname bibfnamefont\endcsname\relax
+  \def\bibfnamefont#1{#1}\fi
+\expandafter\ifx\csname citenamefont\endcsname\relax
+  \def\citenamefont#1{#1}\fi
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{\texttt{#1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
+\providecommand{\bibinfo}[2]{#2}
+\providecommand{\eprint}[2][]{\url{#2}}
+
+\bibitem[{\citenamefont{Das et~al.}(2011)}]{das2011detection}
+\bibinfo{author}{\bibfnamefont{S.}~\bibnamefont{Das}} \bibnamefont{et~al.},
+  \bibinfo{journal}{Physical Review Letters} \textbf{\bibinfo{volume}{107}},
+  \bibinfo{pages}{021301} (\bibinfo{year}{2011}).
+
+\bibitem[{\citenamefont{Engelen et~al.}(2012)}]{van2012measurement}
+\bibinfo{author}{\bibfnamefont{V.}~\bibnamefont{Engelen}} \bibnamefont{et~al.},
+  \bibinfo{journal}{The Astrophysical Journal} \textbf{\bibinfo{volume}{756}},
+  \bibinfo{pages}{142} (\bibinfo{year}{2012}).
+
+\bibitem[{\citenamefont{{Planck Collaboration}}(2014)}]{planck2013lensing}
+\bibinfo{author}{\bibnamefont{{Planck Collaboration}}}, \bibinfo{journal}{\aap}
+  \textbf{\bibinfo{volume}{571}}, \bibinfo{eid}{A17} (\bibinfo{year}{2014}),
+  \eprint{1303.5077}.
+
+\bibitem[{\citenamefont{{The Polarbear Collaboration: P.~A.~R.~Ade}
+  et~al.}(2014)\citenamefont{{The Polarbear Collaboration: P.~A.~R.~Ade},
+  {Akiba}, {Anthony}, {Arnold}, {Atlas}, {Barron}, {Boettger}, {Borrill},
+  {Chapman}, {Chinone} et~al.}}]{Polarbear2014}
+\bibinfo{author}{\bibnamefont{{The Polarbear Collaboration: P.~A.~R.~Ade}}},
+  \bibinfo{author}{\bibfnamefont{Y.}~\bibnamefont{{Akiba}}},
+  \bibinfo{author}{\bibfnamefont{A.~E.} \bibnamefont{{Anthony}}},
+  \bibinfo{author}{\bibfnamefont{K.}~\bibnamefont{{Arnold}}},
+  \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{{Atlas}}},
+  \bibinfo{author}{\bibfnamefont{D.}~\bibnamefont{{Barron}}},
+  \bibinfo{author}{\bibfnamefont{D.}~\bibnamefont{{Boettger}}},
+  \bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{{Borrill}}},
+  \bibinfo{author}{\bibfnamefont{S.}~\bibnamefont{{Chapman}}},
+  \bibinfo{author}{\bibfnamefont{Y.}~\bibnamefont{{Chinone}}},
+  \bibnamefont{et~al.}, \bibinfo{journal}{\apj} \textbf{\bibinfo{volume}{794}},
+  \bibinfo{eid}{171} (\bibinfo{year}{2014}), \eprint{1403.2369}.
+
+\bibitem[{\citenamefont{{Planck Collaboration}}(2015)}]{planck2015lensing}
+\bibinfo{author}{\bibnamefont{{Planck Collaboration}}}, \bibinfo{journal}{ArXiv
+  e-prints}  (\bibinfo{year}{2015}), \eprint{1502.01591}.
+
+\bibitem[{\citenamefont{Hu}(2001)}]{hu2001mapping}
+\bibinfo{author}{\bibfnamefont{W.}~\bibnamefont{Hu}}, \bibinfo{journal}{The
+  Astrophysical Journal Letters} \textbf{\bibinfo{volume}{557}},
+  \bibinfo{pages}{L79} (\bibinfo{year}{2001}).
+
+\bibitem[{\citenamefont{Hu and Okamoto}(2002)}]{hu2002mass}
+\bibinfo{author}{\bibfnamefont{W.}~\bibnamefont{Hu}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{T.}~\bibnamefont{Okamoto}},
+  \bibinfo{journal}{The Astrophysical Journal} \textbf{\bibinfo{volume}{574}},
+  \bibinfo{pages}{566} (\bibinfo{year}{2002}).
+
+\bibitem[{\citenamefont{Hirata and Seljak}(2003{\natexlab{a}})}]{HirataSeljak1}
+\bibinfo{author}{\bibfnamefont{C.~M.} \bibnamefont{Hirata}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{U.~c.~v.} \bibnamefont{Seljak}},
+  \bibinfo{journal}{Phys. Rev. D} \textbf{\bibinfo{volume}{67}},
+  \bibinfo{pages}{043001} (\bibinfo{year}{2003}{\natexlab{a}}),
+  \urlprefix\url{http://link.aps.org/doi/10.1103/PhysRevD.67.043001}.
+
+\bibitem[{\citenamefont{Hirata and Seljak}(2003{\natexlab{b}})}]{HirataSeljak2}
+\bibinfo{author}{\bibfnamefont{C.~M.} \bibnamefont{Hirata}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{U.~c.~v.} \bibnamefont{Seljak}},
+  \bibinfo{journal}{Phys. Rev. D} \textbf{\bibinfo{volume}{68}},
+  \bibinfo{pages}{083002} (\bibinfo{year}{2003}{\natexlab{b}}),
+  \urlprefix\url{http://link.aps.org/doi/10.1103/PhysRevD.68.083002}.
+
+\bibitem[{\citenamefont{Lewis and Challinor}(2006)}]{Lewis20061}
+\bibinfo{author}{\bibfnamefont{A.}~\bibnamefont{Lewis}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{A.}~\bibnamefont{Challinor}},
+  \bibinfo{journal}{Physics Reports} \textbf{\bibinfo{volume}{429}},
+  \bibinfo{pages}{1} (\bibinfo{year}{2006}), ISSN \bibinfo{issn}{0370-1573},
+  \urlprefix\url{http://www.sciencedirect.com/science/article/pii/S0370157306000810}.
+
+\bibitem[{\citenamefont{Dodelson}(2003)}]{dodelson2003modern}
+\bibinfo{author}{\bibfnamefont{S.}~\bibnamefont{Dodelson}},
+  \emph{\bibinfo{title}{Modern cosmology}} (\bibinfo{publisher}{Academic
+  press}, \bibinfo{year}{2003}).
+
+\bibitem[{\citenamefont{Roberts et~al.}(2003)\citenamefont{Roberts,
+  Papaspiliopoulos, and Sk\"old}}]{bernardo2003non}
+\bibinfo{author}{\bibfnamefont{G.}~\bibnamefont{Roberts}},
+  \bibinfo{author}{\bibfnamefont{O.}~\bibnamefont{Papaspiliopoulos}},
+  \bibnamefont{and} \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Sk\"old}},
+  in \emph{\bibinfo{booktitle}{Bayesian Statistics 7: Proceedings of the
+  Seventh Valencia International Meeting}} (\bibinfo{organization}{Oxford
+  University Press, USA}, \bibinfo{year}{2003}), p. \bibinfo{pages}{307}.
+
+\bibitem[{\citenamefont{Gelfand et~al.}(1995)\citenamefont{Gelfand, Sahu, and
+  Carlin}}]{gelfand1995efficient}
+\bibinfo{author}{\bibfnamefont{A.}~\bibnamefont{Gelfand}},
+  \bibinfo{author}{\bibfnamefont{S.}~\bibnamefont{Sahu}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{B.}~\bibnamefont{Carlin}},
+  \bibinfo{journal}{Biometrika} \textbf{\bibinfo{volume}{82}},
+  \bibinfo{pages}{479} (\bibinfo{year}{1995}).
+
+\bibitem[{\citenamefont{Papaspiliopoulos and
+  Roberts}(2008)}]{papaspiliopoulos2008stability}
+\bibinfo{author}{\bibfnamefont{O.}~\bibnamefont{Papaspiliopoulos}}
+  \bibnamefont{and} \bibinfo{author}{\bibfnamefont{G.}~\bibnamefont{Roberts}},
+  \bibinfo{journal}{The Annals of Statistics} pp. \bibinfo{pages}{95--117}
+  (\bibinfo{year}{2008}).
+
+\bibitem[{\citenamefont{Papaspiliopoulos
+  et~al.}(2007)\citenamefont{Papaspiliopoulos, Roberts, and
+  Sk{\"o}ld}}]{papaspiliopoulos2007general}
+\bibinfo{author}{\bibfnamefont{O.}~\bibnamefont{Papaspiliopoulos}},
+  \bibinfo{author}{\bibfnamefont{G.}~\bibnamefont{Roberts}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Sk{\"o}ld}},
+  \bibinfo{journal}{Statistical Science} pp. \bibinfo{pages}{59--73}
+  (\bibinfo{year}{2007}).
+
+\bibitem[{\citenamefont{Yu and Meng}(2011)}]{yu2011center}
+\bibinfo{author}{\bibfnamefont{Y.}~\bibnamefont{Yu}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{X.-L.} \bibnamefont{Meng}},
+  \bibinfo{journal}{Journal of Computational and Graphical Statistics}
+  \textbf{\bibinfo{volume}{20}}, \bibinfo{pages}{531} (\bibinfo{year}{2011}).
+
+\bibitem[{\citenamefont{Elsner and Wandelt}(2013)}]{elsner2013efficient}
+\bibinfo{author}{\bibfnamefont{F.}~\bibnamefont{Elsner}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{B.}~\bibnamefont{Wandelt}},
+  \bibinfo{journal}{Astronomy and Astrophysics} \textbf{\bibinfo{volume}{549}},
+  \bibinfo{pages}{111} (\bibinfo{year}{2013}).
+
+\bibitem[{\citenamefont{Jasche and Lavaux}(2014)}]{jasche2014matrix}
+\bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{Jasche}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{G.}~\bibnamefont{Lavaux}},
+  \bibinfo{journal}{arXiv preprint arXiv:1402.1763}  (\bibinfo{year}{2014}).
+
+\bibitem[{\citenamefont{Neal}(2011)}]{neal2011mcmc}
+\bibinfo{author}{\bibfnamefont{R.~M.} \bibnamefont{Neal}},
+  \bibinfo{journal}{Handbook of Markov Chain Monte Carlo}
+  \textbf{\bibinfo{volume}{2}} (\bibinfo{year}{2011}).
+
+\bibitem[{\citenamefont{Hajian}(2007)}]{PhysRevD.75.083525}
+\bibinfo{author}{\bibfnamefont{A.}~\bibnamefont{Hajian}},
+  \bibinfo{journal}{Phys. Rev. D} \textbf{\bibinfo{volume}{75}},
+  \bibinfo{pages}{083525} (\bibinfo{year}{2007}),
+  \urlprefix\url{http://link.aps.org/doi/10.1103/PhysRevD.75.083525}.
+
+\bibitem[{\citenamefont{Taylor et~al.}(2008)\citenamefont{Taylor, Ashdown, and
+  Hobson}}]{taylor2008fast}
+\bibinfo{author}{\bibfnamefont{J.~F.} \bibnamefont{Taylor}},
+  \bibinfo{author}{\bibfnamefont{M.~A.~J.} \bibnamefont{Ashdown}},
+  \bibnamefont{and} \bibinfo{author}{\bibfnamefont{M.~P.}
+  \bibnamefont{Hobson}}, \bibinfo{journal}{Monthly Notices of the Royal
+  Astronomical Society} \textbf{\bibinfo{volume}{389}}, \bibinfo{pages}{1284}
+  (\bibinfo{year}{2008}).
+
+\bibitem[{\citenamefont{Elsner and Wandelt}(2010)}]{elsner2010local}
+\bibinfo{author}{\bibfnamefont{F.}~\bibnamefont{Elsner}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{B.}~\bibnamefont{Wandelt}},
+  \bibinfo{journal}{The Astrophysical Journal} \textbf{\bibinfo{volume}{724}},
+  \bibinfo{pages}{1262} (\bibinfo{year}{2010}).
+
+\bibitem[{\citenamefont{Jasche et~al.}(2010)\citenamefont{Jasche, Kitaura, Li,
+  and En{\ss}lin}}]{2010MNRAS.409..355J}
+\bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{Jasche}},
+  \bibinfo{author}{\bibfnamefont{F.~S.} \bibnamefont{Kitaura}},
+  \bibinfo{author}{\bibfnamefont{C.}~\bibnamefont{Li}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{T.~A.} \bibnamefont{En{\ss}lin}},
+  \bibinfo{journal}{Monthly Notices of the Royal Astronomical Society}
+  \textbf{\bibinfo{volume}{409}}, \bibinfo{pages}{355} (\bibinfo{year}{2010}),
+  \eprint{0911.2498}.
+
+\bibitem[{\citenamefont{Jasche and Wandelt}(2012)}]{2012MNRAS.425.1042J}
+\bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{Jasche}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{B.}~\bibnamefont{Wandelt}},
+  \bibinfo{journal}{Monthly Notices of the Royal Astronomical Society}
+  \textbf{\bibinfo{volume}{425}}, \bibinfo{pages}{1042} (\bibinfo{year}{2012}),
+  \eprint{1106.2757}.
+
+\bibitem[{\citenamefont{Jasche and
+  Wandelt}(2013{\natexlab{a}})}]{jasche2013bayesian}
+\bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{Jasche}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{B.}~\bibnamefont{Wandelt}},
+  \bibinfo{journal}{Monthly Notices of the Royal Astronomical Society} p.
+  \bibinfo{pages}{stt449} (\bibinfo{year}{2013}{\natexlab{a}}).
+
+\bibitem[{\citenamefont{Jasche and
+  Wandelt}(2013{\natexlab{b}})}]{jasche2013methods}
+\bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{Jasche}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{B.}~\bibnamefont{Wandelt}},
+  \bibinfo{journal}{The Astrophysical Journal} \textbf{\bibinfo{volume}{779}},
+  \bibinfo{pages}{15} (\bibinfo{year}{2013}{\natexlab{b}}).
+
+\bibitem[{\citenamefont{Bezanson et~al.}(2012)\citenamefont{Bezanson,
+  Karpinski, Shah, and Edelman}}]{bezanson2012julia}
+\bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{Bezanson}},
+  \bibinfo{author}{\bibfnamefont{S.}~\bibnamefont{Karpinski}},
+  \bibinfo{author}{\bibfnamefont{V.}~\bibnamefont{Shah}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{A.}~\bibnamefont{Edelman}},
+  \bibinfo{journal}{arXiv preprint arXiv:1209.5145}  (\bibinfo{year}{2012}).
+
+\end{thebibliography}

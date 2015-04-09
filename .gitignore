@@ -1,11 +1,7 @@
 .DS_Store
 !/simulations
 /simulations/*
-!/paper
-/paper/*
-!/paper/BLpaper.tex
-!/paper/BLpaper.pdf
-!/paper/refs.bib
+/paper/RevisionReport.gdoc
 /scripts/clipboard.jl
 /scripts/clipboard.jl
 /scripts/makeFigsOffline.jl

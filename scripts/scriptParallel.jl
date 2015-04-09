@@ -8,7 +8,7 @@
 	In the above command julia is started with 10 independent workers and simulations are made in parallel.
 	You can change this to the number of cores/workers you want.
 
-	The second way is the launch the script from withing julia:
+	The second way is the launch the script from within julia:
 	```
 	$ julia
 	julia> addprocs(10)   # start 10 parallel workers
@@ -18,9 +18,8 @@
 
 
 #--- set the seed or generate a random one
-const seed = Base.Random.RANDOM_SEED
-# const seed = Uint32[2657077506, 531413685, 532641760, 1678774672] # big bump
-# const seed = Uint32[1743177682, 59847886, 1211810022, 297006524] # corner diag bump
+# const seed = Base.Random.RANDOM_SEED
+const seed = Uint32[2657077506, 531413685, 532641760, 1678774672] # big bump
 srand(seed)
 
 
@@ -60,6 +59,7 @@ const scale_hmc  =  2.0e-3
 # ------------ load modules and functions
 @everywhere push!(LOAD_PATH, pwd()*"/src")
 @everywhere using Interp
+@everywhere FFTW.set_num_threads(2)
 require("cmb.jl")
 require("fft.jl")
 require("funcs.jl") # use reload after editing funcs.jl
@@ -149,8 +149,9 @@ writecsv("$savepath/qex_lr.csv", qex_lr)
 		else
 			push!(acceptclk, hmc!(phik_curr, tildetx_hr_curr, parlr, parhr, scale_hmc))
 		end
-		if bglp % 10 == 1
+		if bglp % 50 == 1
 			writecsv("$savepath/job$r/tildetx_lr_curr_$bglp.csv", tildetx_hr_curr[1:int(hrfactor):end,1:int(hrfactor):end])
+			writecsv("$savepath/job$r/tx_lr_curr_$bglp.csv", tx_hr_curr[1:int(hrfactor):end,1:int(hrfactor):end])
 			writecsv("$savepath/job$r/phix_curr_$bglp.csv", ifft2r(phik_curr, parlr))
 			writecsv("$savepath/job$r/acceptclk.csv", acceptclk)	
 		end
