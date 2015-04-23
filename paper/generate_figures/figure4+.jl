@@ -492,7 +492,7 @@ errorbar(
 	xerr = Array{Float64,1}[bin_mids_P-lftcuts, rtcuts-bin_mids_P],  
 	yerr = Array{Float64,1}[map(x-> median(x)-quantile(x,0.025), phb_pwr / dirac_0 / 4), map(x-> quantile(x,0.975)-median(x), phb_pwr / dirac_0 / 4)],
 	fmt="*b",
-	label = L"95% posterior for $l^4 |\phi_l|^2/ (4 \delta_0)$"
+	label = L"95% posterior region for $l^4 |\phi_l|^2/ (4 \delta_0)$"
 )
 plot(collect(bin_mids_P), zero(bin_mids_P), ":k")
 xlabel("wavenumber")

@@ -1,4 +1,4 @@
-\begin{thebibliography}{27}
+\begin{thebibliography}{31}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \expandafter\ifx\csname bibnamefont\endcsname\relax
   \def\bibnamefont#1{#1}\fi
@@ -80,6 +80,14 @@
   \bibinfo{pages}{1} (\bibinfo{year}{2006}), ISSN \bibinfo{issn}{0370-1573},
   \urlprefix\url{http://www.sciencedirect.com/science/article/pii/S0370157306000810}.
 
+\bibitem[{\citenamefont{Bezanson et~al.}(2012)\citenamefont{Bezanson,
+  Karpinski, Shah, and Edelman}}]{bezanson2012julia}
+\bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{Bezanson}},
+  \bibinfo{author}{\bibfnamefont{S.}~\bibnamefont{Karpinski}},
+  \bibinfo{author}{\bibfnamefont{V.}~\bibnamefont{Shah}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{A.}~\bibnamefont{Edelman}},
+  \bibinfo{journal}{arXiv preprint arXiv:1209.5145}  (\bibinfo{year}{2012}).
+
 \bibitem[{\citenamefont{Dodelson}(2003)}]{dodelson2003modern}
 \bibinfo{author}{\bibfnamefont{S.}~\bibnamefont{Dodelson}},
   \emph{\bibinfo{title}{Modern cosmology}} (\bibinfo{publisher}{Academic
@@ -124,16 +132,17 @@
   \bibinfo{journal}{Journal of Computational and Graphical Statistics}
   \textbf{\bibinfo{volume}{20}}, \bibinfo{pages}{531} (\bibinfo{year}{2011}).
 
-\bibitem[{\citenamefont{Elsner and Wandelt}(2013)}]{elsner2013efficient}
-\bibinfo{author}{\bibfnamefont{F.}~\bibnamefont{Elsner}} \bibnamefont{and}
-  \bibinfo{author}{\bibfnamefont{B.}~\bibnamefont{Wandelt}},
-  \bibinfo{journal}{Astronomy and Astrophysics} \textbf{\bibinfo{volume}{549}},
-  \bibinfo{pages}{111} (\bibinfo{year}{2013}).
+\bibitem[{\citenamefont{{Elsner} and {Wandelt}}(2013)}]{elsner2013efficient}
+\bibinfo{author}{\bibfnamefont{F.}~\bibnamefont{{Elsner}}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{B.~D.} \bibnamefont{{Wandelt}}},
+  \bibinfo{journal}{\aap} \textbf{\bibinfo{volume}{549}}, \bibinfo{eid}{A111}
+  (\bibinfo{year}{2013}), \eprint{1210.4931}.
 
-\bibitem[{\citenamefont{Jasche and Lavaux}(2014)}]{jasche2014matrix}
-\bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{Jasche}} \bibnamefont{and}
-  \bibinfo{author}{\bibfnamefont{G.}~\bibnamefont{Lavaux}},
-  \bibinfo{journal}{arXiv preprint arXiv:1402.1763}  (\bibinfo{year}{2014}).
+\bibitem[{\citenamefont{{Jasche} and {Lavaux}}(2015)}]{jasche2014matrix}
+\bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{{Jasche}}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{G.}~\bibnamefont{{Lavaux}}},
+  \bibinfo{journal}{\mnras} \textbf{\bibinfo{volume}{447}},
+  \bibinfo{pages}{1204} (\bibinfo{year}{2015}), \eprint{1402.1763}.
 
 \bibitem[{\citenamefont{Neal}(2011)}]{neal2011mcmc}
 \bibinfo{author}{\bibfnamefont{R.~M.} \bibnamefont{Neal}},
@@ -192,12 +201,47 @@
   \bibinfo{journal}{The Astrophysical Journal} \textbf{\bibinfo{volume}{779}},
   \bibinfo{pages}{15} (\bibinfo{year}{2013}{\natexlab{b}}).
 
-\bibitem[{\citenamefont{Bezanson et~al.}(2012)\citenamefont{Bezanson,
-  Karpinski, Shah, and Edelman}}]{bezanson2012julia}
-\bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{Bezanson}},
-  \bibinfo{author}{\bibfnamefont{S.}~\bibnamefont{Karpinski}},
-  \bibinfo{author}{\bibfnamefont{V.}~\bibnamefont{Shah}}, \bibnamefont{and}
-  \bibinfo{author}{\bibfnamefont{A.}~\bibnamefont{Edelman}},
-  \bibinfo{journal}{arXiv preprint arXiv:1209.5145}  (\bibinfo{year}{2012}).
+\bibitem[{\citenamefont{{Wandelt} et~al.}(2004)\citenamefont{{Wandelt},
+  {Larson}, and {Lakshminarayanan}}}]{wandelt2004cg}
+\bibinfo{author}{\bibfnamefont{B.~D.} \bibnamefont{{Wandelt}}},
+  \bibinfo{author}{\bibfnamefont{D.~L.} \bibnamefont{{Larson}}},
+  \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{A.}~\bibnamefont{{Lakshminarayanan}}},
+  \bibinfo{journal}{\prd} \textbf{\bibinfo{volume}{70}}, \bibinfo{eid}{083511}
+  (\bibinfo{year}{2004}), \eprint{astro-ph/0310080}.
+
+\bibitem[{\citenamefont{{Eriksen} et~al.}(2004)\citenamefont{{Eriksen},
+  {O'Dwyer}, {Jewell}, {Wandelt}, {Larson}, {G{\'o}rski}, {Levin}, {Banday},
+  and {Lilje}}}]{eriksen2004cg}
+\bibinfo{author}{\bibfnamefont{H.~K.} \bibnamefont{{Eriksen}}},
+  \bibinfo{author}{\bibfnamefont{I.~J.} \bibnamefont{{O'Dwyer}}},
+  \bibinfo{author}{\bibfnamefont{J.~B.} \bibnamefont{{Jewell}}},
+  \bibinfo{author}{\bibfnamefont{B.~D.} \bibnamefont{{Wandelt}}},
+  \bibinfo{author}{\bibfnamefont{D.~L.} \bibnamefont{{Larson}}},
+  \bibinfo{author}{\bibfnamefont{K.~M.} \bibnamefont{{G{\'o}rski}}},
+  \bibinfo{author}{\bibfnamefont{S.}~\bibnamefont{{Levin}}},
+  \bibinfo{author}{\bibfnamefont{A.~J.} \bibnamefont{{Banday}}},
+  \bibnamefont{and} \bibinfo{author}{\bibfnamefont{P.~B.}
+  \bibnamefont{{Lilje}}}, \bibinfo{journal}{\apjs}
+  \textbf{\bibinfo{volume}{155}}, \bibinfo{pages}{227} (\bibinfo{year}{2004}),
+  \eprint{astro-ph/0407028}.
+
+\bibitem[{\citenamefont{{Smith} et~al.}(2007)\citenamefont{{Smith}, {Zahn}, and
+  {Dor{\'e}}}}]{smith2007mcg}
+\bibinfo{author}{\bibfnamefont{K.~M.} \bibnamefont{{Smith}}},
+  \bibinfo{author}{\bibfnamefont{O.}~\bibnamefont{{Zahn}}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{O.}~\bibnamefont{{Dor{\'e}}}},
+  \bibinfo{journal}{\prd} \textbf{\bibinfo{volume}{76}}, \bibinfo{eid}{043510}
+  (\bibinfo{year}{2007}), \eprint{0705.3980}.
+
+\bibitem[{\citenamefont{{Seljebotn} et~al.}(2014)\citenamefont{{Seljebotn},
+  {Mardal}, {Jewell}, {Eriksen}, and {Bull}}}]{seljebotn2014mg}
+\bibinfo{author}{\bibfnamefont{D.~S.} \bibnamefont{{Seljebotn}}},
+  \bibinfo{author}{\bibfnamefont{K.-A.} \bibnamefont{{Mardal}}},
+  \bibinfo{author}{\bibfnamefont{J.~B.} \bibnamefont{{Jewell}}},
+  \bibinfo{author}{\bibfnamefont{H.~K.} \bibnamefont{{Eriksen}}},
+  \bibnamefont{and} \bibinfo{author}{\bibfnamefont{P.}~\bibnamefont{{Bull}}},
+  \bibinfo{journal}{\apjs} \textbf{\bibinfo{volume}{210}}, \bibinfo{eid}{24}
+  (\bibinfo{year}{2014}), \eprint{1308.5299}.
 
 \end{thebibliography}
