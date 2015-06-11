@@ -1,4 +1,4 @@
-\begin{thebibliography}{31}
+\begin{thebibliography}{32}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \expandafter\ifx\csname bibnamefont\endcsname\relax
   \def\bibnamefont#1{#1}\fi
@@ -243,5 +243,13 @@
   \bibnamefont{and} \bibinfo{author}{\bibfnamefont{P.}~\bibnamefont{{Bull}}},
   \bibinfo{journal}{\apjs} \textbf{\bibinfo{volume}{210}}, \bibinfo{eid}{24}
   (\bibinfo{year}{2014}), \eprint{1308.5299}.
+
+\bibitem[{\citenamefont{Lewis et~al.}(2000)\citenamefont{Lewis, Challinor, and
+  Lasenby}}]{Lewis:1999bs}
+\bibinfo{author}{\bibfnamefont{A.}~\bibnamefont{Lewis}},
+  \bibinfo{author}{\bibfnamefont{A.}~\bibnamefont{Challinor}},
+  \bibnamefont{and} \bibinfo{author}{\bibfnamefont{A.}~\bibnamefont{Lasenby}},
+  \bibinfo{journal}{Astrophys. J.} \textbf{\bibinfo{volume}{538}},
+  \bibinfo{pages}{473} (\bibinfo{year}{2000}), \eprint{astro-ph/9911177}.
 
 \end{thebibliography}

@@ -298,7 +298,7 @@ The HMC is a discrete version of  this time-dynamic equation, using a leapfrog m
 \end{algorithmic}
 \end{algorithm}
 
-The HMC algorithm is notoriously sensitive to tuning parameters. The prevailing wisdom (see \cite{neal2011mcmc} page 22, for example) is that one should set $\bs m$ to match the reciprocal of the posterior variance of $\bs \phi$. For the simulation presented in Section \ref{Section: simulation examples} we simply set $\bs m^{-1}_l$ to be nearly proportional to $C_l^{\phi\phi}$ with a slight attenuation at low wavenumber. In particular, we set $\bs m_l^{-1} := 2\times 10^2\bigl[\frac{3}{4} +\frac{1}{4}\tanh(\frac{|l| - 1500}{200}) \bigr] C_l^{\phi\phi} \delta_0$ where $\delta_0$  denotes the constant obtained by evaluating the discrete Dirac delta function $\delta_l$ at $l=0$ (see the Appendix for a detailed discussion).  This choice was motivated by the fact that the high frequency terms $\phi_l$ are not well constrained by the posterior distribution which results in a posterior variance closely matching $C_l^{\phi\phi}$. The remaining parameters of Algorithm \ref{ith step of HMC} are set to $n = 30$ and $\epsilon = 2 \times 10^{-3}u$ where $u$ is a uniform $(0,1)$ random variable sampled anew at each pass of Algorithm \ref{ith step of HMC} (the use of random $\epsilon$ is designed to avoid resonant frequencies, as advocated in \cite{taylor2008fast}).
+The HMC algorithm is notoriously sensitive to tuning parameters. The prevailing wisdom (see \cite{neal2011mcmc} page 22, for example) is that one should set $\bs m$ to match the reciprocal of the posterior variance of $\bs \phi$. For the simulation presented in Section \ref{Section: simulation examples} we simply set $\bs m^{-1}_l$ to be nearly proportional to $C_l^{\phi\phi}$ with a slight attenuation at low wavenumber. In particular, we set $\bs m_l^{-1} := 2\times 10^2\bigl[\frac{3}{4} +\frac{1}{4}\tanh(\frac{|l| - 1500}{200}) \bigr] C_l^{\phi\phi} \delta_0$ where \textcolor{red}{$\delta_0$  denotes the constant obtained by evaluating the discrete Dirac delta function $\delta_l$ at $l=0$ (see the Appendix for a detailed discussion)}.  This choice was motivated by the fact that the high frequency terms $\phi_l$ are not well constrained by the posterior distribution which results in a posterior variance closely matching $C_l^{\phi\phi}$. The remaining parameters of Algorithm \ref{ith step of HMC} are set to $n = 30$ and $\epsilon = 2 \times 10^{-3}u$ where $u$ is a uniform $(0,1)$ random variable sampled anew at each pass of Algorithm \ref{ith step of HMC} (the use of random $\epsilon$ is designed to avoid resonant frequencies, as advocated in \cite{taylor2008fast}).
 
 
 
@@ -474,9 +474,11 @@ That being said, the only change needed to incorporate other experimental detail
 
 In this section we present a simulation to illustrate the methodology presented above. The simulated lensing potential used in this section, shown at left in Figure \ref{phix fig}, is generated on a flat sky with periodic boundary conditions. The data, shown upper-left in Figure \ref{tilde fig}, is generated on 2 arcmin pixels with independent additive noise and masking. The noise level is set to $8.0$ $\mu K$ arcmin and the masking covers approximately 10\% of the pixels.  The parameters of the Bayesian lensing procedure are the Fourier modes of $\widetilde T$ and $\phi$. For the lensing potential we set $|l|_\text{max}$ to $~460$. 
 For this sky coverage the scale-resolution in Fourier space  $\Delta l = 21$ yields $1500$ unknown Fourier coefficients for $\phi_l$. The $|l|_\text{max}$ of $2700$ for the unlensed temperature $T$ is set in Algorithm \ref{IMP} and corresponds to half of the Nyquist limit at $2$ arcmin pixels. 
+\textcolor{red}{
 CAMB \citep{Lewis:1999bs} is used to generate the fiducial theoretical power spectra, $C_l^{TT}$ and $C_l^{\phi\phi}$, for simulating the data and for the Bayesian priors on $T$ and $\phi$ (both fields are assumed to be Gaussian).
 The fiducial cosmology used  in CAMB is based on a flat, power law ΛCDM cosmological model, with baryon density $\Omega_b = 0.044$; cold dark matter density $\Omega_{cdm} = 0.21$; cosmological constant density $\Omega_\Lambda = 0.74$; Hubble parameter $h = 0.71$ in units of $100 \text{ km s}^{-1} \text{Mpc}^{-1}$; primordial scalar fluctuation amplitude $A_s(k = 0.002 \text{ Mpc}^{-1}) = 2.45 \times 10^{-9}$; scalar spectral index $n_s(k = 0.002\text{ Mpc}^{-1}) = 0.96$; primordial helium
 abundance $Y_P = 0.24$; and reionization optical depth $\tau_r = 0.088$. 
+}
 
 
 \begin{figure}
@@ -542,7 +544,7 @@ When compared to the nominal difference between lensed and unlensed CMB $T(x) - 
 
 In Figures \ref{p spec fig} and \ref{t spec fig} we summarize the posterior draws for $\phi$ and $T$ in the Fourier domain. The left plot of Figure \ref{p spec fig} shows $95\%$ posterior regions for  $l^4|\phi_l|^2/(4\delta_0)$  averaged over $l$ in wavenumber bins. For comparison the simulation true values of  $l^4|\phi_l|^2/(4\delta_0)$ are shown in red and the spectral density $l^4 C^{\phi\phi}_l/4$ is plotted in the black solid line. 
 The same quantities are shown for $l^2|T_l|^2/(\delta_0)$ in the right plot of Figure \ref{p spec fig}. Finally, in Figure \ref{t spec fig} we show the empirical cross correlation of the posterior draws over wavenumber bins between the simulation truth and the posterior samples of $\phi_l$ and $T_l$. In particular,
-samples were generated from $\frac{1}{c}\sum_{l\in \Delta l} \phi^\text{sim}_l\phi^*_l $ and $\frac{1}{c}\sum_{l\in \Delta l} T^\text{sim}_lT^*_l $ where $\Delta l$ is a frequency wavenumber bin,  $\phi_l$ and $T_l$ are the simulation truth, $\phi^\text{sim}_l$  and $T^\text{sim}_l$  are sampled from the Gibbs algorithm presented here and $c$ is a normalization constant which transforms to a correlation scale.  Notice that the plotted correlations trend to $0$ for larger wavenumber. This is what one would expect since larger wavenumber have correspondingly smaller signal-to-noise ratio which causes the posterior to revert back to the prior. 
+samples were generated from $\frac{1}{c}\sum_{l\in \Delta l} \phi^\text{sim}_l\phi^*_l $ and $\frac{1}{c}\sum_{l\in \Delta l} T^\text{sim}_lT^*_l $ where $\Delta l$ is a frequency wavenumber bin,  $\phi_l$ and $T_l$ are the simulation truth, $\phi^\text{sim}_l$  and $T^\text{sim}_l$  are sampled from the Gibbs algorithm presented here and $c$ is a normalization constant which transforms to a correlation scale.  Notice that the plotted correlations trend to $0$ for larger wavenumber. This is what one would expect since \textcolor{red}{larger wavenumber have correspondingly smaller signal-to-noise ratio} which causes the posterior to revert back to the prior. 
 
 
 
@@ -576,7 +578,7 @@ Estimates of $l^4|\phi_l|^2/4$  and $l^2|T_l|^2$ (shown in blue), scaled to the 
 This plot summaries the correlation, in $\Delta l$ wavenumber bins, between the simulation truth and their corresponding posterior samples. In particular,
 samples were generated from $\frac{1}{c}\sum_{l\in \Delta l} \phi^\text{sim}_l\phi^*_l $ and $\frac{1}{c}\sum_{l\in \Delta l} T^\text{sim}_lT^*_l $ where $\Delta l$ is a frequency wavenumber bin,  $\phi_l$ and $T_l$ are the simulation truth, $\phi^\text{sim}_l$  and $T^\text{sim}_l$  is sampled from the Gibbs algorithm presented here and $c$ is a normalization constant which transforms to a correlation scale.  Recall that $|l|_\text{max}$ for the lensing potential is $\sim460$ and is $\sim2700$ for the unlensed CMB, which explains why the correlation for $\phi_l$ only extends to $460$.
 Notice that the plotted correlations trend to $0$ for larger wavenumber.
-This is what one would expect from the Bayesian posterior. Indeed, the signal-to-noise ratio is lower at larger wavenumber. This causes the Bayesian posterior to revert to the prior, which will be uncorrelated with the simulation truth. 
+This is what one would expect from the Bayesian posterior. \textcolor{red}{Indeed, the signal-to-noise ratio is lower at larger wavenumber}. This causes the Bayesian posterior to revert to the prior, which will be uncorrelated with the simulation truth. 
 }
 \end{figure*}
 
@@ -613,8 +615,8 @@ Notice that both sampling steps $P(\phi |\widetilde T)$ and $P(\widetilde T|\phi
 %%%%%%%%%%%%%%%%%%%%%%
 
 \section*{Acknowledgments}
-The authors wish to thank an anonymous referee for constructive comments and suggestions. 
-BW acknowledges funding through his Chaire d'Excellence from the Agence Nationale
+\textcolor{red}{The authors wish to thank an anonymous referee for constructive comments and suggestions. }
+BW acknowledges funding through his Chaire dÕExcellence from the Agence Nationale
 de la Recherche (ANR-10-CEXC-004-01). This work has been done within the Labex ILP (reference ANR-10-LABX-63) part of the Idex SUPER, and received financial state aid managed by the Agence Nationale de la Recherche, as part of the programme Investissements d'avenir under the reference ANR-11-IDEX-0004-02. EA acknowledges grant support from NSF CAREER DMS-1252795.
 
 \bibliography{refs}
@@ -630,7 +632,7 @@ de la Recherche (ANR-10-CEXC-004-01). This work has been done within the Labex I
 
 Before we proceed to the proofs we briefly discuss notation.
 First, we do not differentiate, notationally, a random field with periodic boundary conditions on $(-L/2, L/2]^2$ and the case where $L\rightarrow \infty$ so that the Fourier series $\sum_{l \in \frac{2\pi}{L}\Bbb Z }   e^{i x\cdot l}  f_l \frac{2\pi/ L}{2\pi} $ converges to the continuous Fourier transform $\int_{\Bbb R^2}  e^{i x\cdot l}  f_l \frac{dl}{2\pi} $. %Indeed,  $\int_{\Bbb R^2}  e^{i x\cdot l}  f_l \frac{dl}{2\pi} $ is simply equivalent notation for the Riemann sum, with $L$ near infinity.
-For example, at times we will refer to an infinitesimal area element $dl$ or $dk$ in Fourier space, which simply equals $(2\pi / L)^2$ for large $L$. In this case, $\delta_l$ denotes a discrete Dirac delta function which we equate with $1/dl$ when $l=0$ and zero otherwise. Indeed, throughout the paper it will be convenient to use $\delta_0 \equiv \delta_l\bigr|_{l=0}$ to denote the constant $1/dl$.
+For example, at times we will refer to an infinitesimal area element $dl$ or $dk$ in Fourier space, which simply equals $(2\pi / L)^2$ for large $L$. In this case, $\delta_l$ denotes a discrete Dirac delta function which we equate with $1/dl$ when $l=0$ and zero otherwise. \textcolor{red}{Indeed, throughout the paper it will be convenient to use $\delta_0 \equiv \delta_l\bigr|_{l=0}$ to denote the constant $1/dl$.} 
 Secondly, for any function $f(x)$ let $f^\phi(x) = f(x-\nabla \phi(x))$ denote anti-lensing of $f$ and $f^\phi_l$ denote the Fourier transform of  $f^\phi(x)$.
 
 
@@ -645,7 +647,7 @@ P(\phi|\widetilde T, \text{\rm data}) &= P(\phi|\widetilde T)\propto P(\widetild
 Since $\phi(x)$ is an isotropic random field with spectral density $C_l^{\phi\phi}$ we have that $E(\phi^{\phantom{*}}_l \phi_{l^\prime}^*) = \delta_{l - l^\prime}C_l^{\phi\phi}$. 
 Therefore  $E(\phi_l^{\phantom{*}}\phi_l^*) = \delta_{0}C_l^{\phi\phi}$ and $E(\phi_l\phi_{l}) = 0$ implies that the random variables $\re \phi_l$, $\im \phi_l$ are independent $\mathcal N(0, \frac{1}{2}\delta_0 C_l^{\phi\phi})$ for each fixed $l$.
 Moreovoer  $\phi(x)$ takes values in $\Bbb R$ so that  $\phi_l = \phi_{-l}^*$.  This implies 
-that $\phi_l$ are independent random variables over all $l$ which are restricted to the Hermitian half of the Fourier grid, denoted $\Bbb H$ here. In particular,  if we exclude the zero frequency $l = 0$ we get
+that $\phi_l$ and are independent random variables over all $l$ which are restricted to the Hermitian half of the Fourier grid, denoted $\Bbb H$ here. In particular,  if we exclude the zero frequency $l = 0$ we get
 \begin{align}
 \log P(\phi) - c_1 &=  - \frac{1}{2}\sum_{k \in \Bbb H\setminus \{0 \}}  \left[\frac{(\re \phi_k)^2}{\frac{1}{2}\delta_0 C_k^{\phi\phi}} +  \frac{(\im \phi_k)^2}{\frac{1}{2}\delta_0 C_k^{\phi\phi}} \right] = - \frac{1}{2}\int_{\Bbb R^2} \frac{|\phi_k|^2}{C_k^{\phi\phi}} dk \label{dr1} \\
 \log P(\widetilde T| \phi) - c_2 &=  - \frac{1}{2}\sum_{k \in \Bbb H\setminus \{0 \}}  \left[\frac{(\re \widetilde T_k^\phi)^2}{\frac{1}{2}\delta_0 C_k^{TT}} +  \frac{(\im \widetilde T_k^\phi)^2}{\frac{1}{2}\delta_0 C_k^{TT}} \right] = - \frac{1}{2}\int_{\Bbb R^2} \frac{\bigl|\widetilde T_k^\phi\bigr|^2}{C_k^{TT}} dk \label{dr2}
