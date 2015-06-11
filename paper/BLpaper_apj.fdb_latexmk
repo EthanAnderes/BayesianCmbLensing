@@ -1,13 +1,13 @@
 # Fdb version 3
-["bibtex BLpaper_apj"] 1434044600 "BLpaper_apj.aux" "BLpaper_apj.bbl" "BLpaper_apj" 1434044604
+["bibtex BLpaper_apj"] 1434044600 "BLpaper_apj.aux" "BLpaper_apj.bbl" "BLpaper_apj" 1434046309
   "/usr/local/texlive/2014/texmf-dist/bibtex/bst/revtex4/apsrev.bst" 1261594643 44155 dc7233506a001aedcd59cfd90f9fe8d7 ""
-  "BLpaper_apj.aux" 1434044603 21771 1e3e3eb27177c19844108290fc8bddbc ""
+  "BLpaper_apj.aux" 1434046308 21771 1e3e3eb27177c19844108290fc8bddbc ""
   "BLpaper_apj.bcf" 0 -1 0 ""
   "refs.bib" 1432850644 16054 67400e6a31cc81d6d9213f411b18ae2b ""
   (generated)
-  "BLpaper_apj.blg"
   "BLpaper_apj.bbl"
-["pdflatex"] 1434044601 "BLpaper_apj.tex" "BLpaper_apj.pdf" "BLpaper_apj" 1434044604
+  "BLpaper_apj.blg"
+["pdflatex"] 1434046307 "BLpaper_apj.tex" "BLpaper_apj.pdf" "BLpaper_apj" 1434046309
   "/usr/local/texlive/2014/texmf-dist/tex/context/base/supp-pdf.mkii" 1337017135 71627 94eb9990bed73c364d7f53f960cc8c5b ""
   "/usr/local/texlive/2014/texmf-dist/tex/generic/dvips/rotate.sty" 1137109563 2285 78d0e614a6c7451f48942a05b03f5173 ""
   "/usr/local/texlive/2014/texmf-dist/tex/generic/epsf/epsf.sty" 1298075956 27123 4572e7b856182a1e6e9df1c7cc21de80 ""
@@ -70,10 +70,10 @@
   "/usr/local/texlive/2014/texmf-dist/tex/latex/tools/enumerate.sty" 1399675188 3255 42d834dc82171769c16badd22df87021 ""
   "/usr/local/texlive/2014/texmf-dist/tex/latex/tools/longtable.sty" 1399675188 11875 98b91a3f62f8b2871fecd2afa02ea4a3 ""
   "/usr/local/texlive/2014/texmf-dist/tex/latex/url/url.sty" 1388531844 12796 8edb7d69a20b857904dd0ea757c14ec9 ""
-  "BLpaper_apj.aux" 1434044603 21771 1e3e3eb27177c19844108290fc8bddbc ""
+  "BLpaper_apj.aux" 1434046308 21771 1e3e3eb27177c19844108290fc8bddbc ""
   "BLpaper_apj.bbl" 1434044601 13855 d380b0489024bb05b1048f0ede079c5a "bibtex BLpaper_apj"
-  "BLpaper_apj.out" 1434044603 645 a9f0f43db82f4b8f760ce472f980ac7a ""
-  "BLpaper_apj.tex" 1434044597 71139 8f4cdc7c6ef79477865b722cba60ecc6 ""
+  "BLpaper_apj.out" 1434046308 645 a9f0f43db82f4b8f760ce472f980ac7a ""
+  "BLpaper_apj.tex" 1434046306 71151 4c60b4e0d4cf2518490f30cbd31dc687 ""
   "emulateapj.cls" 1428616718 64998 c5e4a6efcd2b70b2dfd593f44ef56530 ""
   "figure10a.pdf" 1429052449 92725 145a45b4b8d4da6a8b21312a7c86af44 ""
   "figure10b.pdf" 1429052451 95965 d662894891994f610eaa5b3a6df56cc5 ""
@@ -99,7 +99,7 @@
   "figure8b.pdf" 1429052440 29709 87441b666dfb602ba9d75719bbb915d7 ""
   "figure9a.pdf" 1429052441 25857 51557e5601ff4a97deebef5169b27766 ""
   (generated)
-  "BLpaper_apj.pdf"
   "BLpaper_apj.log"
-  "BLpaper_apj.aux"
   "BLpaper_apj.out"
+  "BLpaper_apj.aux"
+  "BLpaper_apj.pdf"
