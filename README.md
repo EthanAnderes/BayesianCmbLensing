@@ -5,7 +5,7 @@ This repository contains code for generating flat sky lensed CMB simulations and
 
 Requirements: 
 
- * Julia v0.3+ 
+ * Julia v0.3 
  * packages PyCall and PyPlot.
  * Python 2.7 with numpy, scipy and matplotlib
 
