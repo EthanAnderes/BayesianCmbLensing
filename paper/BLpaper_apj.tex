@@ -59,7 +59,6 @@ The Planck satellite, along with several ground based telescopes, have mapped th
 
 
 \section{Introduction}
-
  Over the past few years, data from ground based telescopes (ACT, SPT, Polarbear) and the Planck satellite have resulted in an unprecedented detection of weak gravitational lensing of the cosmic microwave background (CMB) \citep{das2011detection,van2012measurement,planck2013lensing,Polarbear2014,planck2015lensing}.  Upcoming high resolution, high signal-to-noise experiments are poised to    make the gravitational lensing distortion  a  powerful probe of cosmology, dark matter, and neutrino physics. The state-of-the-art estimator of CMB gravitational lensing, the quadratic estimator developed by Hu and Okomoto \citep{hu2001mapping,hu2002mass}, works in part through a delicate cancellation of terms in an infinite Taylor expansion of the lensing effect on the CMB. The effect of this cancellation is particularly sensitive to foreground contaminants and sky masking, which  if not fully accounted for,  limits  the statistical inferential power of this new data.  
 
  Possibly the most promising alternative to the quadratic estimator is Bayesian lensing. It has been known for some time that the quadratic estimator is suboptimal for high signal-to-noise, high resolution experiments and that a full Bayesian treatment can overcome this limitation
@@ -274,7 +273,7 @@ where $l\in \Bbb R^2$ is a two dimensional frequency vector and $x\in \Bbb R^2$ 
 To describe the HMC algorithm let $\bs \phi$ denote the concatenation of the real and imaginary parts of $\phi_l$ as $l$ ranges through discrete frequencies $l$ ranging up to a pre-specified $|l|_{max}$ (but excluding  half of the Fourier frequencies due to the Hermitian symmetry associated with the Fourier transform of a real field). Note that $\bs \phi$ is a vector of real numbers. 
 Let $P(\bs \phi|\widetilde T, \text{data})$ denote the density of $\bs \phi$ given $\widetilde T$ and the data. 
 Let $\bs p$ denote a `momentum' vector and $\bs m$ denote a `mass' vector, which are both the same length as $\bs \phi$. The Hamiltonian is a function of $\bs \phi$ and $\bs p$ and is defined as follows
-\[ H(\bs \phi, \bs p):= -\log P(\bs \phi|\widetilde T, \text{data})+\sum_k \frac{\bs p_k^2}{2\bs m_k^2}. \]
+\[ H(\bs \phi, \bs p):= -\log P(\bs \phi|\widetilde T, \text{data})+\sum_k \frac{\bs p_k^2}{2\bs m_k}. \]
 This Hamiltonian generates a time-dependent evolution of $\bs \phi$ and $\bs p$ given by 
 \begin{align*}
 \frac{d\bs \phi^t}{dt} &= \phantom{-}\nabla_{\bs p} H(\bs \phi^t, \bs p^t) \\
